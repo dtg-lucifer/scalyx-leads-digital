@@ -94,7 +94,10 @@ export async function PATCH(req: NextRequest) {
     if (!updated) {
       return NextResponse.json({ error: 'File not found' }, { status: 404 });
     }
-    const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/share/${updated.shareToken}`;
+    const url = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+    const shareUrl = `${url.replace(/\/$/, "")}/share/${updated.shareToken}`;
 
     return NextResponse.json({ success: true, file: updated, shareUrl });
   } catch (err: any) {

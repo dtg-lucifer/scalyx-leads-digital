@@ -137,7 +137,9 @@ export default function EmailSenderPage() {
     if (!lead) return;
 
     setRecipient(lead.email);
-    const origin = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "https://scalyx.in");
+    const origin = typeof window !== "undefined"
+      ? window.location.origin
+      : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
     const portalUrl = `${origin}/portal/${lead.portalAccessCode || lead.id}`;
     setDeliverablesUrl(`${portalUrl}?tab=deliverables`);
     setFieldValues((prev) => ({

@@ -44,7 +44,10 @@ export async function POST(req: NextRequest) {
     });
 
     // Send auto-generated password to user's email via Resend
-    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/login`;
+    const url = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+    const loginUrl = `${url.replace(/\/$/, "")}/login`;
     await sendTemplatedEmail({
       to: email,
       subject: 'Your LeadsDigital Credentials • Scalyx Portal',

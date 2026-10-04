@@ -82,21 +82,18 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
 ];
 
 export function getAppBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
-  }
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL.replace(/\/$/, "")}`;
-  }
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL.replace(/\/$/, "")}`;
-  }
-  return "https://scalyx.in";
+  const url = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+  return url.replace(/\/$/, "");
 }
 
 export function renderEmailHtml(templateId: EmailTemplateId, params: Record<string, string>): string {
   const currentYear = new Date().getFullYear();
-  const baseUrl = getAppBaseUrl();
+  const url = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
+  const baseUrl = url.replace(/\/$/, "");
   const logoUrl = `${baseUrl}/assets/scalyx_light.png`;
 
   let bodyContent = '';
@@ -239,7 +236,7 @@ export function renderEmailHtml(templateId: EmailTemplateId, params: Record<stri
         <p style="margin: 0 0 24px; color: #64748b; font-size: 13px;">
           Please sign in and change your password in settings if desired.
         </p>
-        <a href="${params.loginUrl || 'http://localhost:3000/login'}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 28px; border-radius: 0px; font-weight: 600; text-decoration: none; font-size: 14px;">Sign In to LeadsDigital &rarr;</a>
+        <a href="${params.loginUrl || `${baseUrl}/login`}" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 12px 28px; border-radius: 0px; font-weight: 600; text-decoration: none; font-size: 14px;">Sign In to LeadsDigital &rarr;</a>
       `;
       break;
   }
