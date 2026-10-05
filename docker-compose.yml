@@ -15,8 +15,9 @@ services:
       - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
       - RESEND_API_KEY=${RESEND_API_KEY}
       - NEXT_PUBLIC_RESEND_API_KEY=${NEXT_PUBLIC_RESEND_API_KEY}
-      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL:-admin@scalyx.in}
-      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD:-ScalyxAdmin2026!}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-contact@piush.in}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
+      - SUPER_ADMIN_PASSWORD=${SUPER_ADMIN_PASSWORD}
       - JWT_SECRET=${JWT_SECRET:-leads_digital_super_secret_jwt_key_2026_scalyx}
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/leadsdigital
       - REDIS_URL=redis://redis:6379

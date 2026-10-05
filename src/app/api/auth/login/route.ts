@@ -1,41 +1,56 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db/store';
-import { verifyPassword, hashPassword } from '@/lib/auth/password';
-import { setSessionCookie } from '@/lib/auth/session';
-import { DEFAULT_SUPER_ADMIN_PERMISSIONS } from '@/types/auth';
+import { type NextRequest, NextResponse } from "next/server";
+import { verifyPassword } from "@/lib/auth/password";
+import { setSessionCookie } from "@/lib/auth/session";
+import { db } from "@/lib/db/store";
+import { DEFAULT_SUPER_ADMIN_PERMISSIONS } from "@/types/auth";
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 },
+      );
     }
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanPassword = password.trim();
 
-    const envAdminEmail = (process.env.SUPER_ADMIN_EMAIL || 'admin@scalyx.in').trim().toLowerCase();
-    const envAdminPassword = (process.env.SUPER_ADMIN_PASSWORD || 'ScalyxAdmin2026!').trim();
+    // Check if logging in with Super Admin env credentials (strictly read from .env)
+    const envAdminEmail = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+    const envAdminPassword = process.env.SUPER_ADMIN_PASSWORD?.trim();
 
-    // Check if logging in with Super Admin env credentials
-    if (cleanEmail === envAdminEmail && cleanPassword === envAdminPassword) {
+    if (
+      envAdminEmail &&
+      envAdminPassword &&
+      cleanEmail === envAdminEmail &&
+      cleanPassword === envAdminPassword
+    ) {
       let user = await db.getUserByEmail(cleanEmail);
       if (!user) {
         user = (await db.createUser({
           email: envAdminEmail,
-          name: 'Scalyx Admin',
+          name: "Scalyx Admin",
           password: envAdminPassword,
-          role: 'super_admin',
+          role: "super_admin",
           permissions: DEFAULT_SUPER_ADMIN_PERMISSIONS,
         })) as any;
       }
 
+      if (!user) {
+        return NextResponse.json(
+          { error: "Failed to authenticate admin" },
+          { status: 500 },
+        );
+      }
+
       const sessionUser = {
-        id: user!.id,
-        email: user!.email,
-        name: user!.name,
-        role: 'super_admin' as const,
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: "super_admin" as const,
         permissions: DEFAULT_SUPER_ADMIN_PERMISSIONS,
       };
 
@@ -46,12 +61,18 @@ export async function POST(req: NextRequest) {
     // Standard database user lookup
     const user = await db.getUserByEmail(cleanEmail);
     if (!user) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
     }
 
     const isValid = await verifyPassword(cleanPassword, user.passwordHash);
     if (!isValid) {
-      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 },
+      );
     }
 
     const sessionUser = {
@@ -66,6 +87,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, user: sessionUser });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Login failed' }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message || "Login failed" },
+      { status: 500 },
+    );
   }
 }
