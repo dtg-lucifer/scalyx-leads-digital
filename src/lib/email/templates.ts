@@ -1,9 +1,9 @@
-import { getAppUrl } from "@/lib/url";
+import { getAppUrl, getDeployedAppUrl, ensureDeployedUrl, sanitizeEmailParams, DEPLOYED_VERCEL_HOST } from "@/lib/url";
 import type { EmailTemplateId, EmailTemplateMeta } from "@/types/email";
 import { SCALYX_LOGO_CID, SCALYX_LOGO_DATA_URI } from "./logo";
 import { markdownToEmailHtml } from "./markdown";
 
-export { getAppUrl as getAppBaseUrl };
+export { getDeployedAppUrl as getAppBaseUrl, getDeployedAppUrl, ensureDeployedUrl };
 
 export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   {
@@ -32,7 +32,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "portalUrl",
         label: "Portal Link",
         type: "text",
-        defaultValue: "https://leads.scalyx.in/portal/techcorp",
+        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
         placeholder: "URL to client portal",
       },
       {
@@ -96,7 +96,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "buttonUrl",
         label: "Button CTA Link (Optional)",
         type: "text",
-        defaultValue: "https://leads.scalyx.in",
+        defaultValue: "https://scalyx-leads-digital.vercel.app",
         placeholder: "https://...",
       },
       {
@@ -181,7 +181,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "downloadUrl",
         label: "Portal Download Link",
         type: "text",
-        defaultValue: "https://leads.scalyx.in/portal/techcorp",
+        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
       },
       {
         key: "retentionNotice",
@@ -281,7 +281,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "portalUrl",
         label: "Project Portal",
         type: "text",
-        defaultValue: "https://leads.scalyx.in/portal/techcorp",
+        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
       },
     ],
   },
@@ -301,7 +301,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "portalUrl",
         label: "Portal Link",
         type: "text",
-        defaultValue: "https://leads.scalyx.in/portal/techcorp",
+        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
       },
       {
         key: "portalPassword",
@@ -355,7 +355,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "loginUrl",
         label: "Login URL",
         type: "text",
-        defaultValue: "https://leads.scalyx.in/login",
+        defaultValue: "https://scalyx-leads-digital.vercel.app/login",
       },
       {
         key: "notes",
@@ -376,11 +376,12 @@ interface RenderOptions {
 
 export async function renderEmailHtml(
   templateId: EmailTemplateId,
-  params: Record<string, string>,
+  rawParams: Record<string, string>,
   options?: RenderOptions,
 ): Promise<string> {
   const currentYear = new Date().getFullYear();
-  const baseUrl = getAppUrl();
+  const baseUrl = getDeployedAppUrl();
+  const params = sanitizeEmailParams(rawParams);
 
   // For emails dispatched via Resend, reference the inline CID attachment.
   // For web preview in dashboard iframe, use the base64 data URI so it renders instantly.
@@ -418,7 +419,7 @@ export async function renderEmailHtml(
             ${eyebrow}
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           ${headline}
         </h1>
         <div style="color: #334155; font-size: 14.5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
@@ -446,7 +447,7 @@ export async function renderEmailHtml(
             WELCOME TO SCALYX
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Welcome Aboard, ${params.clientName || "Partner"}!
         </h1>
         <div style="color: #334155; font-size: 14.5px; line-height: 1.7; margin-bottom: 22px; word-break: break-word; overflow-wrap: anywhere;">
@@ -474,7 +475,7 @@ export async function renderEmailHtml(
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px;">
               Access Code / Password
             </div>
-            <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13.5px; font-weight: 700; padding: 7px 16px; border-radius: 0px !important; letter-spacing: 0.8px; word-break: break-all; max-width: 100%; box-sizing: border-box;">
+            <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13.5px; font-weight: 700; padding: 7px 16px; border-radius: 0px !important; letter-spacing: 0.8px; word-break: break-all; max-width: 100%; box-sizing: border-box;">
               ${params.portalPassword}
             </div>
           </div>
@@ -506,7 +507,7 @@ export async function renderEmailHtml(
             SPRINT MILESTONE
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Project Update: ${params.projectName || "Active Sprint"}
         </h1>
         <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
@@ -559,7 +560,7 @@ export async function renderEmailHtml(
             DELIVERABLES READY
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           New Deliverable Ready for Review
         </h1>
         <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
@@ -599,7 +600,7 @@ export async function renderEmailHtml(
             INVOICE STATEMENT
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Invoice ${params.invoiceNumber}
         </h1>
         <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
@@ -610,7 +611,7 @@ export async function renderEmailHtml(
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0px !important; padding: 20px 22px; margin: 20px 0; box-sizing: border-box; max-width: 100%;">
           <div style="margin-bottom: 12px;">
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Invoice Reference</div>
-            <div style="font-size: 14px; font-weight: 700; color: #0f172a; font-family: ui-monospace, Menlo, monospace; margin-top: 2px;">
+            <div style="font-size: 14px; font-weight: 700; color: #0f172a; font-family: 'Space Grotesk', ui-monospace, Menlo, monospace; margin-top: 2px;">
               ${params.invoiceNumber}
             </div>
           </div>
@@ -648,7 +649,7 @@ export async function renderEmailHtml(
             MEETING FOLLOW-UP
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Discussion Recap & Action Items
         </h1>
         <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
@@ -691,7 +692,7 @@ export async function renderEmailHtml(
             PORTAL ACCESS
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Your Client Portal Access Code
         </h1>
         <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
@@ -715,7 +716,7 @@ export async function renderEmailHtml(
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px;">
               Access Code / Password
             </div>
-            <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13.5px; font-weight: 700; padding: 7px 16px; border-radius: 0px !important; letter-spacing: 0.8px; word-break: break-all; max-width: 100%; box-sizing: border-box;">
+            <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13.5px; font-weight: 700; padding: 7px 16px; border-radius: 0px !important; letter-spacing: 0.8px; word-break: break-all; max-width: 100%; box-sizing: border-box;">
               ${params.portalPassword}
             </div>
           </div>
@@ -746,7 +747,7 @@ export async function renderEmailHtml(
             TEAM ACCOUNT
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Welcome to the LeadsDigital Team!
         </h1>
         <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
@@ -764,7 +765,7 @@ export async function renderEmailHtml(
 
           <div style="margin-bottom: 12px;">
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 4px;">Temporary Password</div>
-            <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13.5px; font-weight: 700; padding: 6px 14px; border-radius: 0px !important; letter-spacing: 0.8px; word-break: break-all; max-width: 100%; box-sizing: border-box;">
+            <div style="display: inline-block; background-color: #0f172a; color: #ffffff; font-family: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13.5px; font-weight: 700; padding: 6px 14px; border-radius: 0px !important; letter-spacing: 0.8px; word-break: break-all; max-width: 100%; box-sizing: border-box;">
               ${params.password}
             </div>
           </div>
@@ -800,8 +801,20 @@ export async function renderEmailHtml(
   <meta name="color-scheme" content="light">
   <meta name="supported-color-schemes" content="light">
   <title>Scalyx Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
   <style>
     /* Sharp corners everywhere and box-sizing guarantees */
+    body, table, td, p, a, li {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    blockquote, q {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    code, pre, .stat-amount, .font-mono {
+      font-family: 'Space Grotesk', ui-monospace, Menlo, monospace !important;
+    }
     *, *:before, *:after {
       box-sizing: border-box !important;
       border-radius: 0px !important;
@@ -891,7 +904,7 @@ export async function renderEmailHtml(
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; border-radius: 0px !important;">
+<body style="margin: 0; padding: 0; background-color: #f1f5f9; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; border-radius: 0px !important;">
   <!-- Full-Width Background Wrapper -->
   <table id="email-root-table" width="100%" border="0" cellspacing="0" cellpadding="0" class="outer-wrapper" style="width: 100% !important; min-width: 100%; height: auto !important; min-height: 0 !important; background-color: #f1f5f9; margin: 0; padding: 28px 12px; box-sizing: border-box; border-radius: 0px !important;">
     <tr>
@@ -946,7 +959,7 @@ export async function renderEmailHtml(
                   <div style="font-size: 10.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;">
                     Attached Documents (${params.attachedFilesList.split(",").length})
                   </div>
-                  <div style="font-size: 12px; color: #0f172a; font-family: ui-monospace, Menlo, monospace; word-break: break-word; overflow-wrap: anywhere; line-height: 1.5;">
+                  <div style="font-size: 12px; color: #0f172a; font-family: 'Space Grotesk', ui-monospace, Menlo, monospace; word-break: break-word; overflow-wrap: anywhere; line-height: 1.5;">
                     ${params.attachedFilesList}
                   </div>
                 </div>

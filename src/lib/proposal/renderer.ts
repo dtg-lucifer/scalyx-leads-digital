@@ -1,9 +1,11 @@
+import { SCALYX_LOGO_DATA_URI } from "@/lib/email/logo";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
-import { SCALYX_LOGO_DATA_URI } from "@/lib/email/logo";
 
 export const PROPOSAL_STYLESHEET = `
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
   *, *:before, *:after {
     box-sizing: border-box !important;
     border-radius: 0px !important;
@@ -13,600 +15,209 @@ export const PROPOSAL_STYLESHEET = `
     padding: 0;
     background-color: #f8fafc;
     color: #1e293b;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 13.5px;
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+  blockquote, q {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-style: italic;
+  }
+  code, pre, kbd, samp, .font-mono {
+    font-family: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  }
   .proposal-page {
-    width: 100%;
-    max-width: 840px;
-    margin: 0 auto;
-    background: #ffffff;
-    padding: 44px 48px;
-    box-sizing: border-box;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-  }
+    width: 100%;\n    max-width: 840px;\n    margin: 0 auto;\n    background: #ffffff;\n    padding: 44px 48px;\n    box-sizing: border-box;\n    border: 1px solid #e2e8f0;\n    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);\n  }
   .proposal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 24px;
-  }
+    display: flex;\n    justify-content: space-between;\n    align-items: flex-start;\n    padding-bottom: 16px;\n    border-bottom: 1px solid #e2e8f0;\n    margin-bottom: 24px;\n  }
   .proposal-header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+    display: flex;\n    align-items: center;\n    gap: 12px;\n  }
   .proposal-logo-img {
-    width: 44px;
-    height: 44px;
-    object-fit: contain;
-    display: block;
-    border-radius: 0px !important;
-  }
+    width: 44px;\n    height: 44px;\n    object-fit: contain;\n    display: block;\n    border-radius: 0px !important;\n  }
   .proposal-brand-title {
-    font-size: 20px;
-    font-weight: 900;
-    color: #0f172a;
-    letter-spacing: -0.5px;
-    line-height: 1;
-  }
+    font-size: 20px;\n    font-weight: 900;\n    color: #0f172a;\n    letter-spacing: -0.5px;\n    line-height: 1;\n  }
   .proposal-brand-subtitle {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    color: #64748b;
-    text-transform: uppercase;
-    margin-top: 3px;
-  }
+    font-size: 9px;\n    font-weight: 700;\n    letter-spacing: 1.2px;\n    color: #64748b;\n    text-transform: uppercase;\n    margin-top: 3px;\n  }
   .proposal-header-right {
-    text-align: right;
-    font-size: 11px;
-    color: #475569;
-    line-height: 1.5;
-  }
+    text-align: right;\n    font-size: 11px;\n    color: #475569;\n    line-height: 1.5;\n  }
   .proposal-header-right .text-muted {
-    color: #94a3b8;
-  }
+    color: #94a3b8;\n  }
   .proposal-title-meta-grid {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 24px;
-    margin: 24px 0 28px;
-  }
+    display: flex;\n    justify-content: space-between;\n    align-items: flex-start;\n    gap: 24px;\n    margin: 24px 0 28px;\n  }
   .proposal-eyebrow {
-    font-size: 11px;
-    font-weight: 800;
-    color: #2563eb;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
+    font-size: 11px;\n    font-weight: 800;\n    color: #2563eb;\n    text-transform: uppercase;\n    letter-spacing: 1px;\n    margin-bottom: 6px;\n  }
   .proposal-main-title {
-    font-size: 32px;
-    font-weight: 900;
-    color: #0f172a;
-    letter-spacing: -1px;
-    line-height: 1.1;
-    margin: 0 0 6px;
-  }
+    font-size: 32px;\n    font-weight: 900;\n    color: #0f172a;\n    letter-spacing: -1px;\n    line-height: 1.1;\n    margin: 0 0 6px;\n  }
   .proposal-main-subtitle {
-    font-size: 13px;
-    color: #475569;
-    max-width: 440px;
-    line-height: 1.5;
-  }
+    font-size: 13px;\n    color: #475569;\n    max-width: 440px;\n    line-height: 1.5;\n  }
   .proposal-meta-card {
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
-    padding: 14px 18px;
-    min-width: 220px;
-    font-size: 11.5px;
-  }
+    border: 1px solid #e2e8f0;\n    background-color: #f8fafc;\n    padding: 14px 18px;\n    min-width: 220px;\n    font-size: 11.5px;\n  }
   .proposal-meta-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 4px;
-    color: #475569;
-  }
+    display: flex;\n    justify-content: space-between;\n    margin-bottom: 4px;\n    color: #475569;\n  }
   .proposal-meta-row strong {
-    color: #0f172a;
-  }
+    color: #0f172a;\n  }
   .proposal-badge-confidential {
-    display: block;
-    text-align: center;
-    margin-top: 10px;
-    padding: 4px 8px;
-    background-color: #fef3c7;
-    border: 1px solid #fde68a;
-    color: #92400e;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
+    display: block;\n    text-align: center;\n    margin-top: 10px;\n    padding: 4px 8px;\n    background-color: #fef3c7;\n    border: 1px solid #fde68a;\n    color: #92400e;\n    font-size: 10px;\n    font-weight: 800;\n    letter-spacing: 1px;\n    text-transform: uppercase;\n  }
   .stat-grid-4 {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin: 24px 0;
-  }
+    display: grid;\n    grid-template-columns: repeat(4, 1fr);\n    gap: 12px;\n    margin: 24px 0;\n  }
   .stat-card {
-    border: 1px solid #e2e8f0;
-    background-color: #ffffff;
-    padding: 14px;
-    border-top: 3px solid #0f172a;
-  }
+    border: 1px solid #e2e8f0;\n    background-color: #ffffff;\n    padding: 14px;\n    border-top: 3px solid #0f172a;\n  }
   .border-top-blue { border-top-color: #2563eb !important; }
   .border-top-purple { border-top-color: #7c3aed !important; }
   .border-top-emerald { border-top-color: #059669 !important; }
   .border-top-amber { border-top-color: #d97706 !important; }
   .stat-card-label {
-    font-size: 9.5px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #64748b;
-    margin-bottom: 4px;
-  }
+    font-size: 9.5px;\n    font-weight: 800;\n    text-transform: uppercase;\n    letter-spacing: 0.8px;\n    color: #64748b;\n    margin-bottom: 4px;\n  }
   .stat-card-value {
-    font-size: 20px;
-    font-weight: 900;
-    color: #0f172a;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    letter-spacing: -0.5px;
-    line-height: 1.15;
-  }
+    font-size: 20px;\n    font-weight: 900;\n    color: #0f172a;\n    font-family: 'Space Grotesk', ui-monospace, SFMono-Regular, Menlo, monospace;\n    letter-spacing: -0.5px;\n    line-height: 1.15;\n  }
   .stat-card-desc {
-    font-size: 11px;
-    color: #64748b;
-    margin-top: 4px;
-    line-height: 1.35;
-  }
+    font-size: 11px;\n    color: #64748b;\n    margin-top: 4px;\n    line-height: 1.35;\n  }
   .section-title-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 32px 0 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f1f5f9;
-  }
+    display: flex;\n    align-items: center;\n    gap: 10px;\n    margin: 32px 0 14px;\n    padding-bottom: 8px;\n    border-bottom: 1px solid #f1f5f9;\n  }
   .section-number-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 28px;
-    background-color: #eff6ff;
-    border: 1px solid #dbeafe;
-    color: #2563eb;
-    font-weight: 800;
-    font-size: 12px;
-    font-family: ui-monospace, monospace;
-  }
+    display: inline-flex;\n    align-items: center;\n    justify-content: center;\n    width: 28px;\n    height: 28px;\n    background-color: #eff6ff;\n    border: 1px solid #dbeafe;\n    color: #2563eb;\n    font-weight: 800;\n    font-size: 12px;\n    font-family: 'Space Grotesk', ui-monospace, monospace;\n  }
   .section-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: #0f172a;
-    letter-spacing: -0.4px;
-    margin: 0;
-  }
+    font-size: 18px;\n    font-weight: 800;\n    color: #0f172a;\n    letter-spacing: -0.4px;\n    margin: 0;\n  }
   .architecture-terminal {
-    background-color: #0a0f1d;
-    border: 1px solid #1e293b;
-    padding: 18px 20px;
-    margin: 20px 0;
-    color: #f8fafc;
-  }
+    background-color: #0a0f1d;\n    border: 1px solid #1e293b;\n    padding: 18px 20px;\n    margin: 20px 0;\n    color: #f8fafc;\n  }
   .architecture-terminal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 12px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid #1e293b;
-  }
+    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    padding-bottom: 12px;\n    margin-bottom: 14px;\n    border-bottom: 1px solid #1e293b;\n  }
   .terminal-title {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    color: #94a3b8;
-  }
+    font-size: 11px;\n    font-weight: 800;\n    letter-spacing: 1.5px;\n    color: #94a3b8;\n  }
   .terminal-badge {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: #38bdf8;
-    background-color: rgba(56, 189, 248, 0.1);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    padding: 2px 8px;
-  }
+    font-size: 10px;\n    font-weight: 800;\n    letter-spacing: 1px;\n    color: #38bdf8;\n    background-color: rgba(56, 189, 248, 0.1);\n    border: 1px solid rgba(56, 189, 248, 0.25);\n    padding: 2px 8px;\n  }
   .pipeline-flow-wrapper {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-  }
+    display: flex;\n    flex-wrap: wrap;\n    align-items: center;\n    gap: 8px;\n    font-size: 12px;\n  }
   .pipeline-node {
-    display: inline-block;
-    background-color: #1e293b;
-    color: #e2e8f0;
-    border: 1px solid #334155;
-    padding: 6px 10px;
-    font-family: ui-monospace, monospace;
-    font-size: 11.5px;
-  }
+    display: inline-block;\n    background-color: #1e293b;\n    color: #e2e8f0;\n    border: 1px solid #334155;\n    padding: 6px 10px;\n    font-family: 'Space Grotesk', ui-monospace, monospace;\n    font-size: 11.5px;\n  }
   .node-primary {
-    background-color: #1e3a8a;
-    border-color: #2563eb;
-    color: #ffffff;
-  }
+    background-color: #1e3a8a;\n    border-color: #2563eb;\n    color: #ffffff;\n  }
   .node-accent {
-    background-color: #1e1b4b;
-    border-color: #6366f1;
-    color: #c7d2fe;
-  }
+    background-color: #1e1b4b;\n    border-color: #6366f1;\n    color: #c7d2fe;\n  }
   .node-warning {
-    background-color: #451a03;
-    border-color: #b45309;
-    color: #fde68a;
-  }
+    background-color: #451a03;\n    border-color: #b45309;\n    color: #fde68a;\n  }
   .pipeline-arrow {
-    color: #38bdf8;
-    font-weight: bold;
-    padding: 0 2px;
-  }
+    color: #38bdf8;\n    font-weight: bold;\n    padding: 0 2px;\n  }
   .proposal-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 18px 0;
-    font-size: 12.5px;
-  }
+    width: 100%;\n    border-collapse: collapse;\n    margin: 18px 0;\n    font-size: 12.5px;\n  }
   .proposal-table th {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 9px 12px;
-    font-weight: 800;
-    color: #0f172a;
-    text-align: left;
-    font-size: 11px;
-    letter-spacing: 0.5px;
-  }
+    background-color: #f8fafc;\n    border: 1px solid #e2e8f0;\n    padding: 9px 12px;\n    font-weight: 800;\n    color: #0f172a;\n    text-align: left;\n    font-size: 11px;\n    letter-spacing: 0.5px;\n  }
   .proposal-table td {
-    border: 1px solid #e2e8f0;
-    padding: 10px 12px;
-    color: #334155;
-    vertical-align: top;
-    line-height: 1.55;
-  }
+    border: 1px solid #e2e8f0;\n    padding: 10px 12px;\n    color: #334155;\n    vertical-align: top;\n    line-height: 1.55;\n  }
   .table-total-row td {
-    background-color: #f8fafc;
-    border-top: 2px solid #0f172a;
-  }
+    background-color: #f8fafc;\n    border-top: 2px solid #0f172a;\n  }
   .tech-chip {
-    display: inline-block;
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #1d4ed8;
-    padding: 2px 7px;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: ui-monospace, monospace;
-  }
+    display: inline-block;\n    background-color: #eff6ff;\n    border: 1px solid #bfdbfe;\n    color: #1d4ed8;\n    padding: 2px 7px;\n    font-size: 11px;\n    font-weight: 700;\n    font-family: 'Space Grotesk', ui-monospace, monospace;\n  }
   .features-2col-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
-    margin: 16px 0;
-  }
+    display: grid;\n    grid-template-columns: repeat(2, 1fr);\n    gap: 14px;\n    margin: 16px 0;\n  }
   .feature-card {
-    border: 1px solid #e2e8f0;
-    background-color: #ffffff;
-    padding: 16px;
-  }
+    border: 1px solid #e2e8f0;\n    background-color: #ffffff;\n    padding: 16px;\n  }
   .feature-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #f1f5f9;
-  }
+    display: flex;\n    align-items: center;\n    gap: 8px;\n    margin-bottom: 10px;\n    padding-bottom: 8px;\n    border-bottom: 1px solid #f1f5f9;\n  }
   .feature-letter-badge {
-    width: 22px;
-    height: 22px;
-    background-color: #eff6ff;
-    border: 1px solid #bfdbfe;
-    color: #2563eb;
-    font-weight: 800;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+    width: 22px;\n    height: 22px;\n    background-color: #eff6ff;\n    border: 1px solid #bfdbfe;\n    color: #2563eb;\n    font-weight: 800;\n    font-size: 11px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n  }
   .feature-card-title {
-    font-size: 13.5px;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0;
-  }
+    font-size: 13.5px;\n    font-weight: 800;\n    color: #0f172a;\n    margin: 0;\n  }
   .scale-card-title {
-    font-size: 13px;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0 0 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #f1f5f9;
-  }
+    font-size: 13px;\n    font-weight: 800;\n    color: #0f172a;\n    margin: 0 0 8px;\n    padding-bottom: 6px;\n    border-bottom: 1px solid #f1f5f9;\n  }
   .feature-bullets {
-    margin: 0;
-    padding-left: 18px;
-    font-size: 12px;
-    color: #475569;
-    line-height: 1.6;
-  }
+    margin: 0;\n    padding-left: 18px;\n    font-size: 12px;\n    color: #475569;\n    line-height: 1.6;\n  }
   .feature-bullets li {
-    margin-bottom: 5px;
-  }
+    margin-bottom: 5px;\n  }
   .commercial-quote-card {
-    background-color: #0f172a;
-    color: #ffffff;
-    padding: 22px 24px;
-    margin: 20px 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 24px;
-  }
+    background-color: #0f172a;\n    color: #ffffff;\n    padding: 22px 24px;\n    margin: 20px 0;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    gap: 24px;\n  }
   .quote-card-label {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    color: #94a3b8;
-    text-transform: uppercase;
-  }
+    font-size: 10px;\n    font-weight: 800;\n    letter-spacing: 1.5px;\n    color: #94a3b8;\n    text-transform: uppercase;\n  }
   .quote-card-amount {
-    font-size: 34px;
-    font-weight: 900;
-    color: #ffffff;
-    font-family: ui-monospace, monospace;
-    letter-spacing: -1px;
-    margin: 4px 0 2px;
-  }
+    font-size: 34px;\n    font-weight: 900;\n    color: #ffffff;\n    font-family: 'Space Grotesk', ui-monospace, monospace;\n    letter-spacing: -1px;\n    margin: 4px 0 2px;\n  }
   .quote-card-sub {
-    font-size: 11.5px;
-    color: #94a3b8;
-  }
+    font-size: 11.5px;\n    color: #94a3b8;\n  }
   .quote-card-right {
-    min-width: 250px;
-    font-size: 12px;
-    line-height: 1.7;
-    border-left: 1px solid #334155;
-    padding-left: 20px;
-  }
+    min-width: 250px;\n    font-size: 12px;\n    line-height: 1.7;\n    border-left: 1px solid #334155;\n    padding-left: 20px;\n  }
   .quote-breakdown-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    color: #cbd5e1;
-  }
+    display: flex;\n    justify-content: space-between;\n    gap: 12px;\n    color: #cbd5e1;\n  }
   .quote-breakdown-row strong {
-    color: #ffffff;
-    font-family: ui-monospace, monospace;
-  }
+    color: #ffffff;\n    font-family: 'Space Grotesk', ui-monospace, monospace;\n  }
   .milestones-heading {
-    font-size: 14.5px;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 22px 0 12px;
-  }
+    font-size: 14.5px;\n    font-weight: 800;\n    color: #0f172a;\n    margin: 22px 0 12px;\n  }
   .milestone-timeline {
-    border-left: 2px solid #e2e8f0;
-    padding-left: 18px;
-    margin: 14px 0 18px 8px;
-  }
+    border-left: 2px solid #e2e8f0;\n    padding-left: 18px;\n    margin: 14px 0 18px 8px;\n  }
   .milestone-item {
-    position: relative;
-    margin-bottom: 14px;
-  }
+    position: relative;\n    margin-bottom: 14px;\n  }
   .milestone-bullet {
-    position: absolute;
-    left: -25px;
-    top: 3px;
-    width: 12px;
-    height: 12px;
-    background-color: #ffffff;
-    border: 2px solid #2563eb;
-  }
+    position: absolute;\n    left: -25px;\n    top: 3px;\n    width: 12px;\n    height: 12px;\n    background-color: #ffffff;\n    border: 2px solid #2563eb;\n  }
   .milestone-content {
-    font-size: 12.5px;
-  }
+    font-size: 12.5px;\n  }
   .milestone-title-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 2px;
-  }
+    display: flex;\n    justify-content: space-between;\n    align-items: baseline;\n    gap: 12px;\n    margin-bottom: 2px;\n  }
   .milestone-title-row strong {
-    color: #0f172a;
-  }
+    color: #0f172a;\n  }
   .milestone-price {
-    font-family: ui-monospace, monospace;
-    font-weight: 800;
-    color: #2563eb;
-    font-size: 13px;
-  }
+    font-family: 'Space Grotesk', ui-monospace, monospace;\n    font-weight: 800;\n    color: #2563eb;\n    font-size: 13px;\n  }
   .milestone-desc {
-    color: #64748b;
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.45;
-  }
+    color: #64748b;\n    margin: 0;\n    font-size: 12px;\n    line-height: 1.45;\n  }
   .callout-box-amber {
-    border: 1px solid #fde68a;
-    border-left: 4px solid #d97706;
-    background-color: #fffbeb;
-    color: #92400e;
-    padding: 14px 16px;
-    margin: 18px 0;
-    font-size: 12.5px;
-    line-height: 1.6;
-  }
+    border: 1px solid #fde68a;\n    border-left: 4px solid #d97706;\n    background-color: #fffbeb;\n    color: #92400e;\n    padding: 14px 16px;\n    margin: 18px 0;\n    font-size: 12.5px;\n    line-height: 1.6;\n  }
   .callout-box-green {
-    border: 1px solid #a7f3d0;
-    border-left: 4px solid #059669;
-    background-color: #ecfdf5;
-    color: #065f46;
-    padding: 14px 16px;
-    margin: 18px 0;
-    font-size: 12.5px;
-    line-height: 1.6;
-  }
+    border: 1px solid #a7f3d0;\n    border-left: 4px solid #059669;\n    background-color: #ecfdf5;\n    color: #065f46;\n    padding: 14px 16px;\n    margin: 18px 0;\n    font-size: 12.5px;\n    line-height: 1.6;\n  }
   .assumptions-list {
-    padding-left: 20px;
-    font-size: 12.5px;
-    color: #334155;
-    line-height: 1.65;
-  }
+    padding-left: 20px;\n    font-size: 12.5px;\n    color: #334155;\n    line-height: 1.65;\n  }
   .assumptions-list li {
-    margin-bottom: 8px;
-  }
+    margin-bottom: 8px;\n  }
   .signoff-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin: 22px 0;
-  }
+    display: grid;\n    grid-template-columns: repeat(2, 1fr);\n    gap: 16px;\n    margin: 22px 0;\n  }
   .signoff-card {
-    border: 1px solid #e2e8f0;
-    background-color: #f8fafc;
-    padding: 16px 18px;
-    font-size: 12px;
-  }
+    border: 1px solid #e2e8f0;\n    background-color: #f8fafc;\n    padding: 16px 18px;\n    font-size: 12px;\n  }
   .signoff-title {
-    font-size: 13.5px;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0 0 10px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #e2e8f0;
-  }
+    font-size: 13.5px;\n    font-weight: 800;\n    color: #0f172a;\n    margin: 0 0 10px;\n    padding-bottom: 6px;\n    border-bottom: 1px solid #e2e8f0;\n  }
   .signoff-line {
-    margin-bottom: 5px;
-    color: #475569;
-  }
+    margin-bottom: 5px;\n    color: #475569;\n  }
   .signoff-line strong {
-    color: #0f172a;
-  }
+    color: #0f172a;\n  }
   .signature-line-box {
-    margin-top: 18px;
-    padding-top: 12px;
-    border-top: 1px dashed #cbd5e1;
-  }
+    margin-top: 18px;\n    padding-top: 12px;\n    border-top: 1px dashed #cbd5e1;\n  }
   .signature-placeholder {
-    font-weight: 700;
-    color: #64748b;
-    font-style: italic;
-    font-size: 11.5px;
-  }
+    font-weight: 700;\n    color: #64748b;\n    font-style: italic;\n    font-size: 11.5px;\n  }
   .signature-caption {
-    font-size: 11px;
-    color: #94a3b8;
-    margin-top: 4px;
-  }
+    font-size: 11px;\n    color: #94a3b8;\n    margin-top: 4px;\n  }
   .proposal-running-footer {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: #94a3b8;
-    border-top: 1px solid #f1f5f9;
-    padding-top: 12px;
-    margin-top: 24px;
-  }
+    display: flex;\n    justify-content: space-between;\n    font-size: 10px;\n    color: #94a3b8;\n    border-top: 1px solid #f1f5f9;\n    padding-top: 12px;\n    margin-top: 24px;\n  }
   .page-break {
-    border-top: 2px dashed #cbd5e1;
-    margin: 36px -48px 36px;
-    position: relative;
-  }
+    border-top: 2px dashed #cbd5e1;\n    margin: 36px -48px 36px;\n    position: relative;\n  }
   .page-break:after {
-    content: "PAGE BREAK (A4)";
-    position: absolute;
-    right: 48px;
-    top: -9px;
-    background-color: #f1f5f9;
-    padding: 0 8px;
-    font-size: 9px;
-    font-weight: 800;
-    color: #94a3b8;
-    letter-spacing: 0.8px;
-  }
+    content: "PAGE BREAK (A4)";\n    position: absolute;\n    right: 48px;\n    top: -9px;\n    background-color: #f1f5f9;\n    padding: 0 8px;\n    font-size: 9px;\n    font-weight: 800;\n    color: #94a3b8;\n    letter-spacing: 0.8px;\n  }
 
   /* Print specific formatting */
   @media print {
     @page {
-      size: A4 portrait;
-      margin: 12mm 15mm;
-    }
+      size: A4 portrait;\n      margin: 12mm 15mm;\n    }
     body {
-      background: #ffffff !important;
-      color: #000000 !important;
-    }
+      background: #ffffff !important;\n      color: #000000 !important;\n    }
     .proposal-page {
-      border: none !important;
-      box-shadow: none !important;
-      padding: 0 !important;
-      max-width: 100% !important;
-    }
+      border: none !important;\n      box-shadow: none !important;\n      padding: 0 !important;\n      max-width: 100% !important;\n    }
     .page-break {
-      border: none !important;
-      margin: 0 !important;
-      page-break-before: always !important;
-      break-before: page !important;
-      height: 0 !important;
-    }
+      border: none !important;\n      margin: 0 !important;\n      page-break-before: always !important;\n      break-before: page !important;\n      height: 0 !important;\n    }
     .page-break:after {
-      display: none !important;
-    }
+      display: none !important;\n    }
     .architecture-terminal {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
+      -webkit-print-color-adjust: exact !important;\n      print-color-adjust: exact !important;\n    }
     .commercial-quote-card {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
+      -webkit-print-color-adjust: exact !important;\n      print-color-adjust: exact !important;\n    }
   }
 
   @media screen and (max-width: 680px) {
     .proposal-page {
-      padding: 24px 16px;
-    }
+      padding: 24px 16px;\n    }
     .stat-grid-4 {
-      grid-template-columns: repeat(2, 1fr);
-    }
+      grid-template-columns: repeat(2, 1fr);\n    }
     .features-2col-grid, .signoff-grid, .proposal-title-meta-grid {
-      grid-template-columns: 1fr;
-      flex-direction: column;
-    }
+      grid-template-columns: 1fr;\n      flex-direction: column;\n    }
     .commercial-quote-card {
-      flex-direction: column;
-      align-items: flex-start;
-    }
+      flex-direction: column;\n      align-items: flex-start;\n    }
     .quote-card-right {
-      border-left: none;
-      border-top: 1px solid #334155;
-      padding-left: 0;
-      padding-top: 14px;
-      width: 100%;
-    }
+      border-left: none;\n      border-top: 1px solid #334155;\n      padding-left: 0;\n      padding-top: 14px;\n      width: 100%;\n    }
   }
 `;
 
@@ -660,142 +271,109 @@ export function preprocessProposalDirectives(
     },
   );
 
-  // 2. Page Break: supports single-line "::: pagebreak", "::: pagebreak ...", or "<PageBreak />"
-  md = md.replace(
-    /(?:^:::\s*pagebreak(?:\s+([^\n]+))?(?:\r?\n:::\s*)?|<PageBreak(?:\s+footer="([^"]+)")?\s*\/?>|<!--\s*pagebreak\s*-->)/gm,
-    (_match, footer1, footer2) => {
-      const footerText =
-        footer1 ||
-        footer2 ||
-        "Scalyx — Technical Proposal | Confidential & Privileged | Architectural Blueprint";
-      const parts = footerText
-        .trim()
-        .split("|")
-        .map((p: string) => p.trim());
-      const spans = parts.map((p: string) => `<span>${p}</span>`).join("\n  ");
-      return register(`
-<div class="proposal-running-footer">
-  ${spans}
-</div>
-<div class="page-break"></div>
-`);
-    },
-  );
-
-  // 3. Title & Meta Box
+  // 2. Title & Meta Block
   md = md.replace(
     /(?:^:::\s*title-meta\s*$([\s\S]*?)^:::\s*$|<TitleMeta>([\s\S]*?)<\/TitleMeta>)/gm,
     (_match, body1, body2) => {
       const body = (body1 || body2 || "").trim();
-      let title = "PROPOSAL";
+      let eyebrow = "PROPOSAL & ARCHITECTURAL BLUEPRINT";
+      let title = "Scalyx Custom Platform Architecture";
       let subtitle = "";
-      let eyebrow = "— TECHNICAL PROPOSAL & EXECUTION SPECIFICATION";
-      const metaRows: { label: string; value: string }[] = [];
-      let confidentialBadge = "";
+      let client = "LexConnect";
+      let date = "March 2026";
+      let version = "v1.0 (Production Blueprint)";
 
       const lines = body.split("\n");
       for (const rawLine of lines) {
         const line = rawLine.trim();
-        if (!line) continue;
-        if (line.startsWith("# ")) {
-          title = line.replace(/^#\s+/, "");
-        } else if (line.startsWith("## ")) {
-          subtitle = line.replace(/^##\s+/, "");
-        } else if (line.startsWith("### ")) {
-          eyebrow = line.replace(/^###\s+/, "");
-        } else if (line.startsWith("- ") || line.startsWith("* ")) {
-          const item = line.replace(/^[-*]\s+/, "");
-          const matchMeta = item.match(/\*\*([^:]+):\*\*\s*(.*)/);
-          if (matchMeta) {
-            const key = matchMeta[1].trim();
-            const val = matchMeta[2].trim();
-            if (
-              key.toLowerCase() === "status" ||
-              key.toLowerCase() === "confidential"
-            ) {
-              confidentialBadge = val;
-            } else {
-              metaRows.push({ label: key, value: val });
-            }
-          }
+        if (!line || (!line.startsWith("- ") && !line.startsWith("* ")))
+          continue;
+        const content = line.replace(/^[-*]\s+/, "");
+        const match = content.match(/\*\*([^:]+):\*\*\s*(.*)/);
+        if (match) {
+          const key = match[1].trim().toLowerCase();
+          const val = match[2].trim();
+          if (key === "eyebrow") eyebrow = val;
+          else if (key === "title") title = val;
+          else if (key === "subtitle") subtitle = val;
+          else if (key === "client") client = val;
+          else if (key === "date") date = val;
+          else if (key === "version") version = val;
         }
       }
-
-      const rowsHtml = metaRows
-        .map(
-          (r) =>
-            `<div class="proposal-meta-row"><span>${r.label}:</span> <strong>${r.value}</strong></div>`,
-        )
-        .join("\n");
-
-      const badgeHtml = confidentialBadge
-        ? `<div class="proposal-badge-confidential">${confidentialBadge}</div>`
-        : `<div class="proposal-badge-confidential">CONFIDENTIAL & PRIVILEGED</div>`;
 
       return register(`
 <div class="proposal-title-meta-grid">
   <div>
     <div class="proposal-eyebrow">${eyebrow}</div>
     <h1 class="proposal-main-title">${title}</h1>
-    <div class="proposal-main-subtitle">${subtitle}</div>
+    ${subtitle ? `<p class="proposal-main-subtitle">${subtitle}</p>` : ""}
   </div>
   <div class="proposal-meta-card">
-    ${rowsHtml}
-    ${badgeHtml}
+    <div class="proposal-meta-row"><span>Prepared For:</span> <strong>${client}</strong></div>
+    <div class="proposal-meta-row"><span>Date:</span> <strong>${date}</strong></div>
+    <div class="proposal-meta-row"><span>Version:</span> <strong>${version}</strong></div>
+    <span class="proposal-badge-confidential">CONFIDENTIAL</span>
   </div>
 </div>
 `);
     },
   );
 
-  // 4. Stats: 4-Grid Metric Cards
+  // 3. Four-Column Stat Grid
   md = md.replace(
     /(?:^:::\s*stats\s*$([\s\S]*?)^:::\s*$|<Stats>([\s\S]*?)<\/Stats>)/gm,
     (_match, body1, body2) => {
       const body = (body1 || body2 || "").trim();
-      const borders = [
+      const lines = body.split("\n");
+      const cards: string[] = [];
+      const borderColors = [
         "border-top-blue",
         "border-top-purple",
         "border-top-emerald",
         "border-top-amber",
       ];
-      const cards: string[] = [];
 
-      const lines = body.split("\n");
-      let idx = 0;
+      let cardIdx = 0;
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line || (!line.startsWith("- ") && !line.startsWith("* ")))
           continue;
         const content = line.replace(/^[-*]\s+/, "");
         const parts = content.split("|").map((p: string) => p.trim());
-        if (parts.length >= 2) {
-          const label = parts[0].replace(/\*\*/g, "");
-          const val = parts[1].replace(/`/g, "");
-          const desc = parts[2] || "";
-          const borderClass = borders[idx % borders.length];
-          cards.push(`
-  <div class="stat-card ${borderClass}">
+        const label = parts[0] || "";
+        const value = parts[1] || "";
+        const desc = parts[2] || "";
+        const borderColor = borderColors[cardIdx % borderColors.length];
+        cardIdx++;
+
+        cards.push(`
+  <div class="stat-card ${borderColor}">
     <div class="stat-card-label">${label}</div>
-    <div class="stat-card-value">${val}</div>
-    <div class="stat-card-desc">${desc}</div>
-  </div>`);
-          idx++;
-        }
+    <div class="stat-card-value">${value}</div>
+    ${desc ? `<div class="stat-card-desc">${desc}</div>` : ""}
+  </div>
+`);
       }
 
-      return register(`
-<div class="stat-grid-4">
-  ${cards.join("\n")}
-</div>
-`);
+      return register(
+        `<div class="stat-grid-4">\n${cards.join("\n")}\n</div>\n`,
+      );
     },
   );
 
-  // 5. Section headers: ## [01] Title or ## [ 01 ] Title
+  // 4. Page Break
   md = md.replace(
-    /^##\s*\[\s*([0-9A-Za-z]+)\s*\]\s*(.*)$/gm,
-    (_match, num, title) => {
+    /(?:^:::\s*page-break\s*$|<PageBreak\s*\/?>)/gm,
+    () => `\n\n<div class="page-break"></div>\n\n`,
+  );
+
+  // 5. Section Header with Badge
+  md = md.replace(
+    /(?:^:::\s*section-header\s+num="([^"]+)"\s+title="([^"]+)"\s*$|<SectionHeader\s+num="([^"]+)"\s+title="([^"]+)"\s*\/?>)/gm,
+    (_match, num1, title1, num2, title2) => {
+      const num = num1 || num2 || "01";
+      const title = title1 || title2 || "Section";
       return register(`
 <div class="section-title-wrap">
   <span class="section-number-badge">${num}</span>
@@ -807,7 +385,7 @@ export function preprocessProposalDirectives(
 
   // 6. Architecture Terminal Diagram
   md = md.replace(
-    /(?:^:::\s*architecture(.*?)[\r\n]+([\s\S]*?)^:::\s*$|<Architecture(.*?)>([\s\S]*?)<\/Architecture>)/gm,
+    /(?:^:::\s*architecture(.*?)[\\r\\n]+([\s\S]*?)^:::\s*$|<Architecture(.*?)>([\s\S]*?)<\/Architecture>)/gm,
     (_match, attrs1, body1, attrs2, body2) => {
       const attrs = attrs1 || attrs2 || "";
       const body = (body1 || body2 || "").trim();
@@ -858,146 +436,134 @@ export function preprocessProposalDirectives(
     /(?:^:::\s*feature-grid\s*$([\s\S]*?)^:::\s*$|<FeatureGrid>([\s\S]*?)<\/FeatureGrid>)/gm,
     (_match, body1, body2) => {
       const body = (body1 || body2 || "").trim();
-      const sections = body
-        .split(/^###\s+/m)
-        .map((s: string) => s.trim())
-        .filter((s: string) => s.length > 0);
+      const rawBlocks = body.split(/^###\s+/m).filter(Boolean);
+      const cards: string[] = [];
 
-      const cards = sections.map((sec: string, i: number) => {
-        const lines = sec.split("\n");
-        const titleLine = lines[0]?.trim() || "";
-        const letterMatch = titleLine.match(/^\[([A-Za-z0-9])\]\s*(.*)/);
-        const letter = letterMatch
-          ? letterMatch[1]
-          : i < 26
-            ? String.fromCharCode(65 + i)
-            : `${i + 1}`;
-        const cardTitle = letterMatch ? letterMatch[2] : titleLine;
+      let badgeLetterIdx = 0;
+      for (const block of rawBlocks) {
+        const lines = block.split("\n");
+        const heading = lines[0]?.trim() || "Feature";
+        const contentLines = lines.slice(1);
+        const letterBadge = String.fromCharCode(65 + badgeLetterIdx++);
 
-        const bulletLines = lines
-          .slice(1)
-          .map((l: string) => l.trim())
-          .filter((l: string) => l.startsWith("- ") || l.startsWith("* "));
+        const bullets: string[] = [];
+        for (const line of contentLines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            bullets.push(
+              `<li>${trimmed
+                .replace(/^[-*]\s+/, "")
+                .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")}</li>`,
+            );
+          }
+        }
 
-        const bulletsHtml =
-          bulletLines.length > 0
-            ? `<ul class="feature-bullets">\n        ${bulletLines
-                .map((l: string) => `<li>${l.replace(/^[-*]\s+/, "")}</li>`)
-                .join("\n        ")}\n      </ul>`
-            : "";
-
-        return `
+        cards.push(`
   <div class="feature-card">
     <div class="feature-card-header">
-      <span class="feature-letter-badge">${letter}</span>
-      <h3 class="feature-card-title">${cardTitle}</h3>
+      <span class="feature-letter-badge">${letterBadge}</span>
+      <h4 class="feature-card-title">${heading}</h4>
     </div>
-    ${bulletsHtml}
-  </div>`;
-      });
-
-      return register(`
-<div class="features-2col-grid">
-  ${cards.join("\n")}
-</div>
+    <ul class="feature-bullets">
+      ${bullets.join("\n")}
+    </ul>
+  </div>
 `);
+      }
+
+      return register(
+        `<div class="features-2col-grid">\n${cards.join("\n")}\n</div>\n`,
+      );
     },
   );
 
-  // 8. Scale Grid: Engineering Hardening Cards
+  // 8. Scale Grid: 2-Column Architecture Pillars
   md = md.replace(
     /(?:^:::\s*scale-grid\s*$([\s\S]*?)^:::\s*$|<ScaleGrid>([\s\S]*?)<\/ScaleGrid>)/gm,
     (_match, body1, body2) => {
       const body = (body1 || body2 || "").trim();
-      const sections = body
-        .split(/^###\s+/m)
-        .map((s: string) => s.trim())
-        .filter((s: string) => s.length > 0);
+      const rawBlocks = body.split(/^###\s+/m).filter(Boolean);
+      const cards: string[] = [];
 
-      const cards = sections.map((sec: string) => {
-        const lines = sec.split("\n");
-        const titleLine = lines[0]?.trim() || "";
-        const bulletLines = lines
-          .slice(1)
-          .map((l: string) => l.trim())
-          .filter((l: string) => l.startsWith("- ") || l.startsWith("* "));
+      for (const block of rawBlocks) {
+        const lines = block.split("\n");
+        const heading = lines[0]?.trim() || "Scale Pillar";
+        const contentLines = lines.slice(1);
 
-        const bulletsHtml =
-          bulletLines.length > 0
-            ? `<ul class="feature-bullets">\n        ${bulletLines
-                .map((l: string) => `<li>${l.replace(/^[-*]\s+/, "")}</li>`)
-                .join("\n        ")}\n      </ul>`
-            : "";
+        const bullets: string[] = [];
+        for (const line of contentLines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            bullets.push(
+              `<li>${trimmed
+                .replace(/^[-*]\s+/, "")
+                .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")}</li>`,
+            );
+          }
+        }
 
-        return `
+        cards.push(`
   <div class="feature-card">
-    <h4 class="scale-card-title">${titleLine}</h4>
-    ${bulletsHtml}
-  </div>`;
-      });
-
-      return register(`
-<div class="features-2col-grid">
-  ${cards.join("\n")}
-</div>
+    <h4 class="scale-card-title">${heading}</h4>
+    <ul class="feature-bullets">
+      ${bullets.join("\n")}
+    </ul>
+  </div>
 `);
+      }
+
+      return register(
+        `<div class="features-2col-grid">\n${cards.join("\n")}\n</div>\n`,
+      );
     },
   );
 
-  // 9. Quotation: Dark Commercial Investment Card
+  // 9. Commercial Quote Highlight Box
   md = md.replace(
-    /(?:^:::\s*quotation\s*$([\s\S]*?)^:::\s*$|<Quotation>([\s\S]*?)<\/Quotation>)/gm,
-    (_match, body1, body2) => {
+    /(?:^:::\s*quote-box(.*?)[\\r\\n]+([\s\S]*?)^:::\s*$|<QuoteBox(.*?)>([\s\S]*?)<\/QuoteBox>)/gm,
+    (_match, attrs1, body1, attrs2, body2) => {
+      const attrs = attrs1 || attrs2 || "";
       const body = (body1 || body2 || "").trim();
-      let amount = "₹85,000";
-      let subtitle = "Complete 2-Phase Engineering & Production Hardening";
-      const rows: { label: string; value: string }[] = [];
+      const amountMatch = attrs.match(/amount="([^"]+)"/);
+      const subMatch = attrs.match(/subtitle="([^"]+)"/);
+      const amount = amountMatch ? amountMatch[1] : "₹85,000 INR";
+      const subtitle = subMatch
+        ? subMatch[1]
+        : "Complete Architecture, MVP & Production Hardening";
 
+      const rows: string[] = [];
       const lines = body.split("\n");
       for (const rawLine of lines) {
         const line = rawLine.trim();
-        if (!line) continue;
-        if (
-          line.toLowerCase().includes("total investment:") ||
-          line.toLowerCase().includes("total commercial investment:")
-        ) {
-          amount = line.split(":")[1]?.trim() || amount;
-        } else if (line.toLowerCase().startsWith("**subtitle:**")) {
-          subtitle = line.replace(/^\*\*subtitle:\*\*\s*/i, "");
-        } else if (line.startsWith("- ") || line.startsWith("* ")) {
-          const item = line.replace(/^[-*]\s+/, "");
-          const match = item.match(/\*\*([^:]+):\*\*\s*(.*)/);
-          if (match) {
-            rows.push({ label: match[1].trim(), value: match[2].trim() });
-          }
+        if (!line || (!line.startsWith("- ") && !line.startsWith("* ")))
+          continue;
+        const content = line.replace(/^[-*]\s+/, "");
+        const parts = content.split("|").map((p: string) => p.trim());
+        if (parts.length >= 2) {
+          rows.push(
+            `<div class="quote-breakdown-row"><span>${parts[0]}</span><strong>${parts[1]}</strong></div>`,
+          );
         }
       }
 
-      const rowsHtml = rows
-        .map(
-          (r) =>
-            `<div class="quote-breakdown-row"><span>${r.label}</span> <strong>${r.value}</strong></div>`,
-        )
-        .join("\n");
-
       return register(`
 <div class="commercial-quote-card">
-  <div class="quote-card-left">
-    <div class="quote-card-label">TOTAL COMMERCIAL INVESTMENT</div>
+  <div>
+    <div class="quote-card-label">TOTAL PROJECT INVESTMENT</div>
     <div class="quote-card-amount">${amount}</div>
     <div class="quote-card-sub">${subtitle}</div>
   </div>
   <div class="quote-card-right">
-    ${rowsHtml}
+    ${rows.join("\n")}
   </div>
 </div>
 `);
     },
   );
 
-  // 10. Milestones: Phased Payment Schedule
+  // 10. Payment Milestones Timeline
   md = md.replace(
-    /(?:^:::\s*milestones(.*?)[\r\n]+([\s\S]*?)^:::\s*$|<Milestones(.*?)>([\s\S]*?)<\/Milestones>)/gm,
+    /(?:^:::\s*milestones(.*?)[\\r\\n]+([\s\S]*?)^:::\s*$|<Milestones(.*?)>([\s\S]*?)<\/Milestones>)/gm,
     (_match, attrs1, body1, attrs2, body2) => {
       const attrs = attrs1 || attrs2 || "";
       const body = (body1 || body2 || "").trim();
@@ -1077,10 +643,7 @@ export function preprocessProposalDirectives(
           const val = match[2].trim();
           if (key.toLowerCase() === "client") {
             clientName = val;
-          } else if (
-            key.toLowerCase() === "total investment" ||
-            key.toLowerCase() === "investment"
-          ) {
+          } else if (key.toLowerCase().includes("investment")) {
             investment = val;
           } else {
             agencyLines.push(
@@ -1093,16 +656,22 @@ export function preprocessProposalDirectives(
       return register(`
 <div class="signoff-grid">
   <div class="signoff-card">
-    <h4 class="signoff-title">Scalyx</h4>
-    ${agencyLines.join("\n    ")}
-  </div>
-  <div class="signoff-card">
-    <h4 class="signoff-title">Proposal Acceptance</h4>
-    <div class="signoff-line"><strong>Client:</strong> ${clientName}</div>
-    <div class="signoff-line"><strong>Total Agreed Investment:</strong> ${investment}</div>
+    <div class="signoff-title">Client Acceptance</div>
+    <div class="signoff-line"><strong>Authorized Client:</strong> ${clientName}</div>
+    <div class="signoff-line"><strong>Agreed Scope:</strong> Full Technical Proposal & Blueprint</div>
+    <div class="signoff-line"><strong>Total Investment:</strong> ${investment}</div>
     <div class="signature-line-box">
-      <div class="signature-placeholder">Authorized Signatory & Seal</div>
-      <div class="signature-caption">Date: ________________________</div>
+      <div class="signature-placeholder">[ Sign & Confirm Acceptance ]</div>
+      <div class="signature-caption">Signature / Digital Confirmation</div>
+    </div>
+  </div>
+
+  <div class="signoff-card">
+    <div class="signoff-title">Scalyx Digital Execution Team</div>
+    ${agencyLines.join("\n")}
+    <div class="signature-line-box">
+      <div class="signature-placeholder">Scalyx Enterprise Delivery & Engineering</div>
+      <div class="signature-caption">Signature & Project Stamp</div>
     </div>
   </div>
 </div>
@@ -1110,13 +679,24 @@ export function preprocessProposalDirectives(
     },
   );
 
+  // 13. Running Footer
+  md = md.replace(
+    /(?:^:::\s*footer\s*$|<Footer\s*\/?>)/gm,
+    () => `
+<div class="proposal-running-footer">
+  <span>Scalyx Architectural Blueprint & Engineering Proposal &bull; Confidential</span>
+  <span>Page Fit: A4 Standard &bull; scalyx.in</span>
+</div>
+`,
+  );
+
   return md;
 }
 
 /**
- * Translates proposal directives into semantic HTML strings directly.
+ * Strips raw custom directives for preview or safe export
  */
-export function translateProposalMarkdown(rawMd: string): string {
+export function stripDirectives(rawMd: string): string {
   return preprocessProposalDirectives(rawMd, (html) => html);
 }
 

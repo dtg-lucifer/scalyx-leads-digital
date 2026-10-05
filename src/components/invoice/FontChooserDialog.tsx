@@ -160,3 +160,5 @@ export default function FontChooserDialog({
     </div>
   );
 }
+
+export { FontChooserDialog };

@@ -3,6 +3,7 @@ import { db } from "@/lib/db/store";
 import type { EmailTemplateId } from "@/types/email";
 import { getScalyxLogoBuffer, SCALYX_LOGO_CID } from "./logo";
 import { renderEmailHtml } from "./templates";
+import { sanitizeEmailParams } from "@/lib/url";
 
 const resendApiKey =
   process.env.RESEND_API_KEY || process.env.NEXT_PUBLIC_RESEND_API_KEY;
@@ -28,7 +29,8 @@ export async function sendTemplatedEmail(
   options: SendEmailOptions,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   // Render HTML with forSending: true so it references the inline CID attachment (cid:scalyx-logo)
-  const html = await renderEmailHtml(options.templateId, options.params, {
+  const sanitizedParams = sanitizeEmailParams(options.params);
+  const html = await renderEmailHtml(options.templateId, sanitizedParams, {
     forSending: true,
   });
 

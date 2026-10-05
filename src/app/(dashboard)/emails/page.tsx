@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import type { EmailLog, EmailTemplateMeta } from "@/types/email";
 import type { Lead } from "@/types/lead";
+import { getDeployedAppUrl, ensureDeployedUrl, sanitizeEmailParams } from "@/lib/url";
 
 export default function EmailSenderPage() {
   const [templates, setTemplates] = useState<EmailTemplateMeta[]>([]);
@@ -129,13 +130,14 @@ export default function EmailSenderPage() {
     async function updatePreview() {
       try {
         setIsPreviewLoading(true);
-        const mergedParams: Record<string, string> = {
+        const rawParams: Record<string, string> = {
           ...fieldValues,
           includeDeliverablesFooter: includeDeliverablesFooter
             ? "true"
             : "false",
           deliverablesUrl: deliverablesUrl || fieldValues.portalUrl || "",
         };
+        const mergedParams = sanitizeEmailParams(rawParams);
         if (attachedFiles.length > 0) {
           mergedParams.attachedFilesList = attachedFiles
             .map((f) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`)
@@ -194,12 +196,7 @@ export default function EmailSenderPage() {
     if (!lead) return;
 
     setRecipient(lead.email);
-    const origin =
-      typeof window !== "undefined"
-        ? window.location.origin
-        : process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}`
-          : "http://localhost:3000";
+    const origin = getDeployedAppUrl();
     const portalUrl = `${origin}/portal/${lead.portalAccessCode || lead.id}`;
     setDeliverablesUrl(`${portalUrl}?tab=deliverables`);
     setFieldValues((prev) => ({
@@ -267,11 +264,12 @@ export default function EmailSenderPage() {
 
     try {
       setIsSending(true);
-      const mergedParams: Record<string, string> = {
+      const rawParams: Record<string, string> = {
         ...fieldValues,
         includeDeliverablesFooter: includeDeliverablesFooter ? "true" : "false",
         deliverablesUrl: deliverablesUrl || fieldValues.portalUrl || "",
       };
+      const mergedParams = sanitizeEmailParams(rawParams);
       if (attachedFiles.length > 0) {
         mergedParams.attachedFilesList = attachedFiles
           .map((f) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`)

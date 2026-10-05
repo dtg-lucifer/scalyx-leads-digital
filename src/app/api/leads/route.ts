@@ -3,6 +3,7 @@ import { db } from '@/lib/db/store';
 import { getCurrentUser } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/rbac';
 import { sendTemplatedEmail } from '@/lib/email/sender';
+import { getDeployedAppUrl } from '@/lib/url';
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -28,8 +29,8 @@ export async function POST(req: NextRequest) {
     }
 
     const lead = await db.createLead({
-      name: body.name,
-      email: body.email,
+      name: body.name.trim(),
+      email: body.email.trim(),
       phone: body.phone || '',
       company: body.company || '',
       roleTitle: body.roleTitle || '',
@@ -45,9 +46,8 @@ export async function POST(req: NextRequest) {
 
     // Optionally send welcome email with portal link if requested
     if (body.sendWelcomeEmail) {
-      const { getAppBaseUrl } = await import('@/lib/email/templates');
       const portal = await db.getPortalByLeadId(lead.id);
-      const portalUrl = `${getAppBaseUrl()}/portal/${portal?.slug || lead.id}`;
+      const portalUrl = `${getDeployedAppUrl(req)}/portal/${portal?.slug || lead.id}`;
       await sendTemplatedEmail({
         to: lead.email,
         subject: `Welcome to Scalyx • Your Dedicated Client Portal for ${lead.company || lead.name}`,

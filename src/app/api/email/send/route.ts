@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { hasPermission } from '@/lib/auth/rbac';
 import { sendTemplatedEmail, EmailAttachment } from '@/lib/email/sender';
+import { sanitizeEmailParams } from '@/lib/url';
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -71,11 +72,13 @@ export async function POST(req: NextRequest) {
       params.attachedFilesList = attachments.map((a) => a.filename).join(', ');
     }
 
+    const sanitizedParams = sanitizeEmailParams(params, req);
+
     const result = await sendTemplatedEmail({
       to,
       subject,
       templateId,
-      params,
+      params: sanitizedParams,
       attachments,
       sentBy: user.email,
     });

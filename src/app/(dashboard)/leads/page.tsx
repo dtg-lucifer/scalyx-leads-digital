@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { AppNavbar } from "@/components/layout/AppNavbar";
 import { Lead, LeadStatus, LeadSource } from "@/types/lead";
+import { getDeployedAppUrl, ensureDeployedUrl } from "@/lib/url";
 import {
   Users,
   Plus,
@@ -228,7 +229,7 @@ export default function LeadsPage() {
     try {
       setSendingPortalEmail(true);
       const portalSlug = leadRelations?.portal?.slug || lead.id;
-      const portalUrl = `${window.location.origin}/portal/${portalSlug}`;
+      const portalUrl = `${getDeployedAppUrl()}/portal/${portalSlug}`;
       const res = await fetch("/api/email/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -265,7 +266,8 @@ export default function LeadsPage() {
   };
 
   const handleCopyPortalUrl = (url: string) => {
-    navigator.clipboard.writeText(url);
+    const deployedUrl = ensureDeployedUrl(url);
+    navigator.clipboard.writeText(deployedUrl);
     setCopiedPortalUrl(true);
     setTimeout(() => setCopiedPortalUrl(false), 2000);
   };
@@ -831,7 +833,7 @@ export default function LeadsPage() {
                           size="icon"
                           onClick={() =>
                             handleCopyPortalUrl(
-                              `${window.location.origin}/portal/${leadRelations?.portal?.slug || selectedLead.id}`
+                              `${getDeployedAppUrl()}/portal/${leadRelations?.portal?.slug || selectedLead.id}`
                             )
                           }
                           className="size-6 text-muted-foreground hover:text-foreground rounded-none"

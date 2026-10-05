@@ -171,7 +171,7 @@ export default function ClientPortalPage() {
     }
   };
 
-  const handleDownloadDeliverable = async (id: string, url?: string) => {
+  const handleDownloadDeliverable = async (id: string, _url?: string) => {
     try {
       const downloadEndpoint = `/api/deliverables/${id}/download`;
       const link = document.createElement("a");
@@ -234,9 +234,9 @@ export default function ClientPortalPage() {
   // PASSWORD CHALLENGE VIEW
   if (!isUnlocked) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-muted/20 relative">
-        <div className="w-full max-w-md bg-card border border-border rounded-none p-8 shadow-xl text-center">
-          <div className="size-16 rounded-none overflow-hidden mx-auto mb-4 border border-border bg-card p-1">
+      <div className="min-h-screen flex flex-col justify-center items-center p-3.5 sm:p-4 bg-muted/20 relative">
+        <div className="w-full max-w-md bg-card border border-border rounded-none p-5 sm:p-8 shadow-xl text-center">
+          <div className="size-14 sm:size-16 rounded-none overflow-hidden mx-auto mb-4 border border-border bg-card p-1">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/scalyx_light.png"
@@ -245,10 +245,10 @@ export default function ClientPortalPage() {
             />
           </div>
 
-          <Badge variant="outline" className="text-primary border-primary/20 text-[11px] mb-2">
+          <Badge variant="outline" className="text-primary border-primary/20 text-[10px] sm:text-[11px] mb-2">
             Secure Client Portal
           </Badge>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Project Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Project Dashboard</h1>
           <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
             Please enter the auto-generated password sent to your email to view your project&apos;s growth and deliverables.
           </p>
@@ -295,9 +295,9 @@ export default function ClientPortalPage() {
   return (
     <div className="min-h-screen flex flex-col bg-muted/20 text-foreground">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-30 h-16 border-b border-border bg-card/85 backdrop-blur-md px-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="size-9 rounded-none overflow-hidden shrink-0 border border-border bg-card p-0.5">
+      <header className="sticky top-0 z-30 min-h-16 py-2.5 sm:py-0 border-b border-border bg-card/90 backdrop-blur-md px-3.5 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="size-8 sm:size-9 rounded-none overflow-hidden shrink-0 border border-border bg-card p-0.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/scalyx_light.png"
@@ -305,41 +305,45 @@ export default function ClientPortalPage() {
               className="w-full h-full object-cover rounded-none"
             />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-sm text-foreground">Scalyx • Client Portal</span>
-              <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/20">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-bold text-xs sm:text-sm text-foreground truncate">
+                Scalyx <span className="hidden xs:inline">• Client Portal</span>
+              </span>
+              <Badge variant="outline" className="text-[9px] sm:text-[10px] text-emerald-600 border-emerald-500/20 shrink-0 hidden sm:inline-flex">
                 Verified Portal
               </Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate max-w-[130px] xs:max-w-[180px] sm:max-w-xs">
               {portal?.company || portal?.leadName} Workspace
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {isTeamMember && (
-            <div className="flex items-center gap-2 mr-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setIsEditModalOpen(true)}
-                className="gap-1.5 text-xs h-8"
+                className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3"
               >
                 <Edit3 className="size-3.5" />
-                <span>Update Progress</span>
+                <span className="hidden md:inline">Update Progress</span>
+                <span className="md:hidden">Progress</span>
               </Button>
 
               <Button
                 type="button"
                 size="sm"
                 onClick={() => setIsNoticeModalOpen(true)}
-                className="gap-1.5 text-xs h-8 font-semibold"
+                className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 font-semibold"
               >
                 <Plus className="size-3.5" />
-                <span>Post Notice</span>
+                <span className="hidden md:inline">Post Notice</span>
+                <span className="md:hidden">Notice</span>
               </Button>
             </div>
           )}
@@ -348,27 +352,28 @@ export default function ClientPortalPage() {
             href="https://scalyx.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-medium"
+            className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 font-medium p-1 sm:p-0"
+            title="Visit scalyx.in"
           >
-            <span>scalyx.in</span>
-            <ExternalLink className="size-2.5" />
+            <span className="hidden sm:inline">scalyx.in</span>
+            <ExternalLink className="size-3 sm:size-2.5" />
           </a>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-6xl w-full mx-auto p-6 sm:p-8 space-y-8 flex-1">
+      <main className="max-w-6xl w-full mx-auto p-3.5 sm:p-6 md:p-8 space-y-6 sm:space-y-8 flex-1">
         {/* Hero Card: Project Growth Bar & Status Message */}
-        <div className="p-8 rounded-none bg-card border border-border shadow-sm relative overflow-hidden">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
+        <div className="p-4 sm:p-6 md:p-8 rounded-none bg-card border border-border shadow-sm relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-5 sm:mb-6">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Live Project Status
                 </span>
                 <span className="size-2 rounded-none bg-emerald-500 animate-pulse" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-foreground">
                 {portal?.company || portal?.leadName}
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl leading-relaxed">
@@ -377,11 +382,11 @@ export default function ClientPortalPage() {
             </div>
 
             {/* Growth KPI */}
-            <div className="text-right">
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-baseline md:flex-col justify-between md:justify-start md:text-right pt-3 md:pt-0 border-t md:border-t-0 border-border/60">
+              <div className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Overall Growth
               </div>
-              <div className="text-4xl sm:text-5xl font-black font-mono text-primary mt-1">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-black font-mono text-primary mt-0.5 md:mt-1">
                 {portal?.projectGrowth || 0}%
               </div>
             </div>
@@ -389,56 +394,56 @@ export default function ClientPortalPage() {
 
           {/* Interactive Animated Growth Progress Bar */}
           <div className="space-y-2">
-            <div className="w-full bg-muted/60 rounded-none h-4 p-0.5 overflow-hidden border border-border">
+            <div className="w-full bg-muted/60 rounded-none h-3.5 sm:h-4 p-0.5 overflow-hidden border border-border">
               <div
                 className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 h-full rounded-none transition-all duration-700 shadow-sm"
                 style={{ width: `${portal?.projectGrowth || 0}%` }}
               />
             </div>
 
-            <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
-              <span>0% Project Kickoff</span>
-              <span>50% Architecture & MVP</span>
-              <span>100% Production Launch</span>
+            <div className="flex justify-between text-[10px] sm:text-[11px] font-mono text-muted-foreground">
+              <span>0% <span className="hidden sm:inline">Project </span>Kickoff</span>
+              <span>50% <span className="hidden sm:inline">Architecture & </span>MVP</span>
+              <span>100% <span className="hidden sm:inline">Production </span>Launch</span>
             </div>
           </div>
         </div>
 
         {/* Two Columns: Left (Updates & Notices Feed), Right (Deliverables & Collectibles) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
           {/* Left Column: Notices Feed (7 cols) */}
           <div className="lg:col-span-7 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+              <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
                 <Bell className="size-4 text-primary" />
                 <span>Notices & Milestones ({portal?.updates?.length || 0})</span>
               </h3>
             </div>
 
-            <div className="space-y-3.5">
+            <div className="space-y-3 sm:space-y-3.5">
               {!portal?.updates || portal.updates.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted-foreground bg-card border border-dashed border-border rounded-none">
+                <div className="p-6 sm:p-8 text-center text-xs text-muted-foreground bg-card border border-dashed border-border rounded-none">
                   No notices posted yet. All announcements from Scalyx will show up here.
                 </div>
               ) : (
                 portal.updates.map((update) => (
                   <div
                     key={update.id}
-                    className={`p-5 rounded-none bg-card border transition-all ${
+                    className={`p-4 sm:p-5 rounded-none bg-card border transition-all ${
                       update.pinned ? "border-primary/40 shadow-xs" : "border-border"
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1.5 xs:gap-3 mb-2">
+                      <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         {update.pinned && (
-                          <Badge variant="secondary" className="gap-1 text-[10px] text-primary">
+                          <Badge variant="secondary" className="gap-1 text-[9px] sm:text-[10px] text-primary">
                             <Pin className="size-2.5" /> Pinned
                           </Badge>
                         )}
-                        <Badge variant="outline" className="capitalize text-[10px]">
+                        <Badge variant="outline" className="capitalize text-[9px] sm:text-[10px]">
                           {update.updateType}
                         </Badge>
-                        <span className="text-[11px] text-muted-foreground">
+                        <span className="text-[10px] sm:text-[11px] text-muted-foreground">
                           {new Date(update.createdAt).toLocaleDateString("en-US", {
                             month: "short",
                             day: "numeric",
@@ -454,8 +459,8 @@ export default function ClientPortalPage() {
                       )}
                     </div>
 
-                    <h4 className="text-sm font-bold text-foreground mb-1.5">{update.title}</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+                    <h4 className="text-xs sm:text-sm font-bold text-foreground mb-1.5">{update.title}</h4>
+                    <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                       {update.content}
                     </p>
                   </div>
@@ -466,38 +471,37 @@ export default function ClientPortalPage() {
 
           {/* Right Column: Deliverables & Collectibles (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Deliverables from Scalyx */}
-            <div className="p-6 bg-card border border-border rounded-none shadow-sm space-y-4">
+            {/* Agency Deliverables for Client */}
+            <div className="p-4 sm:p-6 bg-card border border-border rounded-none shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <PackageCheck className="size-4 text-emerald-500" />
-                  <h3 className="text-sm font-bold text-foreground">Project Deliverables</h3>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <PackageCheck className="size-4 text-primary" />
+                    <span>Project Deliverables</span>
+                  </h3>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+                    Official packages delivered by Scalyx
+                  </p>
                 </div>
-                <Badge variant="outline" className="text-[10px] text-emerald-600">
-                  Ready for Download
+                <Badge variant="outline" className="text-[10px] font-mono">
+                  {deliverables.filter((d) => d.category === "deliverable_from_us").length} items
                 </Badge>
               </div>
 
-              <p className="text-xs text-muted-foreground">
-                Download release builds, code archives, and design bundles provided by our agency.
-              </p>
-
-              {/* 3-day Soft Delete Notice Box */}
-              <div className="p-3 rounded-none bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs">
-                <div className="font-semibold flex items-center gap-1.5 mb-0.5">
-                  <Clock className="size-3.5" />
-                  <span>3-Day Retention Policy</span>
+              {/* Retention Policy Banner */}
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs rounded-none leading-relaxed flex items-start gap-2">
+                <Clock className="size-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                <div>
+                  <span className="font-bold">Storage Policy:</span> Delivered packages expire &
+                  are soft-deleted 3 days after first download.
                 </div>
-                <p className="text-[11px] opacity-90 leading-relaxed">
-                  Downloaded materials remain available for 3 days before auto soft-delete. Please download and back up your assets.
-                </p>
               </div>
 
               {/* Deliverables List */}
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {deliverables.filter((d) => d.category === "deliverable_from_us").length === 0 ? (
                   <p className="text-xs text-muted-foreground italic py-3 text-center">
-                    No deliverables prepared yet.
+                    No deliverables uploaded yet for this phase.
                   </p>
                 ) : (
                   deliverables
@@ -505,28 +509,38 @@ export default function ClientPortalPage() {
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="p-3.5 rounded-none bg-muted/30 border border-border flex items-center justify-between text-xs"
+                        className="p-3 sm:p-3.5 rounded-none bg-muted/30 border border-border flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 sm:gap-3 text-xs"
                       >
-                        <div className="truncate max-w-[65%]">
+                        <div className="min-w-0 flex-1">
                           <div className="font-semibold text-foreground truncate">{item.title}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                          <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
                             {item.fileName} • {(item.fileSize / 1024 / 1024).toFixed(1)} MB
                           </div>
+                          {item.downloadedAt && (
+                            <div className="text-[9px] text-emerald-600 flex items-center gap-1 mt-0.5">
+                              <CheckCircle2 className="size-2.5" />
+                              Downloaded {new Date(item.downloadedAt).toLocaleDateString()}
+                            </div>
+                          )}
                         </div>
 
-                        {item.isSoftDeleted ? (
-                          <Badge variant="destructive" className="text-[10px]">Expired</Badge>
-                        ) : (
-                          <Button
-                            type="button"
-                            size="sm"
-                            onClick={() => handleDownloadDeliverable(item.id, item.fileUrl)}
-                            className="h-8 gap-1.5 text-xs font-semibold"
-                          >
-                            <Download className="size-3.5" />
-                            <span>Download</span>
-                          </Button>
-                        )}
+                        <div className="shrink-0 flex items-center justify-end">
+                          {item.isSoftDeleted ? (
+                            <Badge variant="destructive" className="text-[10px]">
+                              Expired
+                            </Badge>
+                          ) : (
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={() => handleDownloadDeliverable(item.id, item.fileUrl)}
+                              className="h-8 w-full xs:w-auto gap-1.5 text-xs font-semibold"
+                            >
+                              <Download className="size-3.5" />
+                              <span>Download</span>
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     ))
                 )}
@@ -534,29 +548,32 @@ export default function ClientPortalPage() {
             </div>
 
             {/* Collectibles from Client */}
-            <div className="p-6 bg-card border border-border rounded-none shadow-sm space-y-4">
+            <div className="p-4 sm:p-6 bg-card border border-border rounded-none shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Upload className="size-4 text-primary" />
-                  <h3 className="text-sm font-bold text-foreground">Client Collectibles</h3>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <Upload className="size-4 text-primary" />
+                    <span>Client Collectibles</span>
+                  </h3>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">
+                    Assets and data provided by your team
+                  </p>
                 </div>
+
                 <Button
                   type="button"
-                  size="sm"
                   variant="outline"
+                  size="sm"
                   onClick={() => setIsUploadOpen(true)}
-                  className="h-7 text-xs gap-1"
+                  className="gap-1 text-xs h-7.5"
                 >
                   <Plus className="size-3" />
                   <span>Upload Asset</span>
                 </Button>
               </div>
 
-              <p className="text-xs text-muted-foreground">
-                Upload your brand guides, vector logos, API credentials, or feedback files here for Scalyx engineers to retrieve.
-              </p>
-
-              <div className="space-y-2">
+              {/* Collectibles List */}
+              <div className="space-y-2.5">
                 {deliverables.filter((d) => d.category === "collectible_from_client").length === 0 ? (
                   <p className="text-xs text-muted-foreground italic py-3 text-center">
                     No client assets uploaded yet.
@@ -567,16 +584,16 @@ export default function ClientPortalPage() {
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="p-3.5 rounded-none bg-muted/30 border border-border flex items-center justify-between text-xs"
+                        className="p-3 sm:p-3.5 rounded-none bg-muted/30 border border-border flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3 text-xs"
                       >
-                        <div className="truncate max-w-[65%]">
+                        <div className="min-w-0 flex-1">
                           <div className="font-semibold text-foreground truncate">{item.title}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                          <div className="text-[10px] text-muted-foreground mt-0.5 truncate">
                             Uploaded by client • {(item.fileSize / 1024 / 1024).toFixed(1)} MB
                           </div>
                         </div>
 
-                        <Badge variant="outline" className="text-[10px] text-emerald-600">
+                        <Badge variant="outline" className="text-[10px] text-emerald-600 shrink-0 self-start xs:self-auto">
                           Uploaded
                         </Badge>
                       </div>
@@ -590,7 +607,7 @@ export default function ClientPortalPage() {
 
       {/* Edit Growth Dialog (For Team) */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card">
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Edit3 className="size-4 text-primary" />
@@ -627,7 +644,7 @@ export default function ClientPortalPage() {
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex flex-col-reverse xs:flex-row gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" size="sm" onClick={() => setIsEditModalOpen(false)}>
                 Cancel
               </Button>
@@ -641,7 +658,7 @@ export default function ClientPortalPage() {
 
       {/* Post Notice Dialog (For Team) */}
       <Dialog open={isNoticeModalOpen} onOpenChange={setIsNoticeModalOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card">
+        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Bell className="size-4 text-primary" />
@@ -705,7 +722,7 @@ export default function ClientPortalPage() {
               </label>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex flex-col-reverse xs:flex-row gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" size="sm" onClick={() => setIsNoticeModalOpen(false)}>
                 Cancel
               </Button>
@@ -719,7 +736,7 @@ export default function ClientPortalPage() {
 
       {/* Client Upload Asset Modal */}
       <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card">
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Upload className="size-4 text-primary" />
@@ -743,21 +760,21 @@ export default function ClientPortalPage() {
 
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                File Attachment
+                Select File
               </label>
-              <Input
+              <input
                 type="file"
                 onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                className="text-xs file:bg-primary file:text-primary-foreground file:border-0 file:rounded-none file:px-2 file:py-1 file:text-xs file:mr-2 cursor-pointer"
+                className="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-none file:border file:border-border file:text-xs file:font-semibold file:bg-muted file:text-foreground hover:file:bg-accent cursor-pointer"
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="flex flex-col-reverse xs:flex-row gap-2 sm:gap-0 mt-4">
               <Button type="button" variant="outline" size="sm" onClick={() => setIsUploadOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" size="sm" disabled={uploading} className="font-semibold">
-                {uploading ? "Uploading..." : "Submit to Scalyx"}
+                {uploading ? "Uploading..." : "Upload Asset"}
               </Button>
             </DialogFooter>
           </form>

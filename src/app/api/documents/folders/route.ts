@@ -1,3 +1,4 @@
+import { getDeployedAppUrl } from '@/lib/url';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db/store';
 import { getCurrentUser } from '@/lib/auth/session';
@@ -57,10 +58,7 @@ export async function PATCH(req: NextRequest) {
     if (!updated) {
       return NextResponse.json({ error: 'Folder not found' }, { status: 404 });
     }
-    const url = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000";
-    const shareUrl = `${url.replace(/\/$/, "")}/share/${updated.shareToken}`;
+    const shareUrl = `${getDeployedAppUrl(req)}/share/${updated.shareToken}`;
 
     return NextResponse.json({ success: true, folder: updated, shareUrl });
   } catch (err: any) {
