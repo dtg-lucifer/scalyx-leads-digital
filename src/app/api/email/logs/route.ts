@@ -20,9 +20,13 @@ export async function POST(req: NextRequest) {
   }
 
   const { templateId, params } = await req.json();
-  // forSending: false renders with the embedded base64 data URI for instant, flawless iframe preview in dashboard
-  const html = await renderEmailHtml(templateId, params || {}, {
-    forSending: false,
-  });
+  const html = await renderEmailHtml(
+    templateId,
+    params || {},
+    {
+      forSending: false,
+    },
+    req,
+  );
   return NextResponse.json({ html });
 }

@@ -79,11 +79,11 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
                       href={data.company.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors mt-1"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors mt-1"
                     >
-                      <Globe className="size-3" />
+                      <Globe className="size-3 text-slate-400" />
                       {data.company.website.replace(/^https?:\/\//, "")}
-                      <ExternalLink className="size-2.5 opacity-70" />
+                      <ExternalLink className="size-2.5 opacity-50" />
                     </a>
                   </div>
                 </div>
@@ -106,7 +106,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
 
               {/* Invoice Meta */}
               <div className="text-right">
-                <div className="inline-block px-3 py-1 rounded-none bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider mb-2 border border-blue-100">
+                <div className="inline-block px-2.5 py-0.5 rounded-none bg-slate-100 text-slate-800 text-[10px] font-bold uppercase tracking-widest mb-2 border border-slate-200">
                   Tax Invoice
                 </div>
                 <h2 className="text-2xl font-mono font-bold tracking-tight text-slate-900">
@@ -162,10 +162,9 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
                 <p className="text-xs text-slate-600 mt-1 font-mono">
                   {data.paymentDetails || "Contact for bank transfer / UPI"}
                 </p>
-                <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-none border border-emerald-200">
-                  <ShieldCheck className="size-3.5" />
-                  Verified Vendor: scalyx.in
-                </div>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  Agency Billing Operations • scalyx.in
+                </p>
               </div>
             </div>
 

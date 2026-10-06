@@ -135,6 +135,15 @@
   }
 }
 
+/* Utilities for clean horizontal navigation without ugly thick scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @media print {
   @page {
     size: A4 portrait;
@@ -161,33 +170,14 @@
     visibility: visible !important;
   }
 
-  /* Position invoice document at top left of printed A4 page */
   #invoice-document {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    width: 210mm !important;
-    min-height: 297mm !important;
-    box-sizing: border-box !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
     margin: 0 !important;
-    padding: 18mm !important;
-    box-shadow: none !important;
+    padding: 0 !important;
     border: none !important;
-    transform: none !important;
-    background: #ffffff !important;
-    z-index: 9999999 !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
-  /* Reset preview scale wrapper during print */
-  .invoice-scale-wrapper {
-    transform: none !important;
-  }
-
-  /* Hide navigation, sidebar, buttons, and dialogs */
-  aside, nav, header, button, .no-print, [data-slot="dialog-overlay"], [data-slot="dialog-content"] {
-    display: none !important;
-    visibility: hidden !important;
+    box-shadow: none !important;
   }
 }

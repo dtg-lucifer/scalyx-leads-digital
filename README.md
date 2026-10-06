@@ -207,8 +207,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY="your-anon-key"
 SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
 
-# Application URL
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+# Application URL (used for building emails, client portals, public share links)
+NEXT_PUBLIC_APP_URL="https://leads.scalyx.in"
 
 # Authentication Session Secret (Min 32 characters)
 SESSION_SECRET="your-complex-cryptographic-jwt-secret-key-32-chars-min"

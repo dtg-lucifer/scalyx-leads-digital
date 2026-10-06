@@ -27,12 +27,13 @@ export interface SendEmailOptions {
 
 export async function sendTemplatedEmail(
   options: SendEmailOptions,
+  req?: Request | Headers,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   // Render HTML with forSending: true so it references the inline CID attachment (cid:scalyx-logo)
-  const sanitizedParams = sanitizeEmailParams(options.params);
+  const sanitizedParams = sanitizeEmailParams(options.params, req);
   const html = await renderEmailHtml(options.templateId, sanitizedParams, {
     forSending: true,
-  });
+  }, req);
 
   // Take the verified sender address from the environment, defaulting to contact@piush.in
   const rawSender = (

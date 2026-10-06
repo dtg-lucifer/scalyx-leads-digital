@@ -310,9 +310,6 @@ export default function ClientPortalPage() {
               <span className="font-bold text-xs sm:text-sm text-foreground truncate">
                 Scalyx <span className="hidden xs:inline">• Client Portal</span>
               </span>
-              <Badge variant="outline" className="text-[9px] sm:text-[10px] text-emerald-600 border-emerald-500/20 shrink-0 hidden sm:inline-flex">
-                Verified Portal
-              </Badge>
             </div>
             <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate max-w-[130px] xs:max-w-[180px] sm:max-w-xs">
               {portal?.company || portal?.leadName} Workspace

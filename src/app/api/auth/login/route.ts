@@ -3,15 +3,23 @@ import { verifyPassword } from "@/lib/auth/password";
 import { setSessionCookie } from "@/lib/auth/session";
 import { db } from "@/lib/db/store";
 import { DEFAULT_SUPER_ADMIN_PERMISSIONS } from "@/types/auth";
+import { handleCorsPreflight, applyCorsHeaders } from "@/lib/cors";
+
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsPreflight(req);
+}
 
 export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 },
+      return applyCorsHeaders(
+        NextResponse.json(
+          { error: "Email and password are required" },
+          { status: 400 },
+        ),
+        req,
       );
     }
 
@@ -40,9 +48,12 @@ export async function POST(req: NextRequest) {
       }
 
       if (!user) {
-        return NextResponse.json(
-          { error: "Failed to authenticate admin" },
-          { status: 500 },
+        return applyCorsHeaders(
+          NextResponse.json(
+            { error: "Failed to authenticate admin" },
+            { status: 500 },
+          ),
+          req,
         );
       }
 
@@ -55,23 +66,32 @@ export async function POST(req: NextRequest) {
       };
 
       await setSessionCookie(sessionUser);
-      return NextResponse.json({ success: true, user: sessionUser });
+      return applyCorsHeaders(
+        NextResponse.json({ success: true, user: sessionUser }),
+        req,
+      );
     }
 
     // Standard database user lookup
     const user = await db.getUserByEmail(cleanEmail);
     if (!user) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 },
+      return applyCorsHeaders(
+        NextResponse.json(
+          { error: "Invalid email or password" },
+          { status: 401 },
+        ),
+        req,
       );
     }
 
     const isValid = await verifyPassword(cleanPassword, user.passwordHash);
     if (!isValid) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 },
+      return applyCorsHeaders(
+        NextResponse.json(
+          { error: "Invalid email or password" },
+          { status: 401 },
+        ),
+        req,
       );
     }
 
@@ -85,11 +105,17 @@ export async function POST(req: NextRequest) {
 
     await setSessionCookie(sessionUser);
 
-    return NextResponse.json({ success: true, user: sessionUser });
+    return applyCorsHeaders(
+      NextResponse.json({ success: true, user: sessionUser }),
+      req,
+    );
   } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || "Login failed" },
-      { status: 500 },
+    return applyCorsHeaders(
+      NextResponse.json(
+        { error: err.message || "Login failed" },
+        { status: 500 },
+      ),
+      req,
     );
   }
 }

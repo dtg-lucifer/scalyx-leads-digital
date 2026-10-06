@@ -199,16 +199,16 @@ export default function SettingsPage() {
     <div className="flex-1 flex flex-col min-h-screen text-foreground">
       <AppNavbar
         title="Settings & Administration"
-        description="RBAC permissions matrix, user provisioning with Resend emails, and retention policies."
+        description="RBAC permissions matrix, user provisioning with Resend, and retention policies."
       />
 
-      <div className="p-6 space-y-6 max-w-6xl w-full">
+      <div className="p-6 space-y-6 w-full">
         {/* Settings Navigation Tabs */}
-        <div className="flex border-b border-border gap-2">
+        <div className="flex border-b border-border gap-2 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab("users_rbac")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-none ${
               activeTab === "users_rbac"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -221,7 +221,7 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab("retention")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-none ${
               activeTab === "retention"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -234,7 +234,7 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab("agency")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-none ${
               activeTab === "agency"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"

@@ -77,23 +77,23 @@ export function AppSidebar() {
     <aside className="w-64 border-r border-border bg-card flex flex-col justify-between shrink-0 h-screen sticky top-0 text-foreground">
       {/* Brand Header */}
       <div className="flex flex-col">
-        <div className="p-4 border-b border-border flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="size-8 bg-foreground rounded-none flex items-center justify-center text-background font-bold text-lg tracking-wider group-hover:scale-105 transition-transform">
+        <div className="min-h-[72px] sm:min-h-20 h-[72px] sm:h-20 px-5 border-b border-border flex items-center justify-between shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="size-9 bg-foreground rounded-none flex items-center justify-center text-background font-bold text-lg tracking-wider group-hover:scale-105 transition-transform shrink-0">
               S
             </div>
             <div>
               <div className="font-bold text-sm leading-tight text-foreground">
                 Scalyx
               </div>
-              <div className="text-[10px] text-muted-foreground font-mono leading-tight">
+              <div className="text-[10px] text-muted-foreground font-mono leading-tight mt-0.5">
                 LEADS DIGITAL
               </div>
             </div>
           </Link>
           <Badge
             variant="outline"
-            className="text-[10px] font-mono py-0 h-4 border-border rounded-none"
+            className="text-[10px] font-mono px-1.5 py-0.5 h-5 border-border rounded-none text-muted-foreground"
           >
             v1.2.0
           </Badge>
@@ -160,34 +160,17 @@ export function AppSidebar() {
                   </div>
                 </div>
               </div>
-              <Badge
-                variant="outline"
-                className="text-[9px] uppercase font-mono px-1 py-0 border-emerald-500/30 text-emerald-500 rounded-none"
-              >
-                Active
-              </Badge>
             </div>
 
-            <div className="grid grid-cols-2 gap-1 pt-1">
-              <Link
-                href="/portal/demo"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center text-[11px] h-7 gap-1 border border-border text-muted-foreground hover:text-foreground hover:bg-muted/40 font-semibold rounded-none transition-colors"
-              >
-                <ExternalLink className="size-3" />
-                <span>Portal</span>
-              </Link>
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={logout}
-                className="w-full text-[11px] h-7 gap-1 text-destructive hover:bg-destructive/10 rounded-none"
-              >
-                <LogOut className="size-3" />
-                <span>Logout</span>
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={logout}
+              className="w-full text-xs h-7 text-muted-foreground hover:text-destructive hover:border-destructive/30 rounded-none flex items-center justify-center gap-1.5"
+            >
+              <LogOut className="size-3" />
+              <span>Sign Out</span>
+            </Button>
           </div>
         ) : (
           <div className="text-center py-1">
@@ -199,6 +182,18 @@ export function AppSidebar() {
             </Link>
           </div>
         )}
+
+        <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground font-mono">
+          <span>Scalyx Leads Digital</span>
+          <Link
+            href="/portal/demo-lead"
+            target="_blank"
+            className="hover:text-foreground flex items-center gap-0.5"
+          >
+            <span>Demo</span>
+            <ExternalLink className="size-2.5" />
+          </Link>
+        </div>
       </div>
     </aside>
   );

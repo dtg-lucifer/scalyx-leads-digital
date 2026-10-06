@@ -21,6 +21,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-leads_digital_super_secret_jwt_key_2026_scalyx}
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/leadsdigital
       - REDIS_URL=redis://redis:6379
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-https://leads.scalyx.in}
       - RETENTION_DAYS=${RETENTION_DAYS:-3}
     depends_on:
       db:

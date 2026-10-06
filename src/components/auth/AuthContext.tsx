@@ -29,7 +29,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchSession = async () => {
     try {
-      const res = await fetch("/api/auth/session");
+      const res = await fetch("/api/auth/session", {
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.authenticated && data.user) {
         setUser(data.user);
@@ -44,6 +46,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Immediate protocol upgrade if loaded over insecure HTTP in production
+    if (
+      typeof window !== "undefined" &&
+      window.location.protocol === "http:" &&
+      !["localhost", "127.0.0.1", "0.0.0.0"].includes(window.location.hostname)
+    ) {
+      try {
+        if (window.top && window.top.location.protocol === "http:") {
+          window.top.location.replace(
+            window.top.location.href.replace(/^http:/, "https:")
+          );
+          return;
+        }
+      } catch {
+        // Fallback for restricted cross-origin iframes
+      }
+      window.location.replace(window.location.href.replace(/^http:/, "https:"));
+      return;
+    }
     fetchSession();
   }, []);
 
@@ -52,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
@@ -67,7 +89,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
       setUser(null);
       router.push("/login");
     } catch {

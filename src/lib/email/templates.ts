@@ -1,4 +1,11 @@
-import { getAppUrl, getDeployedAppUrl, ensureDeployedUrl, sanitizeEmailParams, DEPLOYED_VERCEL_HOST } from "@/lib/url";
+import {
+  getAppUrl,
+  getDeployedAppUrl,
+  ensureDeployedUrl,
+  sanitizeEmailParams,
+  DEFAULT_APP_HOST,
+  DEPLOYED_VERCEL_HOST,
+} from "@/lib/url";
 import type { EmailTemplateId, EmailTemplateMeta } from "@/types/email";
 import { SCALYX_LOGO_CID, SCALYX_LOGO_DATA_URI } from "./logo";
 import { markdownToEmailHtml } from "./markdown";
@@ -32,7 +39,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "portalUrl",
         label: "Portal Link",
         type: "text",
-        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
+        defaultValue: `${DEFAULT_APP_HOST}/portal/techcorp`,
         placeholder: "URL to client portal",
       },
       {
@@ -96,7 +103,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "buttonUrl",
         label: "Button CTA Link (Optional)",
         type: "text",
-        defaultValue: "https://scalyx-leads-digital.vercel.app",
+        defaultValue: DEFAULT_APP_HOST,
         placeholder: "https://...",
       },
       {
@@ -181,7 +188,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "downloadUrl",
         label: "Portal Download Link",
         type: "text",
-        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
+        defaultValue: `${DEFAULT_APP_HOST}/portal/techcorp`,
       },
       {
         key: "retentionNotice",
@@ -281,7 +288,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "portalUrl",
         label: "Project Portal",
         type: "text",
-        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
+        defaultValue: `${DEFAULT_APP_HOST}/portal/techcorp`,
       },
     ],
   },
@@ -301,7 +308,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "portalUrl",
         label: "Portal Link",
         type: "text",
-        defaultValue: "https://scalyx-leads-digital.vercel.app/portal/techcorp",
+        defaultValue: `${DEFAULT_APP_HOST}/portal/techcorp`,
       },
       {
         key: "portalPassword",
@@ -355,7 +362,7 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
         key: "loginUrl",
         label: "Login URL",
         type: "text",
-        defaultValue: "https://scalyx-leads-digital.vercel.app/login",
+        defaultValue: `${DEFAULT_APP_HOST}/login`,
       },
       {
         key: "notes",
@@ -370,6 +377,29 @@ export const EMAIL_TEMPLATES: EmailTemplateMeta[] = [
   },
 ];
 
+/**
+ * Returns all email templates with dynamic default URLs resolved
+ * via getDeployedAppUrl using the active NEXT_PUBLIC_APP_URL.
+ */
+export function getEmailTemplates(req?: Request | Headers): EmailTemplateMeta[] {
+  return EMAIL_TEMPLATES.map((tmpl) => ({
+    ...tmpl,
+    fields: tmpl.fields.map((f) => {
+      if (
+        f.defaultValue &&
+        (f.key.toLowerCase().endsWith("url") ||
+          f.key.toLowerCase().endsWith("link"))
+      ) {
+        return {
+          ...f,
+          defaultValue: ensureDeployedUrl(f.defaultValue, req),
+        };
+      }
+      return f;
+    }),
+  }));
+}
+
 interface RenderOptions {
   forSending?: boolean;
 }
@@ -378,10 +408,11 @@ export async function renderEmailHtml(
   templateId: EmailTemplateId,
   rawParams: Record<string, string>,
   options?: RenderOptions,
+  req?: Request | Headers,
 ): Promise<string> {
   const currentYear = new Date().getFullYear();
-  const baseUrl = getDeployedAppUrl();
-  const params = sanitizeEmailParams(rawParams);
+  const baseUrl = getDeployedAppUrl(req);
+  const params = sanitizeEmailParams(rawParams, req);
 
   // For emails dispatched via Resend, reference the inline CID attachment.
   // For web preview in dashboard iframe, use the base64 data URI so it renders instantly.
@@ -415,14 +446,14 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #4338ca; background-color: #e0e7ff; border: 1px solid #c7d2fe; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             ${eyebrow}
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           ${headline}
         </h1>
-        <div style="color: #334155; font-size: 14.5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
+        <div style="color: #334155; font-size: 14px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
           ${bodyHtml}
         </div>
         ${buttonHtml}
@@ -438,26 +469,26 @@ export async function renderEmailHtml(
     case "client_onboarding": {
       const customMessageHtml = await markdownToEmailHtml(
         params.customMessage ||
-          "We are excited to partner with your team on this project! Everything is set up for Phase 1 kick-off.",
+          "We are excited to partner with your team on this project! Everything is configured and ready for Phase 1 kick-off.",
       );
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #4338ca; background-color: #e0e7ff; border: 1px solid #c7d2fe; padding: 4px 10px; border-radius: 0px !important;">
-            WELCOME TO SCALYX
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
+            PROJECT ONBOARDING
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
-          Welcome Aboard, ${params.clientName || "Partner"}!
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+          Welcome Aboard, ${params.clientName || "Partner"}
         </h1>
-        <div style="color: #334155; font-size: 14.5px; line-height: 1.7; margin-bottom: 22px; word-break: break-word; overflow-wrap: anywhere;">
+        <div style="color: #334155; font-size: 14px; line-height: 1.7; margin-bottom: 22px; word-break: break-word; overflow-wrap: anywhere;">
           ${customMessageHtml}
         </div>
 
         <!-- Modern Zero-Overflow & 100% Sharp-Cornered Credentials Card -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0px !important; padding: 18px 20px; margin: 22px 0; box-sizing: border-box; max-width: 100%;">
-          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-            Dedicated Client Portal Credentials
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; color: #0f172a; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+            Client Portal Credentials
           </div>
           
           <div style="margin-bottom: 14px;">
@@ -503,27 +534,27 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #059669; background-color: #ecfdf5; border: 1px solid #a7f3d0; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             SPRINT MILESTONE
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Project Update: ${params.projectName || "Active Sprint"}
         </h1>
-        <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
-          Hi ${params.clientName || "there"}, we are pleased to inform you that milestone <strong>${params.milestoneTitle}</strong> has been achieved!
+        <p style="margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.65; word-break: break-word;">
+          Hi ${params.clientName || "there"}, milestone <strong>${params.milestoneTitle}</strong> has been completed.
         </p>
 
         <!-- Modern Sharp-Cornered Progress Card -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0px !important; padding: 18px 20px; margin: 22px 0; box-sizing: border-box; max-width: 100%;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a;">Sprint Progress</span>
-            <span style="font-size: 13px; font-weight: 800; color: #059669; background-color: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 0px !important;">
+            <span style="font-size: 12.5px; font-weight: 800; color: #059669; background-color: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 0px !important;">
               ${completion}% Complete
             </span>
           </div>
           <div style="background-color: #e2e8f0; border-radius: 0px !important; height: 8px; overflow: hidden; margin-top: 8px;">
-            <div style="background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: ${completion}%; border-radius: 0px !important;"></div>
+            <div style="background: linear-gradient(90deg, #10b981 0%, #059669 100%); height: 100%; width: ${completion}%; border-radius: 0px !important;"></div>
           </div>
           ${
             params.demoUrl
@@ -543,7 +574,7 @@ export async function renderEmailHtml(
           <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; margin-bottom: 8px;">
             Summary & Next Steps
           </div>
-          <div style="color: #334155; font-size: 14.5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
+          <div style="color: #334155; font-size: 14px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
             ${notesHtml}
           </div>
         </div>
@@ -556,26 +587,26 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #2563eb; background-color: #eff6ff; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             DELIVERABLES READY
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
-          New Deliverable Ready for Review
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+          Deliverable Ready for Review
         </h1>
-        <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
-          Hi ${params.clientName || "there"}, your requested asset <strong>${params.deliverableTitle}</strong> is packaged and ready for immediate download.
+        <p style="margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.65; word-break: break-word;">
+          Hi ${params.clientName || "there"}, your deliverable <strong>${params.deliverableTitle}</strong> is ready for download.
         </p>
 
-        <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 0px !important; padding: 16px 18px; margin: 20px 0; box-sizing: border-box; max-width: 100%;">
-          <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.55; word-break: break-word;">
-            <strong>Retention Notice:</strong> Under our agency storage policy, downloadable packages expire and are soft-deleted <strong>${params.retentionNotice || "3 days"}</strong> after first download. Please retrieve your materials promptly.
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #0f172a; border-radius: 0px !important; padding: 14px 16px; margin: 20px 0; box-sizing: border-box; max-width: 100%;">
+          <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.55; word-break: break-word;">
+            <strong>Retention Window:</strong> In accordance with project policy, downloadable assets remain accessible on the portal for <strong>${params.retentionNotice || "3 days"}</strong>. Please retrieve your packages promptly.
           </p>
         </div>
 
         ${
           notesHtml
-            ? `<div style="margin: 20px 0; color: #334155; font-size: 14.5px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">${notesHtml}</div>`
+            ? `<div style="margin: 20px 0; color: #334155; font-size: 14px; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">${notesHtml}</div>`
             : ""
         }
 
@@ -596,15 +627,15 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #2563eb; background-color: #eff6ff; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             INVOICE STATEMENT
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Invoice ${params.invoiceNumber}
         </h1>
-        <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
-          Dear ${params.clientName || "Partner"}, please find your verified invoice breakdown for current deliverables below:
+        <p style="margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.65; word-break: break-word;">
+          Dear ${params.clientName || "Partner"}, please find your invoice statement and payment breakdown below:
         </p>
 
         <!-- Modern Sharp-Cornered Invoice Card -->
@@ -645,14 +676,14 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #2563eb; background-color: #eff6ff; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             MEETING FOLLOW-UP
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
           Discussion Recap & Action Items
         </h1>
-        <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
+        <p style="margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.65; word-break: break-word;">
           Hi ${params.clientName || "there"}, thank you for meeting with us regarding <strong>${params.meetingTopic}</strong>.
         </p>
 
@@ -660,7 +691,7 @@ export async function renderEmailHtml(
           <div style="margin: 0 0 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">
             Action Items & Next Steps
           </div>
-          <div style="font-size: 14.5px; color: #334155; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
+          <div style="font-size: 14px; color: #334155; line-height: 1.7; word-break: break-word; overflow-wrap: anywhere;">
             ${actionItemsHtml}
           </div>
         </div>
@@ -688,15 +719,15 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #2563eb; background-color: #eff6ff; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             PORTAL ACCESS
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
-          Your Client Portal Access Code
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+          Client Portal Access
         </h1>
-        <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
-          Hi ${params.clientName || "there"}, here are your refreshed access credentials for the project portal:
+        <p style="margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.65; word-break: break-word;">
+          Hi ${params.clientName || "there"}, here are your direct access credentials for your client portal:
         </p>
 
         <!-- Modern Sharp-Cornered Credentials Card -->
@@ -722,13 +753,13 @@ export async function renderEmailHtml(
           </div>
         </div>
 
-        <div style="margin: 0 0 22px; font-size: 13.5px; color: #64748b; line-height: 1.6; word-break: break-word;">
+        <div style="margin: 0 0 22px; font-size: 13px; color: #64748b; line-height: 1.6; word-break: break-word;">
           ${customMessageHtml}
         </div>
 
         <div>
           <a href="${params.portalUrl}" class="cta-button" style="display: inline-block; background-color: #0f172a; color: #ffffff !important; padding: 13px 28px; border-radius: 0px !important; font-weight: 700; text-decoration: none; font-size: 13.5px; letter-spacing: 0.1px; box-sizing: border-box; text-align: center; max-width: 100%;">
-            Open Portal &rarr;
+            Open Client Portal &rarr;
           </a>
         </div>
       `;
@@ -743,15 +774,15 @@ export async function renderEmailHtml(
 
       bodyContent = `
         <div style="margin-bottom: 12px;">
-          <span style="display: inline-block; font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: #2563eb; background-color: #eff6ff; border: 1px solid #dbeafe; padding: 4px 10px; border-radius: 0px !important;">
+          <span style="display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 0px !important;">
             TEAM ACCOUNT
           </span>
         </div>
-        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 26px; font-weight: 900; letter-spacing: -0.035em; line-height: 1.22; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
-          Welcome to the LeadsDigital Team!
+        <h1 class="headline-title" style="margin: 0 0 18px 0; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
+          Welcome to the Team
         </h1>
-        <p style="margin: 0 0 20px; color: #334155; font-size: 14.5px; line-height: 1.65; word-break: break-word;">
-          Hi ${params.name || "there"}, your staff account has been created on the LeadsDigital portal for Scalyx.
+        <p style="margin: 0 0 20px; color: #334155; font-size: 14px; line-height: 1.65; word-break: break-word;">
+          Hi ${params.name || "there"}, your account has been provisioned on Scalyx LeadsDigital.
         </p>
 
         <!-- Modern Sharp-Cornered Team Credentials Card -->
@@ -772,19 +803,19 @@ export async function renderEmailHtml(
 
           <div>
             <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b;">Assigned Role</div>
-            <div style="font-size: 13px; font-weight: 700; color: #2563eb; text-transform: capitalize; margin-top: 2px;">
+            <div style="font-size: 13px; font-weight: 700; color: #0f172a; text-transform: capitalize; margin-top: 2px;">
               ${params.role}
             </div>
           </div>
         </div>
 
-        <div style="margin: 0 0 22px; color: #64748b; font-size: 13.5px; line-height: 1.6; word-break: break-word;">
+        <div style="margin: 0 0 22px; color: #64748b; font-size: 13px; line-height: 1.6; word-break: break-word;">
           ${notesHtml}
         </div>
 
         <div>
           <a href="${params.loginUrl || `${baseUrl}/login`}" class="cta-button" style="display: inline-block; background-color: #0f172a; color: #ffffff !important; padding: 13px 28px; border-radius: 0px !important; font-weight: 700; text-decoration: none; font-size: 13.5px; letter-spacing: 0.1px; box-sizing: border-box; text-align: center; max-width: 100%;">
-            Sign In to LeadsDigital &rarr;
+            Sign In &rarr;
           </a>
         </div>
       `;
@@ -792,7 +823,7 @@ export async function renderEmailHtml(
     }
   }
 
-  return `
+  const fullHtml = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -912,7 +943,7 @@ export async function renderEmailHtml(
         <!-- Card Container with fixed table-layout to prevent horizontal overflow and sharp corners -->
         <table width="100%" border="0" cellspacing="0" cellpadding="0" class="email-container" style="width: 100%; max-width: 580px; margin: 0 auto; background-color: #ffffff; border-radius: 0px !important; overflow: hidden; border: 1px solid #e2e8f0; table-layout: fixed; box-sizing: border-box;">
           
-          <!-- Top Multi-Stop Modern Gradient Accent -->
+          <!-- Top Modern Gradient Accent -->
           <tr>
             <td height="4" style="background: linear-gradient(90deg, #2563eb 0%, #6366f1 50%, #10b981 100%); line-height: 4px; font-size: 4px; border-radius: 0px !important;">&nbsp;</td>
           </tr>
@@ -931,16 +962,16 @@ export async function renderEmailHtml(
                         <td style="vertical-align: middle; border-radius: 0px !important;">
                           <div style="font-size: 19px; font-weight: 900; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1;">Scalyx</div>
                           <div style="font-size: 11px; color: #64748b; margin-top: 2px; font-weight: 500;">
-                            Client Portal &bull; <a href="https://scalyx.in" style="color: #2563eb; text-decoration: none;">scalyx.in</a>
+                            Client Operations &bull; <a href="https://scalyx.in" style="color: #475569; text-decoration: none;">scalyx.in</a>
                           </div>
                         </td>
                       </tr>
                     </table>
                   </td>
                   <td class="header-col-right" align="right" style="vertical-align: middle; border-radius: 0px !important;">
-                    <span style="display: inline-block; font-size: 11px; font-weight: 600; color: #2563eb; background-color: #eff6ff; border: 1px solid #dbeafe; padding: 3px 10px; border-radius: 0px !important; letter-spacing: 0.2px; white-space: nowrap;">
-                      Verified Agency
-                    </span>
+                    <a href="${baseUrl}" style="display: inline-block; font-size: 11px; font-weight: 600; color: #475569; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 10px; border-radius: 0px !important; text-decoration: none; letter-spacing: 0.2px; white-space: nowrap;">
+                      Client Portal &rarr;
+                    </a>
                   </td>
                 </tr>
               </table>
@@ -990,8 +1021,8 @@ export async function renderEmailHtml(
           <!-- Modern Sharp Branded Footer -->
           <tr>
             <td class="footer-pad" style="padding: 22px 26px; background-color: #fafafa; border-top: 1px solid #f1f5f9; font-size: 11.5px; color: #71717a; text-align: center; line-height: 1.6; box-sizing: border-box; word-break: break-word; overflow-wrap: anywhere; border-radius: 0px !important;">
-              Scalyx Digital Agency &bull; <a href="https://scalyx.in" style="color: #475569; text-decoration: underline;">scalyx.in</a> &bull; WhatsApp: +91-89271-24748<br/>
-              &copy; ${currentYear} Scalyx. Single software to manage and organize all of your leads.
+              Scalyx &bull; Digital Systems & Client Operations &bull; <a href="https://scalyx.in" style="color: #475569; text-decoration: underline;">scalyx.in</a><br/>
+              &copy; ${currentYear} Scalyx. All rights reserved.
             </td>
           </tr>
         </table>
@@ -1019,4 +1050,15 @@ export async function renderEmailHtml(
 </body>
 </html>
   `;
+
+  // Final safety pass: rewrite any leftover relative links, localhost links,
+  // or legacy vercel links to the canonical baseUrl
+  const relativeLinkRegex = /href="(\/(?:portal|share|login|deliverables)[^"]*)"/gi;
+  const legacyVercelLinkRegex = /href="https?:\/\/scalyx-leads-digital\.vercel\.app([^"]*)"/gi;
+  const localhostLinkRegex = /href="https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?([^"]*)"/gi;
+
+  return fullHtml
+    .replace(relativeLinkRegex, `href="${baseUrl}$1"`)
+    .replace(legacyVercelLinkRegex, `href="${baseUrl}$1"`)
+    .replace(localhostLinkRegex, `href="${baseUrl}$1"`);
 }

@@ -351,11 +351,11 @@ export default function EmailSenderPage() {
 
       <AppNavbar
         title="Email Studio & Sender"
-        description="Craft, preview, and dispatch modern transactional emails with RemarkGFM Markdown and Resend."
+        description="Craft, preview, and dispatch transactional emails with RemarkGFM and Resend."
         actions={
           <Badge
             variant="outline"
-            className="gap-1.5 text-xs text-primary border-primary/20 rounded-none"
+            className="gap-1.5 text-xs text-primary border-primary/20 rounded-none h-8 px-2.5 font-medium"
           >
             <Sparkles className="size-3" />
             <span>RemarkGFM & Resend</span>
@@ -365,7 +365,7 @@ export default function EmailSenderPage() {
 
       <div className="p-6 space-y-6">
         {/* Template Selector Pills (Sharp-Cornered) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
           {templates.map((t) => (
             <button
               key={t.id}

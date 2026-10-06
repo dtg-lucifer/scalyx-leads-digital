@@ -1,10 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { handleCorsPreflight, applyCorsHeaders } from '@/lib/cors';
 
-export async function GET() {
+export async function OPTIONS(req: NextRequest) {
+  return handleCorsPreflight(req);
+}
+
+export async function GET(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user) {
-    return NextResponse.json({ authenticated: false, user: null });
+    return applyCorsHeaders(
+      NextResponse.json({ authenticated: false, user: null }),
+      req,
+    );
   }
-  return NextResponse.json({ authenticated: true, user });
+  return applyCorsHeaders(
+    NextResponse.json({ authenticated: true, user }),
+    req,
+  );
 }

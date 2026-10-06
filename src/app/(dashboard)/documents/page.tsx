@@ -244,7 +244,7 @@ export default function DocumentsPage() {
         {/* Drive Explorer Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card border border-border rounded-none shadow-xs">
           {/* Breadcrumb Navigation */}
-          <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-medium">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-medium">
             {breadcrumbs.map((b, idx) => (
               <React.Fragment key={b.id || "root"}>
                 {idx > 0 && <ChevronRight className="size-3.5 text-muted-foreground shrink-0" />}

@@ -48,19 +48,22 @@ export async function POST(req: NextRequest) {
     // Always use deployed host so the teammate receives a live accessible link
     const deployedBase = getDeployedAppUrl(req);
     const loginUrl = `${deployedBase}/login`;
-    await sendTemplatedEmail({
-      to: email,
-      subject: 'Your LeadsDigital Credentials • Scalyx Portal',
-      templateId: 'user_credentials',
-      params: {
-        name,
-        email,
-        password: autoPassword,
-        role: role || 'teammate',
-        loginUrl,
+    await sendTemplatedEmail(
+      {
+        to: email,
+        subject: 'Your LeadsDigital Credentials • Scalyx Portal',
+        templateId: 'user_credentials',
+        params: {
+          name,
+          email,
+          password: autoPassword,
+          role: role || 'teammate',
+          loginUrl,
+        },
+        sentBy: currentUser.email,
       },
-      sentBy: currentUser.email,
-    });
+      req,
+    );
 
     return NextResponse.json({
       success: true,

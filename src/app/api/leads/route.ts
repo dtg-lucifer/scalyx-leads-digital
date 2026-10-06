@@ -48,19 +48,22 @@ export async function POST(req: NextRequest) {
     if (body.sendWelcomeEmail) {
       const portal = await db.getPortalByLeadId(lead.id);
       const portalUrl = `${getDeployedAppUrl(req)}/portal/${portal?.slug || lead.id}`;
-      await sendTemplatedEmail({
-        to: lead.email,
-        subject: `Welcome to Scalyx • Your Dedicated Client Portal for ${lead.company || lead.name}`,
-        templateId: 'client_onboarding',
-        params: {
-          clientName: lead.name,
-          companyName: lead.company || lead.name,
-          portalUrl,
-          portalPassword: lead.portalAccessCode || '',
-          customMessage: lead.notes || 'Welcome to Scalyx! Track your project milestones and files via your portal.',
+      await sendTemplatedEmail(
+        {
+          to: lead.email,
+          subject: `Welcome to Scalyx • Your Dedicated Client Portal for ${lead.company || lead.name}`,
+          templateId: 'client_onboarding',
+          params: {
+            clientName: lead.name,
+            companyName: lead.company || lead.name,
+            portalUrl,
+            portalPassword: lead.portalAccessCode || '',
+            customMessage: lead.notes || 'Welcome to Scalyx! Track your project milestones and files via your portal.',
+          },
+          sentBy: user.email,
         },
-        sentBy: user.email,
-      });
+        req,
+      );
     }
 
     return NextResponse.json({ success: true, lead });

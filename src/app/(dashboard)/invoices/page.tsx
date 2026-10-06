@@ -118,17 +118,17 @@ export default function InvoicesPage() {
 
       <AppNavbar
         title="Scalyx Invoice Generator"
-        description="Official high-resolution A4 invoice generator integrated with client leads."
+        description="Official high-resolution A4 billing tool integrated with client records."
         actions={
           <div className="flex items-center gap-2">
             {/* Quick Fill from Lead Selector */}
             {leads.length > 0 && (
-              <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
+              <div className="hidden md:flex items-center gap-1.5 text-xs text-muted-foreground mr-1">
                 <Users className="size-3.5 text-primary" />
                 <select
                   onChange={(e) => e.target.value && handleLoadLead(e.target.value)}
                   defaultValue=""
-                  className="h-8 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                  className="h-9 px-2.5 rounded-none bg-background border border-border text-xs text-foreground focus:outline-none"
                 >
                   <option value="" disabled className="bg-card">
                     Prefill From Lead...
@@ -147,13 +147,13 @@ export default function InvoicesPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsFontDialogOpen(true)}
-              className="gap-1.5 text-xs h-9"
+              className="gap-1.5 text-xs h-9 rounded-none border-border"
             >
               <Type className="size-3.5 text-primary" />
               <span className="hidden sm:inline">Font:</span>
-              <Badge variant="secondary" className="capitalize text-[10px] px-1.5 py-0">
+              <span className="capitalize text-[10px] font-mono px-1 py-0 bg-muted text-muted-foreground">
                 {invoiceData.font}
-              </Badge>
+              </span>
             </Button>
 
             <Button
@@ -161,7 +161,7 @@ export default function InvoicesPage() {
               size="sm"
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="gap-2 text-xs h-9 font-semibold"
+              className="gap-2 text-xs h-9 font-semibold rounded-none"
             >
               {isDownloading ? (
                 <>

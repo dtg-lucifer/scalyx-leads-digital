@@ -74,14 +74,17 @@ export async function POST(req: NextRequest) {
 
     const sanitizedParams = sanitizeEmailParams(params, req);
 
-    const result = await sendTemplatedEmail({
-      to,
-      subject,
-      templateId,
-      params: sanitizedParams,
-      attachments,
-      sentBy: user.email,
-    });
+    const result = await sendTemplatedEmail(
+      {
+        to,
+        subject,
+        templateId,
+        params: sanitizedParams,
+        attachments,
+        sentBy: user.email,
+      },
+      req,
+    );
 
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Failed to dispatch email' }, { status: 500 });
