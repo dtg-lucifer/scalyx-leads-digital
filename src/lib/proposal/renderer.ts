@@ -169,11 +169,24 @@ export const PROPOSAL_STYLESHEET = `
     letter-spacing: 0.8px;
     text-transform: uppercase;
   }
+  .stat-grid,
   .stat-grid-4 {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
     gap: 12px;
     margin: 24px 0;
+    width: 100%;
+  }
+  .stat-grid-1 {
+    grid-template-columns: 1fr;
+  }
+  .stat-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .stat-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
   }
   .stat-card {
     border: 1px solid #e2e8f0;
@@ -644,8 +657,14 @@ export const PROPOSAL_STYLESHEET = `
     .proposal-page {
       padding: 24px 16px;
     }
-    .stat-grid-4 {
+    .stat-grid,
+    .stat-grid-4,
+    .stat-grid-3,
+    .stat-grid-2 {
       grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-grid-1 {
+      grid-template-columns: 1fr;
     }
     .features-2col-grid, .signoff-grid, .proposal-title-meta-grid {
       grid-template-columns: 1fr;
@@ -661,6 +680,15 @@ export const PROPOSAL_STYLESHEET = `
       padding-left: 0;
       padding-top: 14px;
       width: 100%;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .stat-grid,
+    .stat-grid-4,
+    .stat-grid-3,
+    .stat-grid-2 {
+      grid-template-columns: 1fr;
     }
   }
 `;
@@ -897,6 +925,9 @@ export function preprocessProposalDirectives(
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line || !/^[-*•●]/.test(line)) continue;
+        // Maximum stats number is kept at 4
+        if (cards.length >= 4) break;
+
         const content = line.replace(/^[-*•●\s]+/, "");
         const parts = content.split("|").map((p: string) => p.trim());
         const label = cleanStatText(parts[0] || "");
@@ -914,8 +945,11 @@ export function preprocessProposalDirectives(
 `);
       }
 
+      if (cards.length === 0) return "";
+
+      const colCount = Math.min(Math.max(cards.length, 1), 4);
       return register(
-        `<div class="stat-grid-4">\n${cards.join("\n")}\n</div>\n`,
+        `<div class="stat-grid stat-grid-${colCount}">\n${cards.join("\n")}\n</div>\n`,
       );
     },
   );

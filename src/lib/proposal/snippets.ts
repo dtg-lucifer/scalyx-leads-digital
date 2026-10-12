@@ -35,9 +35,9 @@ export const PROPOSAL_SNIPPETS: ProposalSnippet[] = [
   },
   {
     id: "stat_cards",
-    name: "Key Metrics Cards (4-Grid)",
+    name: "Key Metrics Cards (Flexible 1–4 Grid)",
     category: "Header & Meta",
-    description: "4 high-contrast KPI cards (Capacity, Peak Concurrency, Phase 1 MVP, Phase 2 Scale)",
+    description: "Flexible KPI metrics grid that automatically spans full width for 1, 2, 3, or up to 4 cards",
     markdown: `::: stats
 - **TARGET CAPACITY** | \`1,00,000\` | Verified legal advocates
 - **PEAK CONCURRENCY** | \`10% – 15%\` | 10,000–15,000 simultaneous users
