@@ -100,7 +100,7 @@ function mapPortalFromDb(row: any, updates: any[] = [], lead?: any): ClientPorta
       content: u.content,
       updateType: u.update_type || 'notice',
       pinned: !!u.pinned,
-      postedBy: u.posted_by,
+      postedBy: u.users?.name || (u.posted_by && !u.posted_by.startsWith('user-') ? u.posted_by : 'Scalyx Team'),
       createdAt: u.created_at,
     })),
     createdAt: row.created_at,
@@ -621,7 +621,7 @@ export const supabaseDb = {
   async getPortals(): Promise<ClientPortal[]> {
     const { data: portals } = await supabaseAdmin.from('client_portals').select('*');
     if (!portals) return [];
-    const { data: updates } = await supabaseAdmin.from('portal_updates').select('*');
+    const { data: updates } = await supabaseAdmin.from('portal_updates').select('*, users:posted_by(name, email)');
     const updatesByPortal = new Map<string, any[]>();
     (updates || []).forEach((u) => {
       const list = updatesByPortal.get(u.portal_id) || [];
@@ -629,42 +629,116 @@ export const supabaseDb = {
       updatesByPortal.set(u.portal_id, list);
     });
 
+    const { data: leads } = await supabaseAdmin.from('leads').select('*');
+    const leadsById = new Map<string, any>();
+    (leads || []).forEach((l) => leadsById.set(l.id, l));
+
     return portals.map((p) => {
-      const mapped = mapPortalFromDb(p, updatesByPortal.get(p.id) || []);
+      const mapped = mapPortalFromDb(p, updatesByPortal.get(p.id) || [], leadsById.get(p.lead_id));
       const { passwordHash: _, ...portal } = mapped;
       return portal;
     });
   },
 
   async getPortalBySlug(slug: string): Promise<(ClientPortal & { passwordHash: string }) | null> {
+    if (!slug) return null;
+    const clean = decodeURIComponent(slug).trim();
+    if (!clean) return null;
+
+    // 1. Case-insensitive slug match
     let { data: portal } = await supabaseAdmin
       .from('client_portals')
       .select('*')
-      .eq('slug', slug)
+      .ilike('slug', clean)
       .maybeSingle();
 
+    // 2. Direct portal ID match
     if (!portal) {
       const { data: pById } = await supabaseAdmin
         .from('client_portals')
         .select('*')
-        .eq('id', slug)
+        .eq('id', clean)
         .maybeSingle();
       if (pById) portal = pById;
     }
 
+    // 3. Direct portal lead_id match
     if (!portal) {
-      const { data: lead } = await supabaseAdmin
-        .from('leads')
-        .select('id')
-        .or(`id.eq.${slug},portal_access_code.eq.${slug}`)
+      const { data: pByLeadId } = await supabaseAdmin
+        .from('client_portals')
+        .select('*')
+        .eq('lead_id', clean)
         .maybeSingle();
+      if (pByLeadId) portal = pByLeadId;
+    }
+
+    // 4. Match lead by id, portal_access_code, or email
+    let lead: any = null;
+    if (!portal) {
+      const { data: lById } = await supabaseAdmin
+        .from('leads')
+        .select('*')
+        .eq('id', clean)
+        .maybeSingle();
+      if (lById) {
+        lead = lById;
+      } else {
+        const { data: lByCode } = await supabaseAdmin
+          .from('leads')
+          .select('*')
+          .ilike('portal_access_code', clean)
+          .maybeSingle();
+        if (lByCode) {
+          lead = lByCode;
+        } else {
+          const { data: lByEmail } = await supabaseAdmin
+            .from('leads')
+            .select('*')
+            .ilike('email', clean)
+            .maybeSingle();
+          if (lByEmail) lead = lByEmail;
+        }
+      }
+
       if (lead) {
         const { data: pByLead } = await supabaseAdmin
           .from('client_portals')
           .select('*')
           .eq('lead_id', lead.id)
           .maybeSingle();
-        if (pByLead) portal = pByLead;
+
+        if (pByLead) {
+          portal = pByLead;
+        } else {
+          // Auto-create missing portal record for valid lead
+          const portalAccessCode = lead.portal_access_code || `tc-${Math.random().toString(36).substring(2, 8)}`;
+          const portalPasswordHash = await hashPassword(portalAccessCode);
+          const newPortalId = `portal-${lead.id}`;
+          const now = new Date().toISOString();
+
+          const { data: createdPortal } = await supabaseAdmin
+            .from('client_portals')
+            .insert({
+              id: newPortalId,
+              lead_id: lead.id,
+              slug: portalAccessCode,
+              password_hash: portalPasswordHash,
+              project_growth: 15,
+              status_message: 'Project onboarding initialized. Welcome to your client portal!',
+              is_active: true,
+              created_at: now,
+              updated_at: now,
+            })
+            .select()
+            .maybeSingle();
+
+          if (createdPortal) {
+            portal = createdPortal;
+            if (!lead.portal_access_code) {
+              await supabaseAdmin.from('leads').update({ portal_access_code: portalAccessCode }).eq('id', lead.id);
+            }
+          }
+        }
       }
     }
 
@@ -672,40 +746,92 @@ export const supabaseDb = {
 
     const { data: updates } = await supabaseAdmin
       .from('portal_updates')
-      .select('*')
+      .select('*, users:posted_by(name, email)')
       .eq('portal_id', portal.id)
       .order('created_at', { ascending: false });
 
-    const { data: leadData } = await supabaseAdmin
-      .from('leads')
-      .select('*')
-      .eq('id', portal.lead_id)
-      .maybeSingle();
+    if (!lead) {
+      const { data: leadData } = await supabaseAdmin
+        .from('leads')
+        .select('*')
+        .eq('id', portal.lead_id)
+        .maybeSingle();
+      lead = leadData;
+    }
 
-    return mapPortalFromDb(portal, updates || [], leadData);
+    return mapPortalFromDb(portal, updates || [], lead);
   },
 
   async getPortalByLeadId(leadId: string): Promise<(ClientPortal & { passwordHash: string }) | null> {
-    const { data: portal, error } = await supabaseAdmin
+    if (!leadId) return null;
+    const cleanId = decodeURIComponent(leadId).trim();
+    if (!cleanId) return null;
+
+    let { data: portal, error } = await supabaseAdmin
       .from('client_portals')
       .select('*')
-      .eq('lead_id', leadId)
+      .eq('lead_id', cleanId)
       .maybeSingle();
 
-    if (error || !portal) return null;
+    let lead: any = null;
+    if (error || !portal) {
+      // Check if lead exists
+      const { data: l } = await supabaseAdmin
+        .from('leads')
+        .select('*')
+        .eq('id', cleanId)
+        .maybeSingle();
+
+      if (l) {
+        lead = l;
+        const portalAccessCode = lead.portal_access_code || `tc-${Math.random().toString(36).substring(2, 8)}`;
+        const portalPasswordHash = await hashPassword(portalAccessCode);
+        const newPortalId = `portal-${lead.id}`;
+        const now = new Date().toISOString();
+
+        const { data: createdPortal } = await supabaseAdmin
+          .from('client_portals')
+          .insert({
+            id: newPortalId,
+            lead_id: lead.id,
+            slug: portalAccessCode,
+            password_hash: portalPasswordHash,
+            project_growth: 15,
+            status_message: 'Project onboarding initialized. Welcome to your client portal!',
+            is_active: true,
+            created_at: now,
+            updated_at: now,
+          })
+          .select()
+          .maybeSingle();
+
+        if (createdPortal) {
+          portal = createdPortal;
+          if (!lead.portal_access_code) {
+            await supabaseAdmin.from('leads').update({ portal_access_code: portalAccessCode }).eq('id', lead.id);
+          }
+        }
+      }
+    }
+
+    if (!portal) return null;
+
     const { data: updates } = await supabaseAdmin
       .from('portal_updates')
-      .select('*')
+      .select('*, users:posted_by(name, email)')
       .eq('portal_id', portal.id)
       .order('created_at', { ascending: false });
 
-    const { data: leadData } = await supabaseAdmin
-      .from('leads')
-      .select('*')
-      .eq('id', leadId)
-      .maybeSingle();
+    if (!lead) {
+      const { data: leadData } = await supabaseAdmin
+        .from('leads')
+        .select('*')
+        .eq('id', cleanId)
+        .maybeSingle();
+      lead = leadData;
+    }
 
-    return mapPortalFromDb(portal, updates || [], leadData);
+    return mapPortalFromDb(portal, updates || [], lead);
   },
 
   async updatePortal(portalId: string, updates: Partial<ClientPortal>): Promise<ClientPortal | null> {
@@ -722,12 +848,20 @@ export const supabaseDb = {
       .maybeSingle();
 
     if (error || !data) return null;
+
     const { data: portalUpdates } = await supabaseAdmin
       .from('portal_updates')
-      .select('*')
-      .eq('portal_id', portalId);
+      .select('*, users:posted_by(name, email)')
+      .eq('portal_id', portalId)
+      .order('created_at', { ascending: false });
 
-    const mapped = mapPortalFromDb(data, portalUpdates || []);
+    const { data: leadData } = await supabaseAdmin
+      .from('leads')
+      .select('*')
+      .eq('id', data.lead_id)
+      .maybeSingle();
+
+    const mapped = mapPortalFromDb(data, portalUpdates || [], leadData);
     const { passwordHash: _, ...portal } = mapped;
     return portal;
   },
@@ -739,6 +873,51 @@ export const supabaseDb = {
     const id = `update-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const now = new Date().toISOString();
 
+    // Defensively verify postedBy against users table to prevent FK violations
+    let validUserId: string | null = null;
+    let authorName: string = 'Scalyx Team';
+
+    if (update.postedBy) {
+      // 1. Try matching by id
+      const { data: uById } = await supabaseAdmin
+        .from('users')
+        .select('id, name')
+        .eq('id', update.postedBy)
+        .maybeSingle();
+
+      if (uById) {
+        validUserId = uById.id;
+        if (uById.name) authorName = uById.name;
+      } else {
+        // 2. Try matching by email
+        const { data: uByEmail } = await supabaseAdmin
+          .from('users')
+          .select('id, name')
+          .ilike('email', update.postedBy)
+          .maybeSingle();
+
+        if (uByEmail) {
+          validUserId = uByEmail.id;
+          if (uByEmail.name) authorName = uByEmail.name;
+        } else {
+          // 3. Try matching by name
+          const { data: uByName } = await supabaseAdmin
+            .from('users')
+            .select('id, name')
+            .ilike('name', update.postedBy)
+            .maybeSingle();
+
+          if (uByName) {
+            validUserId = uByName.id;
+            if (uByName.name) authorName = uByName.name;
+          } else {
+            // Keep passed name as display name even if no user table record
+            authorName = update.postedBy;
+          }
+        }
+      }
+    }
+
     const { data, error } = await supabaseAdmin
       .from('portal_updates')
       .insert({
@@ -748,10 +927,10 @@ export const supabaseDb = {
         content: update.content,
         update_type: update.updateType || 'notice',
         pinned: !!update.pinned,
-        posted_by: update.postedBy || null,
+        posted_by: validUserId,
         created_at: now,
       })
-      .select()
+      .select('*, users:posted_by(name, email)')
       .single();
 
     if (error) throw new Error(error.message);
@@ -762,7 +941,7 @@ export const supabaseDb = {
       content: data.content,
       updateType: data.update_type,
       pinned: data.pinned,
-      postedBy: data.posted_by,
+      postedBy: data.users?.name || authorName,
       createdAt: data.created_at,
     };
   },
@@ -889,11 +1068,17 @@ export const supabaseDb = {
     const id = `proj-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const now = new Date().toISOString();
 
+    let validLeadId: string | null = null;
+    if (data.leadId) {
+      const { data: leadMatch } = await supabaseAdmin.from('leads').select('id').eq('id', data.leadId).maybeSingle();
+      if (leadMatch) validLeadId = leadMatch.id;
+    }
+
     const { data: inserted, error } = await supabaseAdmin
       .from('projects')
       .insert({
         id,
-        lead_id: data.leadId || null,
+        lead_id: validLeadId,
         title: data.title,
         description: data.description || null,
         status: data.status || 'In Progress',

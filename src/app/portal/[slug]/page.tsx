@@ -22,6 +22,7 @@ import {
   Clock,
   PackageCheck,
   CheckCircle2,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,8 @@ export default function ClientPortalPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editGrowth, setEditGrowth] = useState(50);
   const [editStatusMsg, setEditStatusMsg] = useState("");
+  const [savingGrowth, setSavingGrowth] = useState(false);
+  const [growthError, setGrowthError] = useState("");
 
   // Post Notice Modal
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
@@ -58,6 +61,9 @@ export default function ClientPortalPage() {
   const [noticeContent, setNoticeContent] = useState("");
   const [noticeType, setNoticeType] = useState<"notice" | "milestone" | "announcement">("notice");
   const [noticePinned, setNoticePinned] = useState(false);
+  const [postingNotice, setPostingNotice] = useState(false);
+  const [noticeError, setNoticeError] = useState("");
+  const [deletingUpdateId, setDeletingUpdateId] = useState<string | null>(null);
 
   // Client Collectible Upload Modal
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -124,33 +130,52 @@ export default function ClientPortalPage() {
   const handleSaveGrowth = async () => {
     if (!portal) return;
     try {
-      const res = await fetch(`/api/portal/${slug}`, {
+      setSavingGrowth(true);
+      setGrowthError("");
+      const targetSlug = portal.slug || portal.id || slug;
+      const res = await fetch(`/api/portal/${targetSlug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          portalId: portal.id,
           projectGrowth: editGrowth,
           statusMessage: editStatusMsg,
         }),
       });
       const data = await res.json();
-      if (data.success) {
-        setPortal(data.portal);
+      if (res.ok && data.success && data.portal) {
+        setPortal((prev) => ({
+          ...prev!,
+          projectGrowth: data.portal.projectGrowth,
+          statusMessage: data.portal.statusMessage,
+          isActive: data.portal.isActive ?? prev!.isActive,
+          updates: data.portal.updates || prev!.updates,
+        }));
         setIsEditModalOpen(false);
+      } else {
+        setGrowthError(data.error || "Failed to update project growth");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setGrowthError(err.message || "Network error while saving changes");
+    } finally {
+      setSavingGrowth(false);
     }
   };
 
   const handlePostNotice = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noticeTitle.trim() || !noticeContent.trim()) return;
+    if (!noticeTitle.trim() || !noticeContent.trim() || !portal) return;
 
     try {
-      const res = await fetch(`/api/portal/${slug}/updates`, {
+      setPostingNotice(true);
+      setNoticeError("");
+      const targetSlug = portal.slug || portal.id || slug;
+      const res = await fetch(`/api/portal/${targetSlug}/updates`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          portalId: portal.id,
           title: noticeTitle.trim(),
           content: noticeContent.trim(),
           updateType: noticeType,
@@ -158,16 +183,48 @@ export default function ClientPortalPage() {
         }),
       });
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success && data.update) {
         setPortal((prev) =>
-          prev ? { ...prev, updates: [data.update, ...prev.updates] } : null
+          prev ? { ...prev, updates: [data.update, ...(prev.updates || [])] } : null
         );
         setIsNoticeModalOpen(false);
         setNoticeTitle("");
         setNoticeContent("");
+        setNoticePinned(false);
+      } else {
+        setNoticeError(data.error || "Failed to post notice");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setNoticeError(err.message || "Network error while posting notice");
+    } finally {
+      setPostingNotice(false);
+    }
+  };
+
+  const handleDeleteNotice = async (updateId: string) => {
+    if (!portal || !isTeamMember) return;
+    if (!confirm("Are you sure you want to delete this notice?")) return;
+
+    try {
+      setDeletingUpdateId(updateId);
+      const targetSlug = portal.slug || portal.id || slug;
+      const res = await fetch(`/api/portal/${targetSlug}/updates?updateId=${updateId}&portalId=${portal.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPortal((prev) =>
+          prev ? { ...prev, updates: prev.updates.filter((u) => u.id !== updateId) } : null
+        );
+      } else {
+        alert(data.error || "Failed to delete notice");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || "Failed to delete notice");
+    } finally {
+      setDeletingUpdateId(null);
     }
   };
 
@@ -449,11 +506,24 @@ export default function ClientPortalPage() {
                         </span>
                       </div>
 
-                      {update.postedBy && (
-                        <span className="text-[10px] text-muted-foreground font-mono">
-                          Posted by {update.postedBy}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {update.postedBy && (
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            Posted by {update.postedBy}
+                          </span>
+                        )}
+                        {isTeamMember && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteNotice(update.id)}
+                            disabled={deletingUpdateId === update.id}
+                            className="text-muted-foreground hover:text-destructive p-1 rounded transition-colors"
+                            title="Delete notice"
+                          >
+                            <Trash2 className="size-3" />
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     <h4 className="text-xs sm:text-sm font-bold text-foreground mb-1.5">{update.title}</h4>
@@ -603,7 +673,7 @@ export default function ClientPortalPage() {
       </main>
 
       {/* Edit Growth Dialog (For Team) */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <Dialog open={isEditModalOpen} onOpenChange={(open) => { setIsEditModalOpen(open); if (!open) setGrowthError(""); }}>
         <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
@@ -611,6 +681,12 @@ export default function ClientPortalPage() {
               <span>Update Project Growth & Message</span>
             </DialogTitle>
           </DialogHeader>
+
+          {growthError && (
+            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+              {growthError}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div>
@@ -642,11 +718,11 @@ export default function ClientPortalPage() {
             </div>
 
             <DialogFooter className="flex flex-col-reverse xs:flex-row gap-2 sm:gap-0 mt-4">
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsEditModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsEditModalOpen(false)} disabled={savingGrowth}>
                 Cancel
               </Button>
-              <Button type="button" size="sm" onClick={handleSaveGrowth}>
-                Save Changes
+              <Button type="button" size="sm" onClick={handleSaveGrowth} disabled={savingGrowth}>
+                {savingGrowth ? "Saving Changes..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </div>
@@ -654,7 +730,7 @@ export default function ClientPortalPage() {
       </Dialog>
 
       {/* Post Notice Dialog (For Team) */}
-      <Dialog open={isNoticeModalOpen} onOpenChange={setIsNoticeModalOpen}>
+      <Dialog open={isNoticeModalOpen} onOpenChange={(open) => { setIsNoticeModalOpen(open); if (!open) setNoticeError(""); }}>
         <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
@@ -662,6 +738,12 @@ export default function ClientPortalPage() {
               <span>Post Client Notice or Milestone</span>
             </DialogTitle>
           </DialogHeader>
+
+          {noticeError && (
+            <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+              {noticeError}
+            </div>
+          )}
 
           <form onSubmit={handlePostNotice} className="space-y-3.5">
             <div>
@@ -720,11 +802,11 @@ export default function ClientPortalPage() {
             </div>
 
             <DialogFooter className="flex flex-col-reverse xs:flex-row gap-2 sm:gap-0 mt-4">
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsNoticeModalOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsNoticeModalOpen(false)} disabled={postingNotice}>
                 Cancel
               </Button>
-              <Button type="submit" size="sm" className="font-semibold">
-                Publish Notice
+              <Button type="submit" size="sm" className="font-semibold" disabled={postingNotice}>
+                {postingNotice ? "Publishing Notice..." : "Publish Notice"}
               </Button>
             </DialogFooter>
           </form>

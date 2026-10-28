@@ -2,12 +2,15 @@ import { type NextRequest, NextResponse } from "next/server";
 import { verifyPassword } from "@/lib/auth/password";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/store";
+import { ClientPortal } from "@/types/portal";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug ? decodeURIComponent(rawSlug).trim() : "";
+
   const portal =
     (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
 
@@ -42,7 +45,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug ? decodeURIComponent(rawSlug).trim() : "";
+
   const portal =
     (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
 
@@ -77,7 +82,6 @@ export async function POST(
           cleanPass.toLowerCase() === lead.portalAccessCode.toLowerCase(),
       ) ||
       Boolean(lead?.portalAccessCode && cleanPass === lead.portalAccessCode) ||
-      cleanPass === portal.slug ||
       cleanPass.toLowerCase() === portal.slug.toLowerCase() ||
       Boolean(envAdminPassword && cleanPass === envAdminPassword);
 
@@ -135,16 +139,24 @@ export async function PATCH(
     );
   }
 
-  const { slug } = await params;
-  const portal =
-    (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug ? decodeURIComponent(rawSlug).trim() : "";
+  const body = await req.json().catch(() => ({}));
+
+  let portal: (ClientPortal & { passwordHash?: string }) | null = null;
+  if (body.portalId) {
+    portal = await db.getPortalBySlug(body.portalId);
+  }
+  if (!portal && slug) {
+    portal =
+      (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
+  }
 
   if (!portal) {
     return NextResponse.json({ error: "Portal not found" }, { status: 404 });
   }
 
   try {
-    const body = await req.json();
     const updated = await db.updatePortal(portal.id, {
       projectGrowth:
         body.projectGrowth !== undefined
@@ -157,6 +169,13 @@ export async function PATCH(
       isActive:
         body.isActive !== undefined ? Boolean(body.isActive) : portal.isActive,
     });
+
+    if (!updated) {
+      return NextResponse.json(
+        { error: "Failed to update portal" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({ success: true, portal: updated });
   } catch (err: any) {

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/session";
 import { db } from "@/lib/db/store";
+import { ClientPortal } from "@/types/portal";
 
 export async function POST(
   req: NextRequest,
@@ -14,16 +15,25 @@ export async function POST(
     );
   }
 
-  const { slug } = await params;
-  const portal =
-    (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug ? decodeURIComponent(rawSlug).trim() : "";
+  const body = await req.json().catch(() => ({}));
+
+  let portal: (ClientPortal & { passwordHash?: string }) | null = null;
+  if (body.portalId) {
+    portal = await db.getPortalBySlug(body.portalId);
+  }
+  if (!portal && slug) {
+    portal =
+      (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
+  }
 
   if (!portal) {
     return NextResponse.json({ error: "Portal not found" }, { status: 404 });
   }
 
   try {
-    const { title, content, updateType, pinned } = await req.json();
+    const { title, content, updateType, pinned } = body;
 
     if (!title || !content) {
       return NextResponse.json(
@@ -37,7 +47,7 @@ export async function POST(
       content,
       updateType: updateType || "notice",
       pinned: Boolean(pinned),
-      postedBy: currentUser.name,
+      postedBy: currentUser.id || currentUser.name,
     });
 
     return NextResponse.json({ success: true, update });
@@ -58,16 +68,26 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { slug } = await params;
-  const portal =
-    (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug ? decodeURIComponent(rawSlug).trim() : "";
+
+  const { searchParams } = new URL(req.url);
+  const portalIdParam = searchParams.get("portalId");
+
+  let portal: (ClientPortal & { passwordHash?: string }) | null = null;
+  if (portalIdParam) {
+    portal = await db.getPortalBySlug(portalIdParam);
+  }
+  if (!portal && slug) {
+    portal =
+      (await db.getPortalBySlug(slug)) || (await db.getPortalByLeadId(slug));
+  }
 
   if (!portal) {
     return NextResponse.json({ error: "Portal not found" }, { status: 404 });
   }
 
   try {
-    const { searchParams } = new URL(req.url);
     const updateId = searchParams.get("updateId");
     if (!updateId) {
       return NextResponse.json(
