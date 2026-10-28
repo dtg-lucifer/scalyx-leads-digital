@@ -135,7 +135,7 @@ export default function InvoiceForm({
   return (
     <div className="space-y-6">
       {/* Quick Action Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card border border-border rounded-none shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card border border-border/80 rounded-xl shadow-xs">
         <div className="flex items-center gap-2">
           {/* Font Dialog Trigger */}
           <Button
@@ -147,7 +147,7 @@ export default function InvoiceForm({
           >
             <Type className="size-3.5 text-primary" />
             <span>Font:</span>
-            <Badge variant="secondary" className="capitalize text-[11px] px-1.5 py-0">
+            <Badge variant="secondary" className="capitalize text-[11px] px-1.5 py-0 rounded-full">
               {data.font}
             </Badge>
           </Button>
@@ -188,7 +188,7 @@ export default function InvoiceForm({
           >
             {isDownloading ? (
               <>
-                <div className="size-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-none animate-spin" />
+                <div className="size-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                 <span>Generating PDF...</span>
               </>
             ) : (
@@ -202,10 +202,10 @@ export default function InvoiceForm({
       </div>
 
       {/* 2 Inputs for Item and Cost + Button to Add Record */}
-      <div className="p-6 bg-card border border-border rounded-none shadow-xs relative overflow-hidden">
+      <div className="p-6 bg-card border border-border/80 rounded-xl shadow-xs relative overflow-hidden">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-none bg-primary/10 text-primary border border-primary/20">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Plus className="size-4" />
             </div>
             <div>
@@ -213,7 +213,7 @@ export default function InvoiceForm({
               <p className="text-xs text-muted-foreground">Enter item description and cost</p>
             </div>
           </div>
-          <Badge variant="outline" className="text-[11px]">
+          <Badge variant="outline" className="text-[11px] rounded-full">
             Quick Line Item
           </Badge>
         </div>
@@ -283,7 +283,7 @@ export default function InvoiceForm({
       </div>
 
       {/* Item Records Table & Live Total */}
-      <div className="p-6 bg-card border border-border rounded-none shadow-xs">
+      <div className="p-6 bg-card border border-border/80 rounded-xl shadow-xs">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">
             Invoice Records ({data.items.length})
@@ -302,7 +302,7 @@ export default function InvoiceForm({
         </div>
 
         {data.items.length === 0 ? (
-          <div className="text-center py-8 px-4 border border-dashed border-border rounded-none bg-muted/20">
+          <div className="text-center py-8 px-4 border border-dashed border-border/80 rounded-xl bg-muted/20">
             <p className="text-xs text-muted-foreground">
               No items in the invoice yet. Enter an item and cost above to add your first record!
             </p>
@@ -312,7 +312,7 @@ export default function InvoiceForm({
             {data.items.map((item, idx) => (
               <div
                 key={item.id}
-                className="flex items-center justify-between p-3 rounded-none bg-muted/30 border border-border hover:bg-muted/50 transition-all text-xs"
+                className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/80 hover:bg-muted/50 transition-all text-xs"
               >
                 <div className="flex items-center gap-3 max-w-[65%]">
                   <span className="text-muted-foreground font-mono text-[11px]">
@@ -331,7 +331,7 @@ export default function InvoiceForm({
                     variant="ghost"
                     size="icon"
                     onClick={() => handleRemoveItem(item.id)}
-                    className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                   >
                     <Trash2 className="size-3.5" />
                   </Button>
@@ -355,7 +355,7 @@ export default function InvoiceForm({
       </div>
 
       {/* Accordion / Tabbed Settings: Client, Invoice Meta, Company Details */}
-      <div className="p-6 bg-card border border-border rounded-none shadow-xs space-y-4">
+      <div className="p-6 bg-card border border-border/80 rounded-xl shadow-xs space-y-4">
         <div className="flex border-b border-border gap-1 pb-2">
           <Button
             type="button"
@@ -513,7 +513,7 @@ export default function InvoiceForm({
                 <select
                   value={data.currency}
                   onChange={(e) => handleCurrencyChange(e.target.value)}
-                  className="w-full h-9 px-3 py-1 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                  className="w-full h-9 px-3 py-1 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code} className="bg-card text-foreground">
@@ -571,7 +571,7 @@ export default function InvoiceForm({
         {/* Company Section (Scalyx) */}
         {activeSection === "company" && (
           <div className="space-y-3.5">
-            <div className="p-3 bg-muted/40 border border-border rounded-none text-xs text-foreground flex items-center justify-between">
+            <div className="p-3.5 bg-muted/40 border border-border/80 rounded-xl text-xs text-foreground flex items-center justify-between">
               <span>Defaults configured for <strong>https://scalyx.in</strong></span>
               <Button
                 type="button"

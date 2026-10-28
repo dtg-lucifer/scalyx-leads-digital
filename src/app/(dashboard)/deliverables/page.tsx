@@ -190,18 +190,18 @@ export default function DeliverablesPage() {
         }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Retention Policy Banner */}
-        <div className="p-4 rounded-none bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-none bg-amber-500/20 text-amber-700 dark:text-amber-300 shrink-0">
+        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="size-11 rounded-2xl bg-amber-500/20 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
               <Clock className="size-5" />
             </div>
             <div>
               <p className="font-bold text-sm">
                 Active Retention Policy: {retentionDays} Days After Download
               </p>
-              <p className="text-[11px] opacity-90 mt-0.5">
+              <p className="text-xs opacity-90 mt-0.5 leading-relaxed">
                 Once downloaded by the respective party, uploaded materials will be soft deleted after{" "}
                 <strong>{retentionDays} days</strong>. You can customize this timeframe in{" "}
                 <a href="/settings" className="underline font-bold hover:text-amber-900">
@@ -211,8 +211,8 @@ export default function DeliverablesPage() {
             </div>
           </div>
 
-          <a href="/settings">
-            <Button variant="outline" size="sm" className="h-8 text-xs shrink-0 border-amber-500/30">
+          <a href="/settings" className="shrink-0">
+            <Button variant="outline" size="sm" className="h-9 text-xs border-amber-500/30 rounded-xl font-semibold">
               Change in Settings
             </Button>
           </a>
@@ -223,7 +223,7 @@ export default function DeliverablesPage() {
           <button
             type="button"
             onClick={() => setActiveTab("deliverable_from_us")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3.5 px-4 text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 transition-all ${
               activeTab === "deliverable_from_us"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -231,7 +231,7 @@ export default function DeliverablesPage() {
           >
             <PackageCheck className="size-4" />
             <span>Deliverables (From Us to Client)</span>
-            <Badge variant="secondary" className="text-[10px] ml-1">
+            <Badge variant="secondary" className="text-[11px] ml-1 rounded-full px-2 py-0.5 font-medium">
               {deliverables.filter((d) => d.category === "deliverable_from_us").length}
             </Badge>
           </button>
@@ -239,7 +239,7 @@ export default function DeliverablesPage() {
           <button
             type="button"
             onClick={() => setActiveTab("collectible_from_client")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all ${
+            className={`pb-3.5 px-4 text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 transition-all ${
               activeTab === "collectible_from_client"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -247,29 +247,29 @@ export default function DeliverablesPage() {
           >
             <Upload className="size-4" />
             <span>Collectibles (From Client to Us)</span>
-            <Badge variant="secondary" className="text-[10px] ml-1">
+            <Badge variant="secondary" className="text-[11px] ml-1 rounded-full px-2 py-0.5 font-medium">
               {deliverables.filter((d) => d.category === "collectible_from_client").length}
             </Badge>
           </button>
         </div>
 
         {/* Client & Search Filter Controls Bar */}
-        <div className="bg-card border border-border p-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-xs p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3 flex-1 flex-wrap">
             {/* Search Input */}
             <div className="relative flex-1 min-w-[220px] max-w-sm">
-              <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 placeholder="Search package title or filename..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 h-8 text-xs rounded-none bg-background"
+                className="pl-9 h-10 text-xs sm:text-sm rounded-xl bg-muted/20 border-border/80 focus:bg-background"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2 top-2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="size-3.5" />
                 </button>
@@ -277,13 +277,13 @@ export default function DeliverablesPage() {
             </div>
 
             {/* Client Filter Dropdown */}
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Building className="size-3.5 text-primary" />
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Building className="size-4 text-primary" />
               <span className="font-semibold text-foreground">Client:</span>
               <select
                 value={selectedClientFilter}
                 onChange={(e) => setSelectedClientFilter(e.target.value)}
-                className="h-8 px-2.5 bg-background border border-input text-xs text-foreground focus:outline-none rounded-none font-medium"
+                className="h-10 px-3 bg-muted/20 border border-border/80 text-xs text-foreground focus:outline-none focus:bg-background rounded-xl font-medium"
               >
                 <option value="all">All Clients ({leads.length})</option>
                 {leads.map((l) => (
@@ -303,7 +303,7 @@ export default function DeliverablesPage() {
                   setSelectedClientFilter("all");
                   setSearchQuery("");
                 }}
-                className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground rounded-none gap-1"
+                className="h-10 px-3 text-xs text-muted-foreground hover:text-foreground rounded-xl gap-1"
               >
                 <X className="size-3" />
                 <span>Reset Filters</span>
@@ -311,37 +311,56 @@ export default function DeliverablesPage() {
             )}
           </div>
 
-          <div className="text-xs text-muted-foreground font-mono self-end sm:self-center">
+          <div className="text-xs text-muted-foreground font-medium self-end sm:self-center">
             Showing <strong className="text-foreground">{filteredItems.length}</strong> items
           </div>
         </div>
 
         {/* Items Table */}
-        <div className="bg-card border border-border rounded-none shadow-xs overflow-hidden">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className="w-full min-w-[950px] text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4 min-w-[200px]">Asset Title & File</th>
-                  <th className="py-3 px-4 min-w-[150px]">Client / Lead</th>
-                  <th className="py-3 px-4 min-w-[140px]">Downloads</th>
-                  <th className="py-3 px-4 min-w-[170px]">Retention Countdown</th>
-                  <th className="py-3 px-4 min-w-[110px]">Status</th>
-                  <th className="py-3 px-4 w-32 text-right">Actions</th>
+                <tr className="border-b border-border bg-muted/30 font-semibold text-muted-foreground text-xs">
+                  <th className="py-3.5 px-4 min-w-[200px]">Asset Title & File</th>
+                  <th className="py-3.5 px-4 min-w-[150px]">Client / Lead</th>
+                  <th className="py-3.5 px-4 min-w-[140px]">Downloads</th>
+                  <th className="py-3.5 px-4 min-w-[170px]">Retention Countdown</th>
+                  <th className="py-3.5 px-4 min-w-[110px]">Status</th>
+                  <th className="py-3.5 px-4 w-32 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-muted-foreground">
-                      <div className="size-6 border-2 border-primary border-t-transparent rounded-none animate-spin mx-auto mb-2" />
-                      Loading deliverables...
+                    <td colSpan={6} className="py-16 text-center text-muted-foreground">
+                      <div className="size-7 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                      <p className="text-xs font-medium">Loading deliverables...</p>
                     </td>
                   </tr>
                 ) : filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-muted-foreground">
-                      No {activeTab === "deliverable_from_us" ? "deliverables" : "collectibles"} registered. Click &quot;Add&quot; to upload your first package.
+                    <td colSpan={6} className="py-16 text-center text-muted-foreground">
+                      <div className="max-w-sm mx-auto flex flex-col items-center">
+                        <div className="size-12 rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground mb-3 shadow-2xs">
+                          <PackageCheck className="size-6" />
+                        </div>
+                        <h4 className="text-sm font-semibold text-foreground mb-1">
+                          No {activeTab === "deliverable_from_us" ? "Deliverables" : "Collectibles"} Found
+                        </h4>
+                        <p className="text-xs text-muted-foreground mb-4">
+                          Upload files to share with client portals or request assets from clients.
+                        </p>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => setIsOpen(true)}
+                          className="rounded-xl gap-1.5 font-semibold"
+                        >
+                          <Plus className="size-3.5" />
+                          <span>{activeTab === "deliverable_from_us" ? "Add Deliverable" : "Add Collectible"}</span>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -478,7 +497,7 @@ export default function DeliverablesPage() {
                 required
                 value={leadId}
                 onChange={(e) => setLeadId(e.target.value)}
-                className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                className="w-full h-9 px-2.5 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none"
               >
                 <option value="" className="bg-card">Select Client...</option>
                 {leads.map((l) => (
@@ -498,7 +517,7 @@ export default function DeliverablesPage() {
                 placeholder="e.g. Next.js SaaS MVP Final Production Bundle"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="h-9 text-xs"
+                className="h-9 text-xs rounded-lg"
               />
             </div>
 
@@ -511,7 +530,7 @@ export default function DeliverablesPage() {
                 placeholder="Included artifacts, migration instructions, design tokens..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="text-xs"
+                className="text-xs rounded-lg"
               />
             </div>
 
@@ -522,15 +541,15 @@ export default function DeliverablesPage() {
               <Input
                 type="file"
                 onChange={(e) => setFileObj(e.target.files?.[0] || null)}
-                className="text-xs file:bg-primary file:text-primary-foreground file:border-0 file:rounded-none file:px-2 file:py-1 file:text-xs file:mr-2 cursor-pointer"
+                className="text-xs file:bg-primary file:text-primary-foreground file:border-0 file:rounded-md file:px-2.5 file:py-1 file:text-xs file:mr-2 cursor-pointer"
               />
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsOpen(false)} className="rounded-lg">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={submitting} className="font-semibold">
+              <Button type="submit" size="sm" disabled={submitting} className="font-semibold rounded-lg">
                 {submitting ? "Uploading..." : "Save Package"}
               </Button>
             </DialogFooter>

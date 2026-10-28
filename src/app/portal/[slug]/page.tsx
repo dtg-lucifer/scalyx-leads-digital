@@ -235,17 +235,17 @@ export default function ClientPortalPage() {
   if (!isUnlocked) {
     return (
       <div className="min-h-screen flex flex-col justify-center items-center p-3.5 sm:p-4 bg-muted/20 relative">
-        <div className="w-full max-w-md bg-card border border-border rounded-none p-5 sm:p-8 shadow-xl text-center">
-          <div className="size-14 sm:size-16 rounded-none overflow-hidden mx-auto mb-4 border border-border bg-card p-1">
+        <div className="w-full max-w-md bg-card border border-border/80 rounded-2xl p-5 sm:p-8 shadow-xl text-center">
+          <div className="size-14 sm:size-16 rounded-2xl overflow-hidden mx-auto mb-4 border border-border shadow-xs bg-card p-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/scalyx_light.png"
               alt="Scalyx"
-              className="w-full h-full object-cover rounded-none"
+              className="w-full h-full object-cover rounded-xl"
             />
           </div>
 
-          <Badge variant="outline" className="text-primary border-primary/20 text-[10px] sm:text-[11px] mb-2">
+          <Badge variant="outline" className="text-primary border-primary/20 text-[10px] sm:text-[11px] mb-2 rounded-full">
             Secure Client Portal
           </Badge>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">Project Dashboard</h1>
@@ -254,7 +254,7 @@ export default function ClientPortalPage() {
           </p>
 
           {error && (
-            <div className="mt-4 p-3 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+            <div className="mt-4 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
               {error}
             </div>
           )}
@@ -297,12 +297,12 @@ export default function ClientPortalPage() {
       {/* Top Navbar */}
       <header className="sticky top-0 z-30 min-h-16 py-2.5 sm:py-0 border-b border-border bg-card/90 backdrop-blur-md px-3.5 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-          <div className="size-8 sm:size-9 rounded-none overflow-hidden shrink-0 border border-border bg-card p-0.5">
+          <div className="size-8 sm:size-9 rounded-xl overflow-hidden shrink-0 border border-border shadow-2xs bg-card p-0.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/scalyx_light.png"
               alt="Scalyx"
-              className="w-full h-full object-cover rounded-none"
+              className="w-full h-full object-cover rounded-lg"
             />
           </div>
           <div className="min-w-0">
@@ -325,7 +325,7 @@ export default function ClientPortalPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsEditModalOpen(true)}
-                className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3"
+                className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 rounded-lg"
               >
                 <Edit3 className="size-3.5" />
                 <span className="hidden md:inline">Update Progress</span>
@@ -336,7 +336,7 @@ export default function ClientPortalPage() {
                 type="button"
                 size="sm"
                 onClick={() => setIsNoticeModalOpen(true)}
-                className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 font-semibold"
+                className="gap-1 sm:gap-1.5 text-xs h-8 px-2 sm:px-3 font-semibold rounded-lg"
               >
                 <Plus className="size-3.5" />
                 <span className="hidden md:inline">Post Notice</span>
@@ -361,14 +361,14 @@ export default function ClientPortalPage() {
       {/* Main Container */}
       <main className="max-w-6xl w-full mx-auto p-3.5 sm:p-6 md:p-8 space-y-6 sm:space-y-8 flex-1">
         {/* Hero Card: Project Growth Bar & Status Message */}
-        <div className="p-4 sm:p-6 md:p-8 rounded-none bg-card border border-border shadow-sm relative overflow-hidden">
+        <div className="p-4 sm:p-6 md:p-8 rounded-2xl bg-card border border-border/80 shadow-xs relative overflow-hidden">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 mb-5 sm:mb-6">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Live Project Status
                 </span>
-                <span className="size-2 rounded-none bg-emerald-500 animate-pulse" />
+                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-foreground">
                 {portal?.company || portal?.leadName}
@@ -391,9 +391,9 @@ export default function ClientPortalPage() {
 
           {/* Interactive Animated Growth Progress Bar */}
           <div className="space-y-2">
-            <div className="w-full bg-muted/60 rounded-none h-3.5 sm:h-4 p-0.5 overflow-hidden border border-border">
+            <div className="w-full bg-muted/60 rounded-full h-3.5 sm:h-4 p-0.5 overflow-hidden border border-border">
               <div
-                className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 h-full rounded-none transition-all duration-700 shadow-sm"
+                className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 h-full rounded-full transition-all duration-700 shadow-sm"
                 style={{ width: `${portal?.projectGrowth || 0}%` }}
               />
             </div>
@@ -419,15 +419,15 @@ export default function ClientPortalPage() {
 
             <div className="space-y-3 sm:space-y-3.5">
               {!portal?.updates || portal.updates.length === 0 ? (
-                <div className="p-6 sm:p-8 text-center text-xs text-muted-foreground bg-card border border-dashed border-border rounded-none">
+                <div className="p-6 sm:p-8 text-center text-xs text-muted-foreground bg-card border border-dashed border-border rounded-xl">
                   No notices posted yet. All announcements from Scalyx will show up here.
                 </div>
               ) : (
                 portal.updates.map((update) => (
                   <div
                     key={update.id}
-                    className={`p-4 sm:p-5 rounded-none bg-card border transition-all ${
-                      update.pinned ? "border-primary/40 shadow-xs" : "border-border"
+                    className={`p-4 sm:p-5 rounded-xl bg-card border border-border/80 shadow-2xs hover:shadow-xs transition-all ${
+                      update.pinned ? "border-primary/40 shadow-xs" : "border-border/80"
                     }`}
                   >
                     <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-1.5 xs:gap-3 mb-2">
@@ -469,7 +469,7 @@ export default function ClientPortalPage() {
           {/* Right Column: Deliverables & Collectibles (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
             {/* Agency Deliverables for Client */}
-            <div className="p-4 sm:p-6 bg-card border border-border rounded-none shadow-sm space-y-4">
+            <div className="p-4 sm:p-6 bg-card border border-border/80 rounded-2xl shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -480,13 +480,13 @@ export default function ClientPortalPage() {
                     Official packages delivered by Scalyx
                   </p>
                 </div>
-                <Badge variant="outline" className="text-[10px] font-mono">
+                <Badge variant="outline" className="text-[10px] font-mono rounded-full">
                   {deliverables.filter((d) => d.category === "deliverable_from_us").length} items
                 </Badge>
               </div>
 
               {/* Retention Policy Banner */}
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs rounded-none leading-relaxed flex items-start gap-2">
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs rounded-xl leading-relaxed flex items-start gap-2">
                 <Clock className="size-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
                 <div>
                   <span className="font-bold">Storage Policy:</span> Delivered packages expire &
@@ -506,7 +506,7 @@ export default function ClientPortalPage() {
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="p-3 sm:p-3.5 rounded-none bg-muted/30 border border-border flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 sm:gap-3 text-xs"
+                        className="p-3 sm:p-3.5 rounded-xl bg-muted/30 border border-border/70 flex flex-col xs:flex-row xs:items-center justify-between gap-2.5 sm:gap-3 text-xs"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="font-semibold text-foreground truncate">{item.title}</div>
@@ -523,7 +523,7 @@ export default function ClientPortalPage() {
 
                         <div className="shrink-0 flex items-center justify-end">
                           {item.isSoftDeleted ? (
-                            <Badge variant="destructive" className="text-[10px]">
+                            <Badge variant="destructive" className="text-[10px] rounded-full">
                               Expired
                             </Badge>
                           ) : (
@@ -531,7 +531,7 @@ export default function ClientPortalPage() {
                               type="button"
                               size="sm"
                               onClick={() => handleDownloadDeliverable(item.id, item.fileUrl)}
-                              className="h-8 w-full xs:w-auto gap-1.5 text-xs font-semibold"
+                              className="h-8 w-full xs:w-auto gap-1.5 text-xs font-semibold rounded-lg"
                             >
                               <Download className="size-3.5" />
                               <span>Download</span>
@@ -545,7 +545,7 @@ export default function ClientPortalPage() {
             </div>
 
             {/* Collectibles from Client */}
-            <div className="p-4 sm:p-6 bg-card border border-border rounded-none shadow-sm space-y-4">
+            <div className="p-4 sm:p-6 bg-card border border-border/80 rounded-2xl shadow-xs space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -562,7 +562,7 @@ export default function ClientPortalPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => setIsUploadOpen(true)}
-                  className="gap-1 text-xs h-7.5"
+                  className="gap-1 text-xs h-7.5 rounded-lg"
                 >
                   <Plus className="size-3" />
                   <span>Upload Asset</span>
@@ -581,7 +581,7 @@ export default function ClientPortalPage() {
                     .map((item) => (
                       <div
                         key={item.id}
-                        className="p-3 sm:p-3.5 rounded-none bg-muted/30 border border-border flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3 text-xs"
+                        className="p-3 sm:p-3.5 rounded-xl bg-muted/30 border border-border/70 flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3 text-xs"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="font-semibold text-foreground truncate">{item.title}</div>
@@ -590,7 +590,7 @@ export default function ClientPortalPage() {
                           </div>
                         </div>
 
-                        <Badge variant="outline" className="text-[10px] text-emerald-600 shrink-0 self-start xs:self-auto">
+                        <Badge variant="outline" className="text-[10px] text-emerald-600 shrink-0 self-start xs:self-auto rounded-full">
                           Uploaded
                         </Badge>
                       </div>
@@ -604,7 +604,7 @@ export default function ClientPortalPage() {
 
       {/* Edit Growth Dialog (For Team) */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none">
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Edit3 className="size-4 text-primary" />
@@ -624,7 +624,7 @@ export default function ClientPortalPage() {
                 max="100"
                 value={editGrowth}
                 onChange={(e) => setEditGrowth(Number(e.target.value))}
-                className="w-full h-2 bg-muted rounded-none appearance-none cursor-pointer accent-primary"
+                className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
               />
             </div>
 
@@ -655,7 +655,7 @@ export default function ClientPortalPage() {
 
       {/* Post Notice Dialog (For Team) */}
       <Dialog open={isNoticeModalOpen} onOpenChange={setIsNoticeModalOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none">
+        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Bell className="size-4 text-primary" />
@@ -684,7 +684,7 @@ export default function ClientPortalPage() {
               <select
                 value={noticeType}
                 onChange={(e) => setNoticeType(e.target.value as any)}
-                className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                className="w-full h-9 px-3 rounded-lg bg-card/60 border border-input text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring/25"
               >
                 <option value="notice" className="bg-card">General Notice</option>
                 <option value="milestone" className="bg-card">Milestone Completed</option>
@@ -733,7 +733,7 @@ export default function ClientPortalPage() {
 
       {/* Client Upload Asset Modal */}
       <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none">
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Upload className="size-4 text-primary" />
@@ -762,7 +762,7 @@ export default function ClientPortalPage() {
               <input
                 type="file"
                 onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
-                className="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-none file:border file:border-border file:text-xs file:font-semibold file:bg-muted file:text-foreground hover:file:bg-accent cursor-pointer"
+                className="w-full text-xs text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-border file:text-xs file:font-semibold file:bg-muted file:text-foreground hover:file:bg-accent cursor-pointer"
               />
             </div>
 

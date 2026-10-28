@@ -183,14 +183,17 @@ Client Apps (iOS / Android / Web) ➔ Cloudflare WAF & CDN ➔ Go API & WebSocke
     id: "signoff_acceptance",
     name: "Sign-off & Acceptance Grid",
     category: "Commercial & Sign-off",
-    description: "Formal dual-column approval box for client sign-off and Scalyx team authorization",
+    description: "Formal dual-column approval box with editable client details and Scalyx team authorization",
     markdown: `::: signoff
+- **Client Name:** [Client Company or Name]
+- **Authorized Signee:** [Representative Name / Title]
+- **Client Email:** client@company.com
+- **Agreed Scope:** Full Technical Architecture & Turnkey Delivery
+- **Total Investment:** ₹85,000 INR (Phased Schedule)
 - **Agency:** Scalyx
 - **Website:** https://scalyx.in
 - **Email:** contact@scalyx.in
 - **Helpline:** +91 8927124748 (Call & WhatsApp)
-- **Client:** LexConnect
-- **Total Investment:** ₹85,000 INR (2 Phases)
 :::
 `,
   },

@@ -21,11 +21,13 @@ import {
   Monitor,
   PanelLeft,
   PanelLeftClose,
+  PenLine,
   Plus,
   Printer,
   Quote,
   RefreshCw,
   Search,
+  Sparkles,
   Users,
 } from "lucide-react";
 import Link from "next/link";
@@ -33,6 +35,14 @@ import { useEffect, useRef, useState } from "react";
 import { AppNavbar } from "@/components/layout/AppNavbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -51,7 +61,18 @@ export default function ProposalsPage() {
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [previewDocHeight, setPreviewDocHeight] = useState<number>(1400);
   const [isRendering, setIsRendering] = useState<boolean>(false);
-  const [showSnippets, setShowSnippets] = useState<boolean>(true);
+  const [showSnippets, setShowSnippets] = useState<boolean>(false);
+  const [isSignoffModalOpen, setIsSignoffModalOpen] = useState<boolean>(false);
+  const [isComponentCatalogOpen, setIsComponentCatalogOpen] = useState<boolean>(false);
+  const [signoffClientName, setSignoffClientName] = useState<string>("");
+  const [signoffSignee, setSignoffSignee] = useState<string>("");
+  const [signoffEmail, setSignoffEmail] = useState<string>("");
+  const [signoffScope, setSignoffScope] = useState<string>(
+    "Full Technical Architecture & Turnkey Delivery"
+  );
+  const [signoffInvestment, setSignoffInvestment] = useState<string>(
+    "₹85,000 INR (2 Phases)"
+  );
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [viewMode, setViewMode] = useState<"split" | "edit" | "preview">(
@@ -140,6 +161,13 @@ export default function ProposalsPage() {
   };
 
   const handleInsertSnippet = (snippet: ProposalSnippet) => {
+    // If inserting Sign-off & Acceptance Grid, open the dedicated customization modal
+    if (snippet.id === "signoff_acceptance") {
+      setIsComponentCatalogOpen(false);
+      setIsSignoffModalOpen(true);
+      return;
+    }
+
     const textarea = textareaRef.current;
     if (!textarea) {
       setMarkdown((prev) => `${prev}\n\n${snippet.markdown}\n`);
@@ -169,6 +197,53 @@ export default function ProposalsPage() {
       message: `Inserted "${snippet.name}" component!`,
     });
     setTimeout(() => setNotification(null), 2500);
+  };
+
+  const handleConfirmInsertSignoff = () => {
+    const clientName = signoffClientName.trim() || "[Client Company or Name]";
+    const signee = signoffSignee.trim() || "[Representative Name / Title]";
+    const email = signoffEmail.trim() || "client@company.com";
+    const scope =
+      signoffScope.trim() || "Full Technical Architecture & Turnkey Delivery";
+    const investment =
+      signoffInvestment.trim() || "As per agreed milestone schedule";
+
+    const customSignoffMd = `::: signoff
+- **Client Name:** ${clientName}
+- **Authorized Signee:** ${signee}
+- **Client Email:** ${email}
+- **Agreed Scope:** ${scope}
+- **Total Investment:** ${investment}
+- **Agency:** Scalyx
+- **Website:** https://scalyx.in
+- **Email:** contact@scalyx.in
+- **Helpline:** +91 8927124748 (Call & WhatsApp)
+:::`;
+
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setMarkdown((prev) => `${prev}\n\n${customSignoffMd}\n`);
+    } else {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const current = textarea.value;
+      const before = current.substring(0, start);
+      const after = current.substring(end);
+      const insertion = `\n\n${customSignoffMd}\n\n`;
+      setMarkdown(before + insertion + after);
+      setTimeout(() => {
+        textarea.focus();
+        const newCursor = start + insertion.length;
+        textarea.setSelectionRange(newCursor, newCursor);
+      }, 50);
+    }
+
+    setIsSignoffModalOpen(false);
+    setNotification({
+      type: "success",
+      message: `Inserted customized Sign-off Grid for "${clientName}"!`,
+    });
+    setTimeout(() => setNotification(null), 3000);
   };
 
   const handleFormat = (prefix: string, suffix: string = "") => {
@@ -207,11 +282,34 @@ export default function ProposalsPage() {
       year: "numeric",
     });
 
+    // Sync signoff modal states with selected lead
+    setSignoffClientName(clientName);
+    setSignoffSignee(lead.name || "");
+    setSignoffEmail(lead.email || "");
+    if (lead.dealValue) {
+      const prefix = lead.currency === "USD" ? "$" : "₹";
+      setSignoffInvestment(
+        `${prefix}${lead.dealValue.toLocaleString("en-IN")}`
+      );
+    }
+
     let updated = markdown;
     updated = updated.replace(
-      /(\*\*Client:\*\*)\s*([^\n]+)/g,
+      /(\*\*(?:Client|Client Name|Authorized Client):\*\*)\s*([^\n]+)/gi,
       `$1 ${clientName}`,
     );
+    if (lead.name) {
+      updated = updated.replace(
+        /(\*\*(?:Authorized Signee|Representative):\*\*)\s*([^\n]+)/gi,
+        `$1 ${lead.name}`,
+      );
+    }
+    if (lead.email) {
+      updated = updated.replace(
+        /(\*\*(?:Client Email|Email):\*\*)\s*([^\n]+)/gi,
+        `$1 ${lead.email}`,
+      );
+    }
     updated = updated.replace(/(\*\*Date:\*\*)\s*([^\n]+)/g, `$1 ${dateStr}`);
     if (lead.dealValue) {
       const prefix = lead.currency === "USD" ? "$" : "₹";
@@ -225,7 +323,7 @@ export default function ProposalsPage() {
     setMarkdown(updated);
     setNotification({
       type: "success",
-      message: `Autofilled document metadata for "${clientName}"!`,
+      message: `Autofilled document metadata & sign-off for "${clientName}"!`,
     });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -295,7 +393,7 @@ export default function ProposalsPage() {
       {notification && (
         <div className="fixed top-20 right-6 z-50 animate-in slide-in-from-top-4 fade-in duration-200">
           <div
-            className={`flex items-center gap-2.5 px-4 py-3 border rounded-none text-xs font-semibold max-w-md shadow-xl ${
+            className={`flex items-center gap-2.5 px-4 py-3 border rounded-xl text-xs font-semibold max-w-md shadow-xl ${
               notification.type === "success"
                 ? "bg-card text-emerald-600 border-emerald-500/20"
                 : "bg-card text-rose-600 border-rose-500/20"
@@ -313,11 +411,11 @@ export default function ProposalsPage() {
 
       {/* MOBILE SCREEN BLOCKER (< 1024px) */}
       <div className="lg:hidden flex-1 flex flex-col items-center justify-center p-6 text-center h-full">
-        <div className="max-w-md w-full bg-card border border-border p-8 rounded-none shadow-sm flex flex-col items-center">
-          <div className="size-14 bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-500 mb-4 rounded-none">
+        <div className="max-w-md w-full bg-card border border-border/80 p-8 rounded-2xl shadow-sm flex flex-col items-center">
+          <div className="size-14 bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-500 mb-4 rounded-xl">
             <Monitor className="size-7" />
           </div>
-          <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-amber-500 bg-amber-500/10 px-2.5 py-0.5 border border-amber-500/20 mb-3">
+          <span className="text-[10px] font-mono uppercase tracking-widest font-bold text-amber-500 bg-amber-500/10 px-2.5 py-0.5 border border-amber-500/20 mb-3 rounded-full">
             Desktop Viewport Required
           </span>
           <h2 className="text-xl font-bold tracking-tight text-foreground mb-2">
@@ -333,13 +431,13 @@ export default function ProposalsPage() {
           <div className="flex flex-col sm:flex-row gap-2.5 w-full">
             <Link
               href="/leads"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-none"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg"
             >
               Back to Leads Record
             </Link>
             <Link
               href="/emails"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border transition-colors rounded-none"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border transition-colors rounded-lg"
             >
               Open Email Sender
             </Link>
@@ -360,7 +458,7 @@ export default function ProposalsPage() {
                   variant="outline"
                   size="sm"
                   onClick={handlePrint}
-                  className="gap-1.5 text-xs font-semibold rounded-none border-border"
+                  className="gap-1.5 text-xs font-semibold rounded-lg border-border"
                   title="Print to PDF (A4 Page Fit)"
                 >
                   <Printer className="size-3.5" />
@@ -370,7 +468,7 @@ export default function ProposalsPage() {
                   type="button"
                   size="sm"
                   onClick={() => handleCopy("md")}
-                  className="gap-1.5 text-xs font-semibold rounded-none shadow-xs"
+                  className="gap-1.5 text-xs font-semibold rounded-lg shadow-xs"
                 >
                   {copiedType === "md" ? (
                     <Check className="size-3.5 text-emerald-400" />
@@ -386,7 +484,7 @@ export default function ProposalsPage() {
 
         <div className="p-3 xl:p-4 space-y-2.5 flex-1 flex flex-col min-h-0 h-full overflow-hidden">
           {/* Preset Selector & Autofill Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-card border border-border rounded-none shadow-xs shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-card border border-border/80 rounded-xl shadow-xs shrink-0">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <LayoutTemplate className="size-3.5 text-primary" />
@@ -397,7 +495,7 @@ export default function ProposalsPage() {
                   key={p.id}
                   type="button"
                   onClick={() => handleSelectPreset(p.id)}
-                  className={`px-3 py-1.5 text-xs font-semibold border rounded-none transition-all flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 text-xs font-semibold border rounded-lg transition-all flex items-center gap-1.5 ${
                     selectedPresetId === p.id
                       ? "bg-primary text-primary-foreground border-primary"
                       : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -405,7 +503,7 @@ export default function ProposalsPage() {
                 >
                   <span>{p.name.split("(")[0].trim()}</span>
                   {p.id === "lexconnect" && (
-                    <span className="text-[10px] bg-primary-foreground/20 text-primary-foreground px-1 py-0.5 rounded-none font-bold">
+                    <span className="text-[10px] bg-primary-foreground/20 text-primary-foreground px-1.5 py-0.5 rounded-full font-bold">
                       Official Blueprint
                     </span>
                   )}
@@ -422,7 +520,7 @@ export default function ProposalsPage() {
                       e.target.value && handleAutofillLead(e.target.value)
                     }
                     defaultValue=""
-                    className="h-8 px-2 rounded-none bg-background border border-input text-xs text-foreground focus:outline-none"
+                    className="h-8 px-2.5 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none"
                   >
                     <option value="" disabled>
                       Autofill with Lead...
@@ -436,31 +534,57 @@ export default function ProposalsPage() {
                 </div>
               )}
 
+              {/* Custom Client Sign-Off Quick Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSignoffModalOpen(true)}
+                className="h-8 px-2.5 rounded-lg text-xs font-semibold gap-1.5 border-border hover:bg-muted/60"
+                title="Configure client acceptance sign-off block"
+              >
+                <PenLine className="size-3.5 text-primary" />
+                <span>Client Sign-Off</span>
+              </Button>
+
+              {/* Component Catalog Modal Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsComponentCatalogOpen(true)}
+                className="h-8 px-2.5 rounded-lg text-xs font-semibold gap-1.5 border-border hover:bg-muted/60"
+                title="Open Component Catalog modal"
+              >
+                <Layers className="size-3.5 text-primary" />
+                <span>Components Catalog</span>
+              </Button>
+
               {/* Component Drawer Toggle */}
               <button
                 type="button"
                 onClick={() => setShowSnippets((prev) => !prev)}
-                className={`h-8 px-2.5 flex items-center gap-1.5 border rounded-none text-xs font-semibold transition-colors ${
+                className={`h-8 px-2.5 flex items-center gap-1.5 border rounded-lg text-xs font-semibold transition-colors ${
                   showSnippets
                     ? "bg-muted text-foreground border-border"
                     : "bg-card text-muted-foreground hover:text-foreground border-border"
                 }`}
-                title="Toggle Component Palette"
+                title="Toggle Side Component Palette"
               >
                 {showSnippets ? (
                   <PanelLeftClose className="size-3.5 text-primary" />
                 ) : (
                   <PanelLeft className="size-3.5" />
                 )}
-                <span>Components</span>
+                <span>Side Palette</span>
               </button>
 
               {/* View Mode Switcher */}
-              <div className="flex items-center border border-border rounded-none bg-muted/40 p-0.5">
+              <div className="flex items-center border border-border/80 rounded-lg bg-muted/40 p-0.5">
                 <button
                   type="button"
                   onClick={() => setViewMode("split")}
-                  className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
+                  className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${
                     viewMode === "split"
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
@@ -504,7 +628,7 @@ export default function ProposalsPage() {
           <div className="grid grid-cols-12 grid-rows-1 gap-3.5 items-stretch flex-1 min-h-0 h-full overflow-hidden">
             {/* Left Sidebar: Prestyled Component Palette */}
             {showSnippets && (
-              <div className="col-span-3 xl:col-span-3 2xl:col-span-2 bg-card border border-border rounded-none shadow-xs p-3 space-y-2.5 h-full min-h-0 flex flex-col overflow-hidden">
+              <div className="col-span-3 xl:col-span-3 2xl:col-span-2 bg-card border border-border/80 rounded-xl shadow-xs p-3 space-y-2.5 h-full min-h-0 flex flex-col overflow-hidden">
                 <div className="shrink-0">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
@@ -513,7 +637,7 @@ export default function ProposalsPage() {
                     </h3>
                     <Badge
                       variant="outline"
-                      className="text-[10px] rounded-none px-1.5 py-0 border-border"
+                      className="text-[10px] rounded-full px-2 py-0 border-border"
                     >
                       {filteredSnippets.length}
                     </Badge>
@@ -530,7 +654,7 @@ export default function ProposalsPage() {
                     placeholder="Search blocks..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-8 pl-8 text-xs rounded-none"
+                    className="h-8 pl-8 text-xs rounded-lg"
                   />
                 </div>
 
@@ -541,7 +665,7 @@ export default function ProposalsPage() {
                       key={cat}
                       type="button"
                       onClick={() => setActiveCategory(cat)}
-                      className={`text-[10px] px-2 py-0.5 font-medium border rounded-none transition-colors ${
+                      className={`text-[10px] px-2.5 py-0.5 font-medium border rounded-full transition-colors ${
                         activeCategory === cat
                           ? "bg-primary text-primary-foreground border-primary"
                           : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
@@ -557,7 +681,7 @@ export default function ProposalsPage() {
                   {filteredSnippets.map((snippet) => (
                     <div
                       key={snippet.id}
-                      className="p-2 border border-border/70 hover:border-primary/60 bg-muted/10 hover:bg-muted/30 transition-all rounded-none group text-left"
+                      className="p-2.5 border border-border/70 hover:border-primary/60 bg-muted/10 hover:bg-muted/30 transition-all rounded-xl group text-left"
                     >
                       <div className="flex items-start justify-between gap-1.5">
                         <div className="font-semibold text-xs text-foreground group-hover:text-primary transition-colors">
@@ -566,7 +690,7 @@ export default function ProposalsPage() {
                         <button
                           type="button"
                           onClick={() => handleInsertSnippet(snippet)}
-                          className="shrink-0 p-1 bg-primary text-primary-foreground hover:bg-primary/90 rounded-none text-[10px] flex items-center gap-0.5"
+                          className="shrink-0 p-1 px-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-[10px] flex items-center gap-0.5"
                           title="Insert snippet at cursor"
                         >
                           <Plus className="size-3" />
@@ -593,7 +717,7 @@ export default function ProposalsPage() {
                     : showSnippets
                       ? "col-span-4 xl:col-span-4 2xl:col-span-5"
                       : "col-span-6"
-                } bg-card border border-border rounded-none shadow-xs flex flex-col h-full min-h-0 overflow-hidden`}
+                } bg-card border border-border/80 rounded-xl shadow-xs flex flex-col h-full min-h-0 overflow-hidden`}
               >
                 {/* Formatting Toolbar - Fixed at top of editor */}
                 <div className="p-2 border-b border-border bg-muted/20 flex flex-wrap items-center justify-between gap-2 shrink-0">
@@ -601,7 +725,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("**", "**")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Bold (**text**)"
                     >
                       <Bold className="size-3.5" />
@@ -609,7 +733,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("*", "*")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Italic (*text*)"
                     >
                       <Italic className="size-3.5" />
@@ -617,7 +741,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("`", "`")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none font-mono text-xs font-bold px-2"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md font-mono text-xs font-bold px-2"
                       title="Inline Code (`code`)"
                     >
                       `code`
@@ -626,7 +750,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("# ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Heading 1"
                     >
                       <Heading1 className="size-3.5" />
@@ -634,7 +758,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("## ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Heading 2"
                     >
                       <Heading2 className="size-3.5" />
@@ -642,7 +766,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("### ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Heading 3"
                     >
                       <Heading3 className="size-3.5" />
@@ -651,7 +775,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("- ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Bullet list"
                     >
                       <List className="size-3.5" />
@@ -659,7 +783,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("1. ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Numbered list"
                     >
                       <ListOrdered className="size-3.5" />
@@ -667,7 +791,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => handleFormat("> ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-none"
+                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
                       title="Blockquote"
                     >
                       <Quote className="size-3.5" />
@@ -681,7 +805,7 @@ export default function ProposalsPage() {
                     <button
                       type="button"
                       onClick={handleDownloadMd}
-                      className="p-1 hover:text-foreground"
+                      className="p-1 hover:text-foreground rounded-md"
                       title="Download .md file"
                     >
                       <Download className="size-3.5" />
@@ -695,7 +819,7 @@ export default function ProposalsPage() {
                   value={markdown}
                   onChange={(e) => setMarkdown(e.target.value)}
                   placeholder="Write your technical proposal in Markdown..."
-                  className="w-full font-mono text-xs p-4 rounded-none border-none focus-visible:ring-0 flex-1 min-h-0 h-full resize-none leading-relaxed overflow-y-auto"
+                  className="w-full font-mono text-xs p-4 rounded-b-xl border-none focus-visible:ring-0 flex-1 min-h-0 h-full resize-none leading-relaxed overflow-y-auto"
                   spellCheck={false}
                 />
               </div>
@@ -712,12 +836,12 @@ export default function ProposalsPage() {
                     : showSnippets
                       ? "col-span-5 xl:col-span-5 2xl:col-span-5"
                       : "col-span-6"
-                } bg-card border border-border rounded-none shadow-xs flex flex-col h-full min-h-0 overflow-hidden`}
+                } bg-card border border-border/80 rounded-xl shadow-xs flex flex-col h-full min-h-0 overflow-hidden`}
               >
                 {/* Preview Bar - Fixed at top of preview */}
                 <div className="p-2 border-b border-border bg-muted/20 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
-                    <span className="size-2 bg-emerald-500 animate-pulse" />
+                    <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-xs font-bold uppercase tracking-wider text-foreground">
                       Document Preview (A4 Scaled)
                     </span>
@@ -732,7 +856,7 @@ export default function ProposalsPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleCopy("html")}
-                      className="h-7 px-2 text-[11px] rounded-none gap-1"
+                      className="h-7 px-2 text-[11px] rounded-lg gap-1"
                     >
                       {copiedType === "html" ? (
                         <Check className="size-3 text-emerald-500" />
@@ -745,7 +869,7 @@ export default function ProposalsPage() {
                       type="button"
                       size="sm"
                       onClick={handlePrint}
-                      className="h-7 px-2.5 text-[11px] rounded-none gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                      className="h-7 px-2.5 text-[11px] rounded-lg gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       <Printer className="size-3" />
                       <span>Print PDF</span>
@@ -787,6 +911,238 @@ export default function ProposalsPage() {
           </div>
         </div>
       </div>
+
+      {/* 1. Client Sign-Off & Acceptance Customization Modal */}
+      <Dialog open={isSignoffModalOpen} onOpenChange={setIsSignoffModalOpen}>
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card rounded-2xl p-6 shadow-2xl">
+          <DialogHeader className="pb-3 border-b border-border/80">
+            <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
+              <PenLine className="size-4 text-primary shrink-0" />
+              <span>Customize Client Sign-off & Acceptance Grid</span>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              Specify the client details, authorized representative, scope, and total investment for this proposal document.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Quick Autofill from Leads Database */}
+            {leads.length > 0 && (
+              <div className="p-3 bg-muted/40 border border-border/80 rounded-xl space-y-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <Users className="size-3.5 text-primary" />
+                  <span>Quick Autofill with Registered Lead</span>
+                </label>
+                <select
+                  defaultValue=""
+                  onChange={(e) => {
+                    const selectedLead = leads.find((l) => l.id === e.target.value);
+                    if (selectedLead) {
+                      setSignoffClientName(selectedLead.company || selectedLead.name);
+                      setSignoffSignee(selectedLead.name);
+                      setSignoffEmail(selectedLead.email);
+                      if (selectedLead.dealValue) {
+                        const prefix = selectedLead.currency === "USD" ? "$" : "₹";
+                        setSignoffInvestment(`${prefix}${selectedLead.dealValue.toLocaleString("en-IN")}`);
+                      }
+                    }
+                  }}
+                  className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none"
+                >
+                  <option value="" disabled>Select lead to auto-populate...</option>
+                  {leads.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.company || l.name} ({l.name} — {l.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Client / Company Name <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  value={signoffClientName}
+                  onChange={(e) => setSignoffClientName(e.target.value)}
+                  placeholder="e.g. LexConnect Legal Tech"
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Authorized Signee / Title
+                </label>
+                <Input
+                  value={signoffSignee}
+                  onChange={(e) => setSignoffSignee(e.target.value)}
+                  placeholder="e.g. Adv. Rohit Mehra, Founder"
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Client Contact Email
+                </label>
+                <Input
+                  type="email"
+                  value={signoffEmail}
+                  onChange={(e) => setSignoffEmail(e.target.value)}
+                  placeholder="e.g. rohit@lexconnect.in"
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Total Commercial Investment
+                </label>
+                <Input
+                  value={signoffInvestment}
+                  onChange={(e) => setSignoffInvestment(e.target.value)}
+                  placeholder="e.g. ₹85,000 INR (2 Phases)"
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                Agreed Scope of Delivery
+              </label>
+              <Input
+                value={signoffScope}
+                onChange={(e) => setSignoffScope(e.target.value)}
+                placeholder="e.g. Full Technical Architecture & Turnkey Delivery"
+                className="h-9 text-xs rounded-lg"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSignoffModalOpen(false)}
+              className="rounded-lg"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleConfirmInsertSignoff}
+              className="font-semibold rounded-lg bg-primary text-primary-foreground gap-1.5"
+            >
+              <Check className="size-3.5" />
+              <span>Insert Sign-off Block</span>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2. Component Catalog Dialog */}
+      <Dialog open={isComponentCatalogOpen} onOpenChange={setIsComponentCatalogOpen}>
+        <DialogContent className="w-[94vw] sm:max-w-2xl md:max-w-3xl bg-card rounded-2xl p-6 shadow-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="pb-3 border-b border-border/80 shrink-0">
+            <DialogTitle className="text-base font-bold flex items-center justify-between text-foreground">
+              <div className="flex items-center gap-2">
+                <Layers className="size-4 text-primary shrink-0" />
+                <span>Components Catalog ({PROPOSAL_SNIPPETS.length} Pre-Styled Blocks)</span>
+              </div>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              Click any component to insert it directly into your proposal at cursor position.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-3 flex-1 min-h-0 flex flex-col overflow-hidden">
+            <div className="flex flex-col sm:flex-row gap-2 shrink-0">
+              <div className="relative flex-1">
+                <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search components by name or description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-9 pl-9 text-xs rounded-lg"
+                />
+              </div>
+              <div className="flex flex-wrap gap-1 shrink-0 items-center">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setActiveCategory(cat)}
+                    className={`text-xs px-2.5 py-1 font-medium border rounded-full transition-colors ${
+                      activeCategory === cat
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted/40 text-muted-foreground border-border hover:text-foreground"
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 overflow-y-auto flex-1 min-h-0 pr-1">
+              {filteredSnippets.map((snippet) => (
+                <div
+                  key={snippet.id}
+                  className="p-3.5 border border-border/80 hover:border-primary/60 bg-muted/10 hover:bg-muted/30 transition-all rounded-xl flex flex-col justify-between gap-2"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="font-semibold text-xs text-foreground">
+                        {snippet.name}
+                      </span>
+                      <span className="text-[10px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-full">
+                        {snippet.category}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">
+                      {snippet.description}
+                    </p>
+                  </div>
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        handleInsertSnippet(snippet);
+                        if (snippet.id !== "signoff_acceptance") {
+                          setIsComponentCatalogOpen(false);
+                        }
+                      }}
+                      className="h-7 px-3 text-xs rounded-lg gap-1 font-semibold"
+                    >
+                      <Plus className="size-3" />
+                      <span>{snippet.id === "signoff_acceptance" ? "Configure & Insert" : "Insert"}</span>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <DialogFooter className="pt-2 border-t border-border/80 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsComponentCatalogOpen(false)}
+              className="rounded-lg"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -202,13 +202,13 @@ export default function SettingsPage() {
         description="RBAC permissions matrix, user provisioning with Resend, and retention policies."
       />
 
-      <div className="p-6 space-y-6 w-full">
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Settings Navigation Tabs */}
         <div className="flex border-b border-border gap-2 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveTab("users_rbac")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-none ${
+            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
               activeTab === "users_rbac"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -221,7 +221,7 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab("retention")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-none ${
+            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
               activeTab === "retention"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -234,7 +234,7 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={() => setActiveTab("agency")}
-            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap rounded-none ${
+            className={`pb-3 px-4 text-xs font-bold flex items-center gap-2 border-b-2 transition-all whitespace-nowrap ${
               activeTab === "agency"
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground"
@@ -249,7 +249,7 @@ export default function SettingsPage() {
         {activeTab === "users_rbac" && (
           <div className="space-y-8">
             {/* User Provisioning Header */}
-            <div className="p-6 rounded-none bg-card border border-border shadow-xs space-y-4">
+            <div className="p-6 rounded-2xl bg-card border border-border/80 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -266,7 +266,7 @@ export default function SettingsPage() {
                     type="button"
                     size="sm"
                     onClick={() => setIsCreateUserOpen(true)}
-                    className="gap-1.5 text-xs h-9 font-semibold shrink-0"
+                    className="gap-1.5 text-xs h-9 font-semibold shrink-0 rounded-lg"
                   >
                     <Plus className="size-3.5" />
                     <span>Create User</span>
@@ -275,7 +275,7 @@ export default function SettingsPage() {
               </div>
 
               {/* Users List Table */}
-              <div className="border border-border rounded-none overflow-hidden mt-4">
+              <div className="border border-border/80 rounded-xl overflow-hidden mt-4">
                 <table className="w-full text-left text-xs">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground uppercase tracking-wider text-[11px]">
@@ -295,7 +295,7 @@ export default function SettingsPage() {
                         <td className="py-3 px-4">
                           <Badge
                             variant={u.role === "super_admin" ? "default" : "outline"}
-                            className="capitalize text-[11px]"
+                            className="capitalize text-[11px] rounded-full"
                           >
                             {u.role.replace("_", " ")}
                           </Badge>
@@ -310,7 +310,7 @@ export default function SettingsPage() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeleteUser(u.id)}
-                              className="size-7 text-muted-foreground hover:text-destructive"
+                              className="size-7 text-muted-foreground hover:text-destructive rounded-lg"
                             >
                               <Trash2 className="size-3.5" />
                             </Button>
@@ -324,7 +324,7 @@ export default function SettingsPage() {
             </div>
 
             {/* RBAC Visual Matrix */}
-            <div className="p-6 rounded-none bg-card border border-border shadow-xs space-y-4">
+            <div className="p-6 rounded-2xl bg-card border border-border/80 shadow-xs space-y-4">
               <div>
                 <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                   <Shield className="size-4 text-primary" />
@@ -335,7 +335,7 @@ export default function SettingsPage() {
                 </p>
               </div>
 
-              <div className="border border-border rounded-none overflow-x-auto">
+              <div className="border border-border/80 rounded-xl overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground uppercase tracking-wider text-[11px]">
@@ -365,7 +365,7 @@ export default function SettingsPage() {
 
                           {/* Super admin */}
                           <td className="py-2.5 px-4 text-center">
-                            <span className="inline-flex size-5 rounded-none bg-emerald-500/10 text-emerald-600 items-center justify-center">
+                            <span className="inline-flex size-5 rounded-md bg-emerald-500/10 text-emerald-600 items-center justify-center">
                               <Check className="size-3" />
                             </span>
                           </td>
@@ -373,11 +373,11 @@ export default function SettingsPage() {
                           {/* Teammate */}
                           <td className="py-2.5 px-4 text-center">
                             {act === "delete" || mod.id === "settings" ? (
-                              <span className="inline-flex size-5 rounded-none bg-muted text-muted-foreground/50 items-center justify-center">
+                              <span className="inline-flex size-5 rounded-md bg-muted text-muted-foreground/50 items-center justify-center">
                                 <X className="size-3" />
                               </span>
                             ) : (
-                              <span className="inline-flex size-5 rounded-none bg-emerald-500/10 text-emerald-600 items-center justify-center">
+                              <span className="inline-flex size-5 rounded-md bg-emerald-500/10 text-emerald-600 items-center justify-center">
                                 <Check className="size-3" />
                               </span>
                             )}
@@ -386,11 +386,11 @@ export default function SettingsPage() {
                           {/* Viewer */}
                           <td className="py-2.5 px-4 text-center">
                             {act === "view" || act === "download" ? (
-                              <span className="inline-flex size-5 rounded-none bg-emerald-500/10 text-emerald-600 items-center justify-center">
+                              <span className="inline-flex size-5 rounded-md bg-emerald-500/10 text-emerald-600 items-center justify-center">
                                 <Check className="size-3" />
                               </span>
                             ) : (
-                              <span className="inline-flex size-5 rounded-none bg-muted text-muted-foreground/50 items-center justify-center">
+                              <span className="inline-flex size-5 rounded-md bg-muted text-muted-foreground/50 items-center justify-center">
                                 <X className="size-3" />
                               </span>
                             )}
@@ -407,7 +407,7 @@ export default function SettingsPage() {
 
         {/* TAB 2: DELIVERABLES RETENTION POLICY */}
         {activeTab === "retention" && (
-          <div className="p-6 rounded-none bg-card border border-border shadow-xs space-y-6">
+          <div className="p-6 rounded-2xl bg-card border border-border/80 shadow-xs space-y-6">
             <div>
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                 <Clock className="size-4 text-primary" />
@@ -418,7 +418,7 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <div className="p-5 rounded-none bg-muted/30 border border-border max-w-lg space-y-4">
+            <div className="p-5 rounded-xl bg-muted/30 border border-border max-w-lg space-y-4">
               <div>
                 <div className="flex items-center justify-between text-xs font-semibold mb-2">
                   <span>Auto Soft-Delete Window</span>
@@ -432,7 +432,7 @@ export default function SettingsPage() {
                   max="30"
                   value={retentionDays}
                   onChange={(e) => setRetentionDays(Number(e.target.value))}
-                  className="w-full h-2 bg-muted rounded-none appearance-none cursor-pointer accent-primary"
+                  className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-mono mt-1">
                   <span>1 day</span>
@@ -448,7 +448,7 @@ export default function SettingsPage() {
                   size="sm"
                   onClick={handleSaveRetention}
                   disabled={savingRetention}
-                  className="gap-2 text-xs font-semibold"
+                  className="gap-2 text-xs font-semibold rounded-lg"
                 >
                   <Save className="size-3.5" />
                   <span>{savingRetention ? "Saving..." : "Save Retention Window"}</span>
@@ -466,7 +466,7 @@ export default function SettingsPage() {
 
         {/* TAB 3: AGENCY PROFILE */}
         {activeTab === "agency" && (
-          <div className="p-6 rounded-none bg-card border border-border shadow-xs space-y-6">
+          <div className="p-6 rounded-2xl bg-card border border-border/80 shadow-xs space-y-6">
             <div>
               <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                 <Building className="size-4 text-primary" />
@@ -528,7 +528,7 @@ export default function SettingsPage() {
               size="sm"
               onClick={handleSaveAgency}
               disabled={savingAgency}
-              className="gap-2 text-xs font-semibold"
+              className="gap-2 text-xs font-semibold rounded-lg"
             >
               <Save className="size-3.5" />
               <span>{savingAgency ? "Saving..." : "Update Agency Defaults"}</span>
@@ -539,7 +539,7 @@ export default function SettingsPage() {
 
       {/* Create User Dialog */}
       <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card rounded-none p-6">
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card rounded-2xl p-6">
           <DialogHeader className="pr-12 pb-3 border-b border-border">
             <DialogTitle className="text-sm font-bold flex items-center gap-2 text-foreground">
               <Users className="size-4 text-primary shrink-0" />
@@ -585,7 +585,7 @@ export default function SettingsPage() {
               <select
                 value={newUserRole}
                 onChange={(e) => setNewUserRole(e.target.value as any)}
-                className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                className="w-full h-9 px-3 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none"
               >
                 <option value="teammate" className="bg-card">Teammate (Standard Agency Member)</option>
                 <option value="viewer" className="bg-card">Viewer (Read Only Access)</option>
@@ -593,16 +593,16 @@ export default function SettingsPage() {
               </select>
             </div>
 
-            <div className="p-3 rounded-none bg-primary/10 border border-primary/20 text-xs text-primary font-medium flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 text-xs text-primary font-medium flex items-center gap-2">
               <Sparkles className="size-4 shrink-0" />
               <span>An auto-generated secure password will be dispatched to their inbox via Resend.</span>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsCreateUserOpen(false)}>
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsCreateUserOpen(false)} className="rounded-lg">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={creatingUser} className="font-semibold">
+              <Button type="submit" size="sm" disabled={creatingUser} className="font-semibold rounded-lg">
                 {creatingUser ? "Creating..." : "Create & Send Password"}
               </Button>
             </DialogFooter>
@@ -612,7 +612,7 @@ export default function SettingsPage() {
 
       {/* Generated Password Modal */}
       <Dialog open={Boolean(createdPasswordModal)} onOpenChange={(open) => !open && setCreatedPasswordModal(null)}>
-        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card">
+        <DialogContent className="w-[94vw] sm:max-w-lg md:max-w-xl bg-card rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2 text-emerald-600">
               <Check className="size-5" />
@@ -626,7 +626,7 @@ export default function SettingsPage() {
                 An invitation email has been sent to <strong>{createdPasswordModal.email}</strong>. For your records, here is the generated password:
               </p>
 
-              <div className="flex items-center gap-2 p-3 bg-muted/40 border border-border rounded-none">
+              <div className="flex items-center gap-2 p-3 bg-muted/40 border border-border rounded-xl">
                 <code className="font-mono text-sm font-bold text-foreground flex-1">
                   {createdPasswordModal.pass}
                 </code>
@@ -634,7 +634,7 @@ export default function SettingsPage() {
                   type="button"
                   size="sm"
                   onClick={handleCopyPass}
-                  className="gap-1 h-8 text-xs shrink-0"
+                  className="gap-1 h-8 text-xs shrink-0 rounded-lg"
                 >
                   {copiedPass ? <Check className="size-3 text-emerald-300" /> : <Copy className="size-3" />}
                   <span>{copiedPass ? "Copied" : "Copy"}</span>

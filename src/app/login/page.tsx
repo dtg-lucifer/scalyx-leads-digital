@@ -41,21 +41,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center p-6 bg-muted/15 relative">
-      <div className="w-full max-w-md bg-card border border-border rounded-none shadow-xl p-8 relative z-10">
+      <div className="w-full max-w-md bg-card border border-border/80 rounded-2xl shadow-xl p-8 relative z-10">
         {/* Header */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="size-16 rounded-none overflow-hidden mb-4 border border-border shadow-xs bg-card p-1">
+          <div className="size-16 rounded-2xl overflow-hidden mb-4 border border-border shadow-xs bg-card p-1.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/scalyx_light.png"
               alt="Scalyx Logo"
-              className="w-full h-full object-cover rounded-none"
+              className="w-full h-full object-cover rounded-xl"
             />
           </div>
 
           <div className="flex items-center gap-2 mb-1.5">
             <h1 className="text-2xl font-bold tracking-tight text-foreground">LeadsDigital</h1>
-            <Badge variant="outline" className="text-[10px] text-primary border-primary/20 rounded-none">
+            <Badge variant="outline" className="text-[10px] text-primary border-primary/20 rounded-full">
               Scalyx
             </Badge>
           </div>
@@ -67,8 +67,8 @@ export default function LoginPage() {
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-3.5 rounded-none bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium flex items-center gap-2.5">
-            <span className="size-1.5 bg-destructive shrink-0" />
+          <div className="mb-6 p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium flex items-center gap-2.5">
+            <span className="size-2 bg-destructive rounded-full shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -76,7 +76,7 @@ export default function LoginPage() {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">
+            <label className="block text-xs font-medium text-muted-foreground mb-1.5">
               Work Email
             </label>
             <div className="relative">
@@ -86,7 +86,7 @@ export default function LoginPage() {
                 placeholder="your.email@agency.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 h-11 text-sm rounded-none"
+                className="pl-10 h-10 text-xs rounded-lg"
                 required
               />
             </div>
@@ -94,7 +94,7 @@ export default function LoginPage() {
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <label className="block text-xs font-medium text-muted-foreground">
                 Password
               </label>
             </div>
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 h-11 text-sm font-mono rounded-none"
+                className="pl-10 h-10 text-xs font-mono rounded-lg"
                 required
               />
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-11 gap-2 text-sm font-semibold shadow-xs mt-2 rounded-none"
+            className="w-full h-10 gap-2 text-xs font-semibold shadow-xs mt-2 rounded-lg"
           >
             {loading ? (
               <>

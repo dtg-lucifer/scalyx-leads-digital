@@ -240,9 +240,9 @@ export default function DocumentsPage() {
         }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Drive Explorer Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card border border-border rounded-none shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-card border border-border/80 rounded-2xl shadow-xs">
           {/* Breadcrumb Navigation */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs font-medium">
             {breadcrumbs.map((b, idx) => (
@@ -251,7 +251,7 @@ export default function DocumentsPage() {
                 <button
                   type="button"
                   onClick={() => handleNavigateBreadcrumb(idx)}
-                  className={`px-2 py-1 rounded-none transition-colors whitespace-nowrap ${
+                  className={`px-2.5 py-1 rounded-lg transition-colors whitespace-nowrap ${
                     idx === breadcrumbs.length - 1
                       ? "bg-accent/40 font-bold text-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -264,11 +264,11 @@ export default function DocumentsPage() {
           </div>
 
           {/* View mode toggle */}
-          <div className="flex items-center gap-1 bg-muted/40 border border-border rounded-none p-1">
+          <div className="flex items-center gap-1 bg-muted/40 border border-border/80 rounded-lg p-1">
             <button
               type="button"
               onClick={() => setViewMode("grid")}
-              className={`p-1.5 rounded-none text-xs transition-colors ${
+              className={`p-1.5 rounded-md text-xs transition-colors ${
                 viewMode === "grid" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground"
               }`}
             >
@@ -277,7 +277,7 @@ export default function DocumentsPage() {
             <button
               type="button"
               onClick={() => setViewMode("list")}
-              className={`p-1.5 rounded-none text-xs transition-colors ${
+              className={`p-1.5 rounded-md text-xs transition-colors ${
                 viewMode === "list" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground"
               }`}
             >
@@ -296,7 +296,7 @@ export default function DocumentsPage() {
           </div>
 
           {folders.length === 0 ? (
-            <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-none bg-muted/10">
+            <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border/80 rounded-2xl bg-muted/10">
               No folders inside this directory. Click &quot;New Folder&quot; above to organize your client assets.
             </div>
           ) : viewMode === "grid" ? (
@@ -305,10 +305,10 @@ export default function DocumentsPage() {
                 <div
                   key={folder.id}
                   onClick={() => handleOpenFolder(folder)}
-                  className="group p-4 rounded-none bg-card border border-border hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
+                  className="group p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 hover:shadow-sm transition-all cursor-pointer flex flex-col justify-between"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="size-10 rounded-none bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+                    <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                       <Folder className="size-5" />
                     </div>
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
@@ -318,7 +318,7 @@ export default function DocumentsPage() {
                         size="icon"
                         onClick={() => handleOpenShare("folder", folder)}
                         title="Share Folder Recursively"
-                        className="size-7 text-muted-foreground hover:text-foreground"
+                        className="size-7 text-muted-foreground hover:text-foreground rounded-lg"
                       >
                         <Share2 className="size-3.5" />
                       </Button>
@@ -328,7 +328,7 @@ export default function DocumentsPage() {
                         size="icon"
                         onClick={() => handleDeleteFolder(folder.id)}
                         title="Delete Folder"
-                        className="size-7 text-muted-foreground hover:text-destructive"
+                        className="size-7 text-muted-foreground hover:text-destructive rounded-lg"
                       >
                         <Trash2 className="size-3.5" />
                       </Button>
@@ -352,7 +352,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-card border border-border rounded-none overflow-hidden">
+            <div className="bg-card border border-border/80 rounded-2xl overflow-hidden shadow-xs">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
@@ -376,7 +376,7 @@ export default function DocumentsPage() {
                       <td className="py-3 px-4 text-muted-foreground">{folder.leadName || "—"}</td>
                       <td className="py-3 px-4">
                         {folder.isShared ? (
-                          <Badge variant="outline" className="text-emerald-600 border-emerald-500/20 text-[10px]">
+                          <Badge variant="outline" className="text-emerald-600 border-emerald-500/20 text-[10px] rounded-full">
                             Public Link
                           </Badge>
                         ) : (
@@ -389,7 +389,7 @@ export default function DocumentsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleOpenShare("folder", folder)}
-                          className="size-7 text-muted-foreground hover:text-foreground"
+                          className="size-7 text-muted-foreground hover:text-foreground rounded-lg"
                         >
                           <Share2 className="size-3.5" />
                         </Button>
@@ -412,7 +412,7 @@ export default function DocumentsPage() {
           </div>
 
           {files.length === 0 ? (
-            <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-none bg-muted/10">
+            <div className="p-8 text-center text-xs text-muted-foreground border border-dashed border-border/80 rounded-2xl bg-muted/10">
               No files in this folder. Upload project deliverables, specs, contracts, or media assets.
             </div>
           ) : viewMode === "grid" ? (
@@ -420,10 +420,10 @@ export default function DocumentsPage() {
               {files.map((file) => (
                 <div
                   key={file.id}
-                  className="group p-4 rounded-none bg-card border border-border hover:border-primary/50 hover:shadow-sm transition-all flex flex-col justify-between"
+                  className="group p-4 rounded-2xl bg-card border border-border/80 hover:border-primary/50 hover:shadow-sm transition-all flex flex-col justify-between"
                 >
                   <div className="flex items-start justify-between mb-3">
-                    <div className="size-10 rounded-none bg-accent text-foreground flex items-center justify-center">
+                    <div className="size-10 rounded-xl bg-accent text-foreground flex items-center justify-center">
                       <FileText className="size-5 text-primary" />
                     </div>
                     <div className="flex items-center gap-1">
@@ -433,7 +433,7 @@ export default function DocumentsPage() {
                         size="icon"
                         onClick={() => handleOpenShare("file", file)}
                         title="Share File"
-                        className="size-7 text-muted-foreground hover:text-foreground"
+                        className="size-7 text-muted-foreground hover:text-foreground rounded-lg"
                       >
                         <Share2 className="size-3.5" />
                       </Button>
@@ -443,7 +443,7 @@ export default function DocumentsPage() {
                         size="icon"
                         onClick={() => handleDeleteFile(file.id)}
                         title="Delete File"
-                        className="size-7 text-muted-foreground hover:text-destructive"
+                        className="size-7 text-muted-foreground hover:text-destructive rounded-lg"
                       >
                         <Trash2 className="size-3.5" />
                       </Button>
@@ -471,7 +471,7 @@ export default function DocumentsPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-card border border-border rounded-none overflow-hidden">
+            <div className="bg-card border border-border/80 rounded-2xl overflow-hidden shadow-xs">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground">
@@ -554,7 +554,7 @@ export default function DocumentsPage() {
               <select
                 value={selectedLeadId}
                 onChange={(e) => setSelectedLeadId(e.target.value)}
-                className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                className="w-full h-9 px-2.5 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none"
               >
                 <option value="" className="bg-card">None (General Folder)</option>
                 {leads.map((l) => (
@@ -596,7 +596,7 @@ export default function DocumentsPage() {
                 required
                 type="file"
                 onChange={(e) => setSelectedFileObj(e.target.files?.[0] || null)}
-                className="text-xs file:bg-primary file:text-primary-foreground file:border-0 file:rounded-none file:px-2 file:py-1 file:text-xs file:mr-2 cursor-pointer"
+                className="text-xs file:bg-primary file:text-primary-foreground file:border-0 file:rounded-md file:px-2.5 file:py-1 file:text-xs file:mr-2 cursor-pointer"
               />
             </div>
 
@@ -607,7 +607,7 @@ export default function DocumentsPage() {
               <select
                 value={selectedLeadId}
                 onChange={(e) => setSelectedLeadId(e.target.value)}
-                className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                className="w-full h-9 px-2.5 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none"
               >
                 <option value="" className="bg-card">None (General File)</option>
                 {leads.map((l) => (
@@ -642,7 +642,7 @@ export default function DocumentsPage() {
 
           {shareResource && (
             <div className="space-y-4 text-xs">
-              <div className="p-3.5 rounded-none bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
+              <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300">
                 <p className="font-semibold mb-1">
                   Anyone with this link can view and download without signing in.
                 </p>

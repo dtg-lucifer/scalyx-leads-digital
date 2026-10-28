@@ -53,7 +53,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          "fixed top-1/2 left-1/2 z-50 grid w-[94vw] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-none bg-popover p-6 text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10 duration-100 outline-none sm:max-w-lg md:max-w-xl data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+          "fixed top-1/2 left-1/2 z-50 grid w-[94vw] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-2xl border border-border/80 bg-card p-6 text-sm text-foreground shadow-2xl duration-150 outline-none sm:max-w-lg md:max-w-xl data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
           className
         )}
         {...props}
@@ -65,7 +65,7 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-4 right-4 rounded-none text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors z-20"
+                className="absolute top-4 right-4 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors z-20"
                 size="icon-sm"
               />
             }
@@ -121,7 +121,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
     <DialogPrimitive.Title
       data-slot="dialog-title"
       className={cn(
-        "font-heading text-lg leading-none font-semibold tracking-wider uppercase",
+        "font-heading text-lg leading-none font-semibold tracking-tight text-foreground",
         className
       )}
       {...props}

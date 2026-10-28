@@ -1288,38 +1288,94 @@ export function preprocessProposalDirectives(
     /(?:^:::\s*signoff\b([\s\S]*?)(?:^:::|:::\s*$)|<SignOff>([\s\S]*?)<\/SignOff>)/gm,
     (_match, body1, body2) => {
       const body = (body1 || body2 || "").replace(/:::\s*$/, "").trim();
-      let clientName = "LexConnect";
-      let investment = "₹85,000 INR (2 Phases)";
+      const clientLines: string[] = [];
       const agencyLines: string[] = [];
+
+      let hasClientName = false;
+      let hasScope = false;
+      let hasInvestment = false;
 
       const lines = body.split("\n");
       for (const rawLine of lines) {
-        const line = rawLine.trim();
-        if (!line || !/^[-*•●]/.test(line)) continue;
-        const content = line.replace(/^[-*•●\s]+/, "");
-        const match = content.match(/\*\*([^:]+):\*\*\s*(.*)/i);
+        let line = rawLine.trim();
+        if (!line) continue;
+        // Strip markdown list bullets without stripping bold ** markers
+        line = line.replace(/^[-*+•●]\s+/, "").trim();
+
+        // Match **Key:** Value, **Key**: Value, or Key: Value
+        const match =
+          line.match(/^\*\*([^:]+?)\*\*:\s*(.*)$/) ||
+          line.match(/^([^:]+?):\s*(.*)$/);
+
         if (match) {
-          const key = match[1].trim();
-          const val = match[2].trim();
-          if (key.toLowerCase() === "client") {
-            clientName = val;
-          } else if (key.toLowerCase().includes("investment")) {
-            investment = val;
+          const rawKey = match[1].replace(/\*\*/g, "").trim();
+          const val = match[2].replace(/^\*\*|\*\*$/g, "").trim();
+          const lowerKey = rawKey.toLowerCase();
+
+          // Check if this key belongs to Client details
+          const isClientKey =
+            lowerKey.includes("client") ||
+            lowerKey.includes("representative") ||
+            lowerKey.includes("signee") ||
+            lowerKey.includes("scope") ||
+            lowerKey.includes("investment") ||
+            lowerKey.includes("customer") ||
+            lowerKey.includes("authorized");
+
+          // Check if key belongs to Agency details
+          const isAgencyKey =
+            lowerKey.includes("agency") ||
+            lowerKey.includes("scalyx") ||
+            lowerKey.includes("website") ||
+            lowerKey.includes("helpline") ||
+            lowerKey.includes("phone") ||
+            lowerKey.includes("region") ||
+            lowerKey.includes("engagement") ||
+            lowerKey.includes("prepared");
+
+          let displayKey = rawKey;
+          if (lowerKey === "client") displayKey = "Authorized Client";
+
+          if (isClientKey || (!isAgencyKey && clientLines.length < 4 && !lowerKey.includes("email"))) {
+            if (lowerKey.includes("client") || lowerKey.includes("authorized")) hasClientName = true;
+            if (lowerKey.includes("scope")) hasScope = true;
+            if (lowerKey.includes("investment")) hasInvestment = true;
+
+            clientLines.push(
+              `<div class="signoff-line"><strong>${displayKey}:</strong> ${val}</div>`,
+            );
           } else {
             agencyLines.push(
-              `<div class="signoff-line"><strong>${key}:</strong> ${val}</div>`,
+              `<div class="signoff-line"><strong>${displayKey}:</strong> ${val}</div>`,
             );
           }
         }
+      }
+
+      // If missing essential client fields, add clean placeholders
+      if (clientLines.length === 0) {
+        clientLines.push(
+          `<div class="signoff-line"><strong>Authorized Client:</strong> [Client Company / Organization]</div>`,
+          `<div class="signoff-line"><strong>Agreed Scope:</strong> Full Technical Proposal & Blueprint</div>`,
+          `<div class="signoff-line"><strong>Total Investment:</strong> As outlined in milestone schedule</div>`,
+        );
+      }
+
+      // If missing agency fields, provide default Scalyx agency details
+      if (agencyLines.length === 0) {
+        agencyLines.push(
+          `<div class="signoff-line"><strong>Agency:</strong> Scalyx</div>`,
+          `<div class="signoff-line"><strong>Website:</strong> https://scalyx.in</div>`,
+          `<div class="signoff-line"><strong>Email:</strong> contact@scalyx.in</div>`,
+          `<div class="signoff-line"><strong>Helpline:</strong> +91 8927124748 (Call & WhatsApp)</div>`,
+        );
       }
 
       return register(`
 <div class="signoff-grid">
   <div class="signoff-card">
     <div class="signoff-title">Client Acceptance</div>
-    <div class="signoff-line"><strong>Authorized Client:</strong> ${clientName}</div>
-    <div class="signoff-line"><strong>Agreed Scope:</strong> Full Technical Proposal & Blueprint</div>
-    <div class="signoff-line"><strong>Total Investment:</strong> ${investment}</div>
+    ${clientLines.join("\n    ")}
     <div class="signature-line-box">
       <div class="signature-placeholder">[ Sign & Confirm Acceptance ]</div>
       <div class="signature-caption">Signature / Digital Confirmation</div>

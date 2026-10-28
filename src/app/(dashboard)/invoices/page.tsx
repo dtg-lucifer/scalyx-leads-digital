@@ -100,7 +100,7 @@ export default function InvoicesPage() {
       {notification && (
         <div className="fixed top-20 right-6 z-50 animate-in slide-in-from-top-4 fade-in duration-200">
           <div
-            className={`flex items-center gap-2.5 px-4 py-3 rounded-none shadow-xl border text-xs font-semibold ${
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-xl border text-xs font-semibold ${
               notification.type === "success"
                 ? "bg-card text-emerald-600 border-emerald-500/20"
                 : "bg-card text-rose-600 border-rose-500/20"
@@ -128,7 +128,7 @@ export default function InvoicesPage() {
                 <select
                   onChange={(e) => e.target.value && handleLoadLead(e.target.value)}
                   defaultValue=""
-                  className="h-9 px-2.5 rounded-none bg-background border border-border text-xs text-foreground focus:outline-none"
+                  className="h-9 px-2.5 rounded-lg bg-background border border-border text-xs text-foreground focus:outline-none"
                 >
                   <option value="" disabled className="bg-card">
                     Prefill From Lead...
@@ -147,11 +147,11 @@ export default function InvoicesPage() {
               variant="outline"
               size="sm"
               onClick={() => setIsFontDialogOpen(true)}
-              className="gap-1.5 text-xs h-9 rounded-none border-border"
+              className="gap-1.5 text-xs h-9 rounded-lg border-border"
             >
               <Type className="size-3.5 text-primary" />
               <span className="hidden sm:inline">Font:</span>
-              <span className="capitalize text-[10px] font-mono px-1 py-0 bg-muted text-muted-foreground">
+              <span className="capitalize text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground">
                 {invoiceData.font}
               </span>
             </Button>
@@ -161,11 +161,11 @@ export default function InvoicesPage() {
               size="sm"
               onClick={handleDownloadPdf}
               disabled={isDownloading}
-              className="gap-2 text-xs h-9 font-semibold rounded-none"
+              className="gap-2 text-xs h-9 font-semibold rounded-lg"
             >
               {isDownloading ? (
                 <>
-                  <div className="size-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-none animate-spin" />
+                  <div className="size-3.5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   <span>Generating PDF...</span>
                 </>
               ) : (
@@ -208,8 +208,8 @@ export default function InvoicesPage() {
       </div>
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0 print:m-0 print:block">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start print:block print:m-0 print:p-0">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 print:p-0 print:m-0 print:block w-full">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start print:block print:m-0 print:p-0">
           {/* Left Column: Form & Item Controls (5 cols) */}
           <div
             className={`lg:col-span-5 no-print ${
@@ -235,18 +235,18 @@ export default function InvoicesPage() {
             {/* Preview Toolbar */}
             <div className="w-full max-w-[210mm] flex items-center justify-between pb-3 mb-3 border-b border-border text-xs no-print">
               <div className="flex items-center gap-2">
-                <span className="flex size-2 rounded-none bg-emerald-500 animate-pulse" />
+                <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="font-semibold text-foreground">Live A4 Document Preview</span>
                 <span className="text-[10px] font-mono text-muted-foreground">(210mm × 297mm)</span>
               </div>
 
               {/* Zoom Controls */}
-              <div className="flex items-center gap-1 bg-card border border-border rounded-none p-1 shadow-2xs">
+              <div className="flex items-center gap-1 bg-card border border-border/80 rounded-xl p-1 shadow-2xs">
                 <button
                   type="button"
                   onClick={() => setPreviewScale((s) => Math.max(0.4, s - 0.1))}
                   title="Zoom Out"
-                  className="p-1.5 rounded-none hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ZoomOut className="size-3.5" />
                 </button>
@@ -257,7 +257,7 @@ export default function InvoicesPage() {
                   type="button"
                   onClick={() => setPreviewScale((s) => Math.min(1.2, s + 0.1))}
                   title="Zoom In"
-                  className="p-1.5 rounded-none hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <ZoomIn className="size-3.5" />
                 </button>
@@ -265,7 +265,7 @@ export default function InvoicesPage() {
                   type="button"
                   onClick={() => setPreviewScale(0.82)}
                   title="Reset Zoom"
-                  className="p-1.5 rounded-none hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border-l border-border"
+                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors border-l border-border"
                 >
                   <Maximize2 className="size-3.5" />
                 </button>
@@ -273,7 +273,7 @@ export default function InvoicesPage() {
             </div>
 
             {/* A4 Sheet Container */}
-            <div className="w-full overflow-x-auto flex justify-center py-6 bg-muted/20 rounded-none border border-border shadow-inner print:p-0 print:m-0 print:bg-transparent print:border-none print:shadow-none print:block print:overflow-visible">
+            <div className="w-full overflow-x-auto flex justify-center py-6 bg-muted/20 rounded-2xl border border-border/80 shadow-inner print:p-0 print:m-0 print:bg-transparent print:border-none print:shadow-none print:block print:overflow-visible">
               <InvoicePreview data={invoiceData} scale={previewScale} />
             </div>
           </div>

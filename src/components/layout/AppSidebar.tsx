@@ -79,7 +79,7 @@ export function AppSidebar() {
       <div className="flex flex-col">
         <div className="min-h-[72px] sm:min-h-20 h-[72px] sm:h-20 px-5 border-b border-border flex items-center justify-between shrink-0">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="size-9 bg-foreground rounded-none flex items-center justify-center text-background font-bold text-lg tracking-wider group-hover:scale-105 transition-transform shrink-0">
+            <div className="size-9 bg-foreground rounded-xl flex items-center justify-center text-background font-bold text-base tracking-wider group-hover:scale-105 transition-all shadow-xs shrink-0">
               S
             </div>
             <div>
@@ -93,7 +93,7 @@ export function AppSidebar() {
           </Link>
           <Badge
             variant="outline"
-            className="text-[10px] font-mono px-1.5 py-0.5 h-5 border-border rounded-none text-muted-foreground"
+            className="text-[10px] font-mono px-2 py-0.5 h-5 border-border rounded-full text-muted-foreground"
           >
             v1.2.0
           </Badge>
@@ -111,10 +111,10 @@ export function AppSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-none transition-all group ${
+                className={`flex items-center gap-3 px-3 py-2.5 text-xs font-medium rounded-xl transition-all group ${
                   isActive
-                    ? "bg-primary text-primary-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    ? "bg-primary text-primary-foreground shadow-xs font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 }`}
               >
                 <Icon
@@ -148,7 +148,7 @@ export function AppSidebar() {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs px-1">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="size-6 bg-primary/10 text-primary border border-primary/20 rounded-none flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                <div className="size-7 bg-primary/10 text-primary border border-primary/20 rounded-full flex items-center justify-center font-bold text-xs uppercase shrink-0">
                   {user.name.charAt(0)}
                 </div>
                 <div className="truncate">
@@ -166,7 +166,7 @@ export function AppSidebar() {
               variant="outline"
               size="sm"
               onClick={logout}
-              className="w-full text-xs h-7 text-muted-foreground hover:text-destructive hover:border-destructive/30 rounded-none flex items-center justify-center gap-1.5"
+              className="w-full text-xs h-8 text-muted-foreground hover:text-destructive hover:border-destructive/30 rounded-lg flex items-center justify-center gap-1.5"
             >
               <LogOut className="size-3" />
               <span>Sign Out</span>
@@ -176,7 +176,7 @@ export function AppSidebar() {
           <div className="text-center py-1">
             <Link
               href="/login"
-              className="w-full inline-flex items-center justify-center text-xs h-7 border border-border text-muted-foreground hover:text-foreground hover:bg-muted/40 font-semibold rounded-none transition-colors"
+              className="w-full inline-flex items-center justify-center text-xs h-8 border border-border text-muted-foreground hover:text-foreground hover:bg-muted/40 font-medium rounded-lg transition-colors"
             >
               Sign In
             </Link>

@@ -200,25 +200,25 @@ export default function ProjectsPage() {
         }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* Kanban Board Integration Notice */}
-        <div className="p-4 rounded-none bg-card border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-none bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400">
+        <div className="p-5 rounded-2xl bg-card border border-border/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="size-11 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
               <Kanban className="size-5" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">
                 External Kanban Quick-Links Connected
               </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
                 Each project stores a direct link to your team&apos;s sprint board (Linear, Trello, Jira, GitHub Projects, or Notion) for rapid 1-click access.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-purple-600 border-purple-500/20 text-xs">
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge variant="outline" className="text-purple-600 border-purple-500/20 text-xs px-3 py-1 rounded-full font-medium">
               Any Teammate Can Update
             </Badge>
           </div>
@@ -228,12 +228,27 @@ export default function ProjectsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             <div className="col-span-full py-16 text-center text-muted-foreground">
-              <div className="size-6 border-2 border-primary border-t-transparent rounded-none animate-spin mx-auto mb-2" />
-              Loading running projects...
+              <div className="size-7 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+              <p className="text-xs font-medium">Loading running projects...</p>
             </div>
           ) : projects.length === 0 ? (
-            <div className="col-span-full py-16 text-center text-xs text-muted-foreground bg-card border border-dashed border-border rounded-none">
-              No projects created yet. Click &quot;New Project&quot; above to link your first Kanban sprint board!
+            <div className="col-span-full py-16 px-6 text-center bg-card border border-dashed border-border/80 rounded-2xl flex flex-col items-center">
+              <div className="size-14 rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground mb-3 shadow-2xs">
+                <Kanban className="size-7" />
+              </div>
+              <h4 className="text-base font-semibold text-foreground mb-1">No Projects Found</h4>
+              <p className="text-xs text-muted-foreground max-w-md mb-5 leading-relaxed">
+                Connect your first agency project to track deliverables, milestones, and quick-launch directly into team sprint boards.
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleOpenAdd}
+                className="rounded-xl gap-1.5 font-semibold px-4"
+              >
+                <Plus className="size-3.5" />
+                <span>Create First Project</span>
+              </Button>
             </div>
           ) : (
             projects.map((proj) => {
@@ -245,13 +260,13 @@ export default function ProjectsPage() {
               return (
                 <div
                   key={proj.id}
-                  className="p-6 rounded-none bg-card border border-border hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between"
+                  className="p-6 rounded-2xl bg-card border border-border/80 hover:border-primary/50 hover:shadow-md transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-3.5">
                     {/* Header */}
                     <div className="flex items-start justify-between gap-3">
                       <span
-                        className={`inline-flex items-center px-2.5 py-1 rounded-none text-[11px] font-semibold border ${statusCfg.color} ${statusCfg.bg}`}
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border ${statusCfg.color} ${statusCfg.bg}`}
                       >
                         {proj.status}
                       </span>
@@ -263,7 +278,7 @@ export default function ProjectsPage() {
                           size="icon"
                           onClick={() => handleOpenEdit(proj)}
                           title="Edit Project"
-                          className="size-7 text-muted-foreground hover:text-foreground"
+                          className="size-7 text-muted-foreground hover:text-foreground rounded-lg"
                         >
                           <Edit2 className="size-3.5" />
                         </Button>
@@ -273,7 +288,7 @@ export default function ProjectsPage() {
                           size="icon"
                           onClick={() => handleDelete(proj.id)}
                           title="Delete Project"
-                          className="size-7 text-muted-foreground hover:text-destructive"
+                          className="size-7 text-muted-foreground hover:text-destructive rounded-lg"
                         >
                           <Trash2 className="size-3.5" />
                         </Button>
@@ -290,7 +305,7 @@ export default function ProjectsPage() {
                     </div>
 
                     {/* Metadata Pill */}
-                    <div className="p-3 rounded-none bg-muted/30 border border-border space-y-1.5 text-xs">
+                    <div className="p-3.5 rounded-xl bg-muted/30 border border-border/80 space-y-1.5 text-xs">
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Client:</span>
                         <span className="font-semibold text-foreground truncate max-w-[180px]">
@@ -315,7 +330,7 @@ export default function ProjectsPage() {
                     {proj.assignedTeammates && proj.assignedTeammates.length > 0 && (
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {proj.assignedTeammates.map((member, i) => (
-                          <Badge key={i} variant="outline" className="text-[10px] py-0 px-2 font-normal">
+                          <Badge key={i} variant="outline" className="text-[10px] py-0 px-2 font-normal rounded-full">
                             {member}
                           </Badge>
                         ))}
@@ -324,13 +339,13 @@ export default function ProjectsPage() {
                   </div>
 
                   {/* Kanban External Action */}
-                  <div className="mt-5 pt-4 border-t border-border">
+                  <div className="mt-5 pt-4 border-t border-border/80">
                     {proj.kanbanUrl ? (
                       <a
                         href={proj.kanbanUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-none bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold shadow-xs transition-all active:scale-[0.99]"
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold shadow-xs transition-all active:scale-[0.99]"
                       >
                         <Kanban className="size-3.5" />
                         <span>Open Kanban Board</span>
@@ -342,7 +357,7 @@ export default function ProjectsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleOpenEdit(proj)}
-                        className="w-full text-xs text-muted-foreground"
+                        className="w-full text-xs text-muted-foreground rounded-lg"
                       >
                         Add Kanban URL
                       </Button>
@@ -386,7 +401,7 @@ export default function ProjectsPage() {
               <select
                 value={leadId}
                 onChange={(e) => setLeadId(e.target.value)}
-                className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                className="w-full h-9 px-2.5 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none"
               >
                 <option value="" className="bg-card">Select Client...</option>
                 {leads.map((l) => (
@@ -418,7 +433,7 @@ export default function ProjectsPage() {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as any)}
-                  className="w-full h-9 px-2 rounded-none bg-transparent border border-input text-xs text-foreground focus:outline-none"
+                  className="w-full h-9 px-2.5 rounded-lg bg-transparent border border-input text-xs text-foreground focus:outline-none"
                 >
                   <option value="Planning" className="bg-card">Planning</option>
                   <option value="Design" className="bg-card">Design</option>

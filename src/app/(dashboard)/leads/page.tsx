@@ -326,7 +326,7 @@ export default function LeadsPage() {
               variant="outline"
               size="sm"
               onClick={handleExportCSV}
-              className="gap-1.5 text-xs h-9 rounded-none"
+              className="gap-1.5 text-xs h-9 rounded-lg"
             >
               <Download className="size-3.5" />
               <span>Export CSV</span>
@@ -335,7 +335,7 @@ export default function LeadsPage() {
               type="button"
               size="sm"
               onClick={() => setIsAddOpen(true)}
-              className="gap-1.5 text-xs h-9 font-semibold rounded-none"
+              className="gap-1.5 text-xs h-9 font-semibold rounded-lg"
             >
               <Plus className="size-3.5" />
               <span>Add Lead</span>
@@ -344,78 +344,81 @@ export default function LeadsPage() {
         }
       />
 
-      <div className="p-6 space-y-6">
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
         {/* KPI Metrics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 bg-card border border-border rounded-none shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="p-6 bg-card border border-border/80 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">
                 Total Revenue Collected
               </p>
-              <h2 className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
+              <h2 className="text-3xl font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
                 ₹{totalCollectedRevenue.toLocaleString("en-IN")}
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Across closed deals</p>
+              <p className="text-xs text-muted-foreground">Across closed & realized deals</p>
             </div>
-            <div className="size-11 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center rounded-none">
-              <DollarSign className="size-5" />
+            <div className="size-12 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center rounded-2xl shadow-2xs">
+              <DollarSign className="size-6" />
             </div>
           </div>
 
-          <div className="p-5 bg-card border border-border rounded-none shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="p-6 bg-card border border-border/80 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">
                 Pipeline Deal Value
               </p>
-              <h2 className="text-2xl font-bold font-mono text-primary mt-1">
+              <h2 className="text-3xl font-bold font-mono tracking-tight text-foreground">
                 ₹{totalPipelineValue.toLocaleString("en-IN")}
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Total opportunity pipeline</p>
+              <p className="text-xs text-muted-foreground">Total opportunity pipeline</p>
             </div>
-            <div className="size-11 bg-primary/10 border border-primary/20 text-primary flex items-center justify-center rounded-none">
-              <TrendingUp className="size-5" />
+            <div className="size-12 bg-primary/10 border border-primary/20 text-primary flex items-center justify-center rounded-2xl shadow-2xs">
+              <TrendingUp className="size-6" />
             </div>
           </div>
 
-          <div className="p-5 bg-card border border-border rounded-none shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Client Relationships
+          <div className="p-6 bg-card border border-border/80 rounded-2xl shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">
+                Active Client Relationships
               </p>
-              <h2 className="text-2xl font-bold text-foreground mt-1">
-                {leads.length} <span className="text-xs font-normal text-muted-foreground">leads ({wonLeadsCount} won)</span>
+              <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                {leads.length}{" "}
+                <span className="text-xs font-normal text-muted-foreground">
+                  leads ({wonLeadsCount} won)
+                </span>
               </h2>
-              <p className="text-[11px] text-muted-foreground mt-0.5">Linked to drive & portals</p>
+              <p className="text-xs text-muted-foreground">Linked to drive & portals</p>
             </div>
-            <div className="size-11 bg-accent text-foreground flex items-center justify-center rounded-none">
-              <Users className="size-5 text-primary" />
+            <div className="size-12 bg-accent text-foreground flex items-center justify-center rounded-2xl shadow-2xs">
+              <Users className="size-6 text-primary" />
             </div>
           </div>
         </div>
 
         {/* Filter Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-card border border-border rounded-none shadow-xs">
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-card border border-border/80 rounded-2xl shadow-xs">
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <div className="relative flex-1 min-w-[220px] max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
                 type="text"
                 placeholder="Search leads by name, email, company..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9 text-xs rounded-none"
+                className="pl-10 h-10 text-xs sm:text-sm rounded-xl bg-muted/20 border-border/80 focus:bg-background"
               />
             </div>
 
             {/* Status Filter */}
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <Filter className="size-3.5" />
               <span>Status:</span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="h-8 px-2 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-none"
+                className="h-10 px-3 bg-muted/20 border border-border/80 text-xs font-medium text-foreground focus:outline-none focus:bg-background rounded-xl"
               >
                 <option value="all" className="bg-card">All Statuses</option>
                 <option value="New" className="bg-card">New</option>
@@ -429,12 +432,12 @@ export default function LeadsPage() {
             </div>
 
             {/* Source Filter */}
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <span>Source:</span>
               <select
                 value={sourceFilter}
                 onChange={(e) => setSourceFilter(e.target.value)}
-                className="h-8 px-2 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-none"
+                className="h-10 px-3 bg-muted/20 border border-border/80 text-xs font-medium text-foreground focus:outline-none focus:bg-background rounded-xl"
               >
                 <option value="all" className="bg-card">All Sources</option>
                 {SOURCES.map((s) => (
@@ -444,42 +447,61 @@ export default function LeadsPage() {
             </div>
           </div>
 
-          <div className="text-xs text-muted-foreground font-mono">
-            Showing <strong>{filteredLeads.length}</strong> of {leads.length} records
+          <div className="text-xs text-muted-foreground font-medium">
+            Showing <strong className="text-foreground">{filteredLeads.length}</strong> of {leads.length} records
           </div>
         </div>
 
         {/* Excel-like Relational Table View */}
-        <div className="bg-card border border-border rounded-none shadow-xs overflow-hidden">
+        <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className="w-full min-w-[1150px] text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-border bg-muted/40 font-semibold text-muted-foreground uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4 w-12 text-center">#</th>
-                  <th className="py-3 px-4 min-w-[200px]">Client / Lead</th>
-                  <th className="py-3 px-4 min-w-[130px]">Source</th>
-                  <th className="py-3 px-4 min-w-[120px]">Status</th>
-                  <th className="py-3 px-4 min-w-[120px] text-right">Deal Value</th>
-                  <th className="py-3 px-4 min-w-[130px] text-right font-bold text-emerald-600 dark:text-emerald-400">
+                <tr className="border-b border-border bg-muted/30 font-semibold text-muted-foreground text-xs">
+                  <th className="py-3.5 px-4 w-12 text-center">#</th>
+                  <th className="py-3.5 px-4 min-w-[200px]">Client / Lead</th>
+                  <th className="py-3.5 px-4 min-w-[130px]">Source</th>
+                  <th className="py-3.5 px-4 min-w-[120px]">Status</th>
+                  <th className="py-3.5 px-4 min-w-[120px] text-right">Deal Value</th>
+                  <th className="py-3.5 px-4 min-w-[130px] text-right font-bold text-emerald-600 dark:text-emerald-400">
                     Revenue Recv
                   </th>
-                  <th className="py-3 px-4 min-w-[220px]">Relations Hub</th>
-                  <th className="py-3 px-4 min-w-[160px]">Remarks</th>
-                  <th className="py-3 px-4 w-24 text-right">Actions</th>
+                  <th className="py-3.5 px-4 min-w-[220px]">Relations Hub</th>
+                  <th className="py-3.5 px-4 min-w-[160px]">Remarks</th>
+                  <th className="py-3.5 px-4 w-24 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <tbody className="divide-y divide-border/60">
                 {loading ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-muted-foreground">
-                      <div className="size-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                      Loading relational records...
+                    <td colSpan={9} className="py-16 text-center text-muted-foreground">
+                      <div className="size-7 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                      <p className="text-xs font-medium">Loading relational records...</p>
                     </td>
                   </tr>
                 ) : filteredLeads.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-muted-foreground">
-                      No leads found matching your search and filter criteria.
+                    <td colSpan={9} className="py-16 text-center text-muted-foreground">
+                      <div className="max-w-sm mx-auto flex flex-col items-center">
+                        <div className="size-12 rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground mb-3">
+                          <Users className="size-6" />
+                        </div>
+                        <h4 className="text-sm font-semibold text-foreground mb-1">No Leads Found</h4>
+                        <p className="text-xs text-muted-foreground mb-4">
+                          {searchTerm || statusFilter !== "all" || sourceFilter !== "all"
+                            ? "No records match your active search and filter criteria."
+                            : "Your leads pipeline is currently empty. Start by adding your first client lead."}
+                        </p>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() => setIsAddOpen(true)}
+                          className="rounded-xl gap-1.5 font-semibold"
+                        >
+                          <Plus className="size-3.5" />
+                          <span>Add New Lead</span>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -508,7 +530,7 @@ export default function LeadsPage() {
 
                         {/* Source */}
                         <td className="py-3.5 px-4">
-                          <Badge variant="outline" className="text-[11px] font-normal rounded-none">
+                          <Badge variant="outline" className="text-[11px] font-normal rounded-full">
                             {lead.source}
                           </Badge>
                         </td>
@@ -516,7 +538,7 @@ export default function LeadsPage() {
                         {/* Status */}
                         <td className="py-3.5 px-4">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 text-[11px] font-semibold border rounded-none ${statusCfg.color} ${statusCfg.bg}`}
+                            className={`inline-flex items-center px-2.5 py-0.5 text-[11px] font-semibold border rounded-full ${statusCfg.color} ${statusCfg.bg}`}
                           >
                             {lead.status}
                           </span>
@@ -537,7 +559,7 @@ export default function LeadsPage() {
                           <div className="flex items-center gap-1.5 flex-wrap">
                             <span
                               title="Connected Documents in Drive"
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-none"
+                              className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-full"
                             >
                               <FolderTree className="size-3 text-primary" />
                               <span>{lead.documentsCount ?? 0} docs</span>
@@ -545,7 +567,7 @@ export default function LeadsPage() {
 
                             <span
                               title="Active Deliverables"
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-none"
+                              className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-full"
                             >
                               <PackageCheck className="size-3 text-emerald-500" />
                               <span>{lead.deliverablesCount ?? 0} deliv</span>
@@ -553,7 +575,7 @@ export default function LeadsPage() {
 
                             <span
                               title="Linked Projects"
-                              className="inline-flex items-center gap-1 px-2 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-none"
+                              className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-full"
                             >
                               <Kanban className="size-3 text-purple-500" />
                               <span>{lead.projectsCount ?? 0} proj</span>
@@ -575,7 +597,7 @@ export default function LeadsPage() {
                               size="icon"
                               onClick={() => handleOpenDetails(lead)}
                               title="Open Relational Drawer"
-                              className="size-7 text-muted-foreground hover:text-foreground rounded-none"
+                              className="size-7 text-muted-foreground hover:text-foreground rounded-lg"
                             >
                               <Eye className="size-3.5" />
                             </Button>
@@ -585,7 +607,7 @@ export default function LeadsPage() {
                               size="icon"
                               onClick={() => handleDeleteLead(lead.id)}
                               title="Delete Lead"
-                              className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-none"
+                              className="size-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                             >
                               <Trash2 className="size-3.5" />
                             </Button>
@@ -603,7 +625,7 @@ export default function LeadsPage() {
 
       {/* Add Lead Dialog Modal */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card rounded-none border border-border p-6">
+        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card rounded-2xl border border-border/80 shadow-2xl p-6">
           <DialogHeader>
             <DialogTitle className="text-base font-bold flex items-center gap-2">
               <Plus className="size-4 text-primary" />
@@ -622,7 +644,7 @@ export default function LeadsPage() {
                   placeholder="e.g. Vikram Singhania"
                   value={newLead.name}
                   onChange={(e) => setNewLead({ ...newLead, name: e.target.value })}
-                  className="h-9 text-xs rounded-none"
+                  className="h-9 text-xs rounded-lg"
                 />
               </div>
 
@@ -634,7 +656,7 @@ export default function LeadsPage() {
                   placeholder="e.g. Singhania Tech Ltd"
                   value={newLead.company}
                   onChange={(e) => setNewLead({ ...newLead, company: e.target.value })}
-                  className="h-9 text-xs rounded-none"
+                  className="h-9 text-xs rounded-lg"
                 />
               </div>
             </div>
@@ -650,7 +672,7 @@ export default function LeadsPage() {
                   placeholder="vikram@singhaniatech.com"
                   value={newLead.email}
                   onChange={(e) => setNewLead({ ...newLead, email: e.target.value })}
-                  className="h-9 text-xs rounded-none"
+                  className="h-9 text-xs rounded-lg"
                 />
               </div>
 
@@ -662,7 +684,7 @@ export default function LeadsPage() {
                   placeholder="+91 98200 55443"
                   value={newLead.phone}
                   onChange={(e) => setNewLead({ ...newLead, phone: e.target.value })}
-                  className="h-9 text-xs rounded-none"
+                  className="h-9 text-xs rounded-lg"
                 />
               </div>
             </div>
@@ -675,7 +697,7 @@ export default function LeadsPage() {
                 <select
                   value={newLead.source}
                   onChange={(e) => setNewLead({ ...newLead, source: e.target.value as any })}
-                  className="w-full h-9 px-2 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-none"
+                  className="w-full h-9 px-2.5 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-lg"
                 >
                   {SOURCES.map((s) => (
                     <option key={s} value={s} className="bg-card">{s}</option>
@@ -690,7 +712,7 @@ export default function LeadsPage() {
                 <select
                   value={newLead.status}
                   onChange={(e) => setNewLead({ ...newLead, status: e.target.value as any })}
-                  className="w-full h-9 px-2 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-none"
+                  className="w-full h-9 px-2.5 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-lg"
                 >
                   <option value="New" className="bg-card">New</option>
                   <option value="Contacted" className="bg-card">Contacted</option>
@@ -711,7 +733,7 @@ export default function LeadsPage() {
                   min="0"
                   value={newLead.dealValue}
                   onChange={(e) => setNewLead({ ...newLead, dealValue: parseFloat(e.target.value) || 0 })}
-                  className="h-9 text-xs font-mono rounded-none"
+                  className="h-9 text-xs font-mono rounded-lg"
                 />
               </div>
             </div>
@@ -725,18 +747,18 @@ export default function LeadsPage() {
                 placeholder="Key requirements, milestones agreed, meeting summary..."
                 value={newLead.remarks}
                 onChange={(e) => setNewLead({ ...newLead, remarks: e.target.value })}
-                className="text-xs rounded-none"
+                className="text-xs rounded-lg"
               />
             </div>
 
             {/* Welcome Email Option */}
-            <div className="p-3 border border-border bg-muted/20 flex items-start gap-2.5">
+            <div className="p-3.5 border border-border/80 bg-muted/20 rounded-xl flex items-start gap-2.5">
               <input
                 type="checkbox"
                 id="sendWelcomeEmail"
                 checked={newLead.sendWelcomeEmail}
                 onChange={(e) => setNewLead({ ...newLead, sendWelcomeEmail: e.target.checked })}
-                className="mt-0.5 size-4 accent-primary rounded-none cursor-pointer"
+                className="mt-0.5 size-4 accent-primary rounded cursor-pointer"
               />
               <label htmlFor="sendWelcomeEmail" className="text-xs cursor-pointer select-none">
                 <span className="font-semibold text-foreground block">
@@ -749,10 +771,10 @@ export default function LeadsPage() {
             </div>
 
             <DialogFooter className="mt-4">
-              <Button type="button" variant="outline" size="sm" onClick={() => setIsAddOpen(false)} className="rounded-none">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsAddOpen(false)} className="rounded-lg">
                 Cancel
               </Button>
-              <Button type="submit" size="sm" disabled={submitting} className="font-semibold rounded-none">
+              <Button type="submit" size="sm" disabled={submitting} className="font-semibold rounded-lg">
                 {submitting ? "Saving..." : "Create Client & Hub"}
               </Button>
             </DialogFooter>
@@ -760,15 +782,15 @@ export default function LeadsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Redesigned Sharp-Cornered Slide-Over Drawer for Selected Lead */}
+      {/* Slide-Over Drawer for Selected Lead */}
       <Sheet open={Boolean(selectedLead)} onOpenChange={(open) => !open && setSelectedLead(null)}>
-        <SheetContent className="overflow-y-auto bg-card border-l border-border p-0 rounded-none w-full max-w-2xl">
+        <SheetContent className="overflow-y-auto bg-card border-l border-border/80 p-0 rounded-l-2xl w-full max-w-2xl">
           {selectedLead && (
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
-              <div className="p-6 border-b border-border bg-muted/20">
+              <div className="p-6 border-b border-border/80 bg-muted/20">
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className="text-primary border-primary/20 text-[10px] rounded-none font-semibold">
+                  <Badge variant="outline" className="text-primary border-primary/20 text-[10px] rounded-full font-semibold">
                     Client Hub
                   </Badge>
                   <span className="text-[11px] font-mono text-muted-foreground">ID: {selectedLead.id}</span>
@@ -798,13 +820,13 @@ export default function LeadsPage() {
               {/* Drawer Body */}
               <div className="p-6 space-y-6 flex-1 overflow-y-auto">
                 {/* 1. Client Portal Access Credentials Card */}
-                <div className="border border-border bg-card p-4 space-y-3">
+                <div className="border border-border/80 bg-card p-4 rounded-xl space-y-3 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 font-bold text-xs text-foreground uppercase tracking-wider">
                       <KeyRound className="size-3.5 text-primary" />
                       <span>Dedicated Client Portal</span>
                     </div>
-                    <Badge variant="outline" className="text-emerald-600 border-emerald-500/20 text-[10px] rounded-none">
+                    <Badge variant="outline" className="text-emerald-600 border-emerald-500/20 text-[10px] rounded-full">
                       Password Protected
                     </Badge>
                   </div>
@@ -814,7 +836,7 @@ export default function LeadsPage() {
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div className="border border-border p-3 bg-muted/20">
+                    <div className="border border-border/80 p-3 bg-muted/20 rounded-lg">
                       <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">
                         Portal Link
                       </div>
@@ -836,14 +858,14 @@ export default function LeadsPage() {
                               `${getDeployedAppUrl()}/portal/${leadRelations?.portal?.slug || selectedLead.id}`
                             )
                           }
-                          className="size-6 text-muted-foreground hover:text-foreground rounded-none"
+                          className="size-6 text-muted-foreground hover:text-foreground rounded-lg"
                         >
                           {copiedPortalUrl ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
                         </Button>
                       </div>
                     </div>
 
-                    <div className="border border-border p-3 bg-muted/20">
+                    <div className="border border-border/80 p-3 bg-muted/20 rounded-lg">
                       <div className="text-[10px] uppercase font-bold text-muted-foreground mb-1">
                         Client Password
                       </div>
@@ -856,7 +878,7 @@ export default function LeadsPage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleCopyCode(selectedLead.portalAccessCode || "")}
-                          className="size-6 text-muted-foreground hover:text-foreground rounded-none"
+                          className="size-6 text-muted-foreground hover:text-foreground rounded-lg"
                         >
                           {copiedKey ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
                         </Button>
@@ -876,7 +898,7 @@ export default function LeadsPage() {
                       size="sm"
                       disabled={sendingPortalEmail}
                       onClick={() => handleSendPortalCredentialsEmail(selectedLead)}
-                      className="h-7 text-xs font-semibold rounded-none gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+                      className="h-7 text-xs font-semibold rounded-lg gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
                     >
                       <Mail className="size-3" />
                       <span>{sendingPortalEmail ? "Sending Email..." : "Send Credentials via Email"}</span>
@@ -884,14 +906,14 @@ export default function LeadsPage() {
                   </div>
 
                   {portalEmailToast && (
-                    <div className="text-xs font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 p-2 text-center rounded-none">
+                    <div className="text-xs font-semibold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 p-2 text-center rounded-lg">
                       {portalEmailToast}
                     </div>
                   )}
                 </div>
 
                 {/* 2. Quick Edit Status & Revenue */}
-                <div className="border border-border bg-card p-4 space-y-3">
+                <div className="border border-border/80 bg-card p-4 rounded-xl space-y-3 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                       Status & Revenue Adjustment
@@ -901,7 +923,7 @@ export default function LeadsPage() {
                       size="sm"
                       onClick={handleSaveDrawerDetails}
                       disabled={savingDrawer}
-                      className="h-7 text-xs gap-1 font-semibold rounded-none"
+                      className="h-7 text-xs gap-1 font-semibold rounded-lg"
                     >
                       <Save className="size-3" />
                       <span>{savingDrawer ? "Saving..." : "Save"}</span>
@@ -916,7 +938,7 @@ export default function LeadsPage() {
                       <select
                         value={editStatus}
                         onChange={(e) => setEditStatus(e.target.value as any)}
-                        className="w-full h-8 px-2 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-none"
+                        className="w-full h-8 px-2.5 bg-transparent border border-input text-xs text-foreground focus:outline-none rounded-lg"
                       >
                         <option value="New" className="bg-card">New</option>
                         <option value="Contacted" className="bg-card">Contacted</option>
@@ -937,7 +959,7 @@ export default function LeadsPage() {
                         min="0"
                         value={editRevenue}
                         onChange={(e) => setEditRevenue(parseFloat(e.target.value) || 0)}
-                        className="h-8 text-xs font-mono rounded-none"
+                        className="h-8 text-xs font-mono rounded-lg"
                       />
                     </div>
                   </div>
@@ -951,7 +973,7 @@ export default function LeadsPage() {
                       value={editRemarks}
                       onChange={(e) => setEditRemarks(e.target.value)}
                       placeholder="Add remarks or next follow-up details..."
-                      className="text-xs rounded-none"
+                      className="text-xs rounded-lg"
                     />
                   </div>
                 </div>
@@ -968,7 +990,7 @@ export default function LeadsPage() {
                     </a>
                   </div>
 
-                  <div className="border border-border divide-y divide-border">
+                  <div className="border border-border/80 rounded-xl overflow-hidden divide-y divide-border">
                     {!leadRelations?.files || leadRelations.files.length === 0 ? (
                       <div className="p-4 text-center text-xs text-muted-foreground bg-muted/10">
                         No documents stored in this client&apos;s folder.
@@ -1000,7 +1022,7 @@ export default function LeadsPage() {
                     </a>
                   </div>
 
-                  <div className="border border-border divide-y divide-border">
+                  <div className="border border-border/80 rounded-xl overflow-hidden divide-y divide-border">
                     {!leadRelations?.deliverables || leadRelations.deliverables.length === 0 ? (
                       <div className="p-4 text-center text-xs text-muted-foreground bg-muted/10">
                         No deliverables uploaded yet.
@@ -1015,9 +1037,9 @@ export default function LeadsPage() {
                             </div>
                           </div>
                           {item.isSoftDeleted ? (
-                            <Badge variant="destructive" className="text-[10px] rounded-none">Expired</Badge>
+                            <Badge variant="destructive" className="text-[10px] rounded-full">Expired</Badge>
                           ) : (
-                            <Badge variant="outline" className="text-[10px] text-emerald-600 rounded-none">Active</Badge>
+                            <Badge variant="outline" className="text-[10px] text-emerald-600 rounded-full">Active</Badge>
                           )}
                         </div>
                       ))
@@ -1037,7 +1059,7 @@ export default function LeadsPage() {
                     </a>
                   </div>
 
-                  <div className="border border-border divide-y divide-border">
+                  <div className="border border-border/80 rounded-xl overflow-hidden divide-y divide-border">
                     {!leadRelations?.projects || leadRelations.projects.length === 0 ? (
                       <div className="p-4 text-center text-xs text-muted-foreground bg-muted/10">
                         No active project sprint boards attached.
@@ -1069,13 +1091,13 @@ export default function LeadsPage() {
               </div>
 
               {/* Drawer Sticky Footer with Delete Action and Close */}
-              <div className="p-4 border-t border-border bg-card flex items-center justify-between shrink-0">
+              <div className="p-4 border-t border-border/80 bg-card flex items-center justify-between shrink-0">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => handleDeleteLead(selectedLead.id)}
-                  className="text-xs text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground h-8 px-3 rounded-none flex items-center gap-1.5 font-medium"
+                  className="text-xs text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground h-8 px-3 rounded-lg flex items-center gap-1.5 font-medium"
                 >
                   <Trash2 className="size-3.5" />
                   <span>Delete Client Lead</span>
@@ -1086,7 +1108,7 @@ export default function LeadsPage() {
                   variant="secondary"
                   size="sm"
                   onClick={() => setSelectedLead(null)}
-                  className="h-8 px-4 text-xs font-semibold rounded-none"
+                  className="h-8 px-4 text-xs font-semibold rounded-lg"
                 >
                   Close
                 </Button>

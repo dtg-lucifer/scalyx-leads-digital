@@ -68,13 +68,13 @@ export default function FontChooserDialog({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl md:max-w-2xl bg-card border border-border rounded-none shadow-2xl overflow-hidden"
+        className="w-full max-w-xl md:max-w-2xl bg-card border border-border/80 rounded-2xl shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-none bg-primary/10 text-primary border border-primary/20">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
               <Type className="size-5" />
             </div>
             <div>
@@ -86,7 +86,7 @@ export default function FontChooserDialog({
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-muted-foreground hover:text-foreground rounded-none hover:bg-muted transition-colors"
+            className="p-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
             aria-label="Close dialog"
           >
             <X className="size-5" />
@@ -104,7 +104,7 @@ export default function FontChooserDialog({
                 onClick={() => {
                   onSelectFont(option.id);
                 }}
-                className={`w-full text-left p-4 rounded-none border transition-all relative flex flex-col gap-2 ${
+                className={`w-full text-left p-4 rounded-xl border transition-all relative flex flex-col gap-2 ${
                   isSelected
                     ? "bg-accent/40 border-primary shadow-sm"
                     : "bg-card border-border hover:border-primary/50 hover:bg-accent/20"
@@ -116,13 +116,13 @@ export default function FontChooserDialog({
                       {option.name}
                     </span>
                     {option.id === "poppins" && (
-                      <span className="px-2 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 rounded-none">
+                      <span className="px-2.5 py-0.5 text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 rounded-full">
                         Scalyx Default
                       </span>
                     )}
                   </div>
                   <div
-                    className={`size-5 rounded-none flex items-center justify-center transition-colors ${
+                    className={`size-5 rounded-md flex items-center justify-center transition-colors ${
                       isSelected
                         ? "bg-primary text-primary-foreground"
                         : "border border-border text-transparent"
@@ -135,7 +135,7 @@ export default function FontChooserDialog({
                 <p className="text-xs text-muted-foreground">{option.description}</p>
 
                 <div
-                  className={`mt-1 p-2.5 rounded-none bg-muted/40 border border-border text-xs text-foreground tracking-wide ${option.className}`}
+                  className={`mt-1 p-2.5 rounded-lg bg-muted/40 border border-border text-xs text-foreground tracking-wide ${option.className}`}
                 >
                   <p className="font-semibold text-xs">
                     INVOICE #INV-2026-001 • Total: ₹85,000.00
