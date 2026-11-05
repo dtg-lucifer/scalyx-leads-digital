@@ -231,3 +231,65 @@ export function createDefaultContractBlocks(
   ];
 }
 
+export function createBlankContractBlocks(): ContractBlock[] {
+  const today = new Date().toISOString().split("T")[0];
+  const refNo = `SCX-CTR-${Date.now().toString(36).toUpperCase()}`;
+
+  return [
+    {
+      id: generateContractBlockId("header"),
+      type: "contract_header",
+      brandName: "SCALYX",
+      brandSubtitle: "",
+      referenceNo: refNo,
+      agreementDate: today,
+      website: "scalyx.in",
+      email: "contact@scalyx.in",
+      phone: "+91 8927124748",
+      address: "Kolkata, West Bengal, India",
+    },
+    {
+      id: generateContractBlockId("parties"),
+      type: "contract_parties",
+      providerName: "Scalyx",
+      providerEntity: "Scalyx",
+      providerAddress: "Salt Lake Sector V, Kolkata, WB 700091",
+      providerSignatory: "Mainak Panda",
+      providerSignatoryTitle: "Managing Principal & Lead Architect",
+      providerEmail: "contact@scalyx.in",
+      clientName: "Valued Client",
+      clientCompany: "Client Enterprise",
+      clientAddress: "Corporate Office Address",
+      clientSignatoryTitle: "Authorized Representative",
+      clientEmail: "client@example.com",
+      clientPhone: "+91 98765 43210",
+    },
+    {
+      id: generateContractBlockId("preamble"),
+      type: "contract_preamble",
+      title: "SERVICE CONTRACT & ENGAGEMENT AGREEMENT",
+      effectiveDate: today,
+      body: `This Professional Services Agreement (the "Agreement") is entered into and made effective as of ${today}, by and between Scalyx ("Service Provider"), and Client Enterprise ("Client").`,
+    },
+    {
+      id: generateContractBlockId("clause"),
+      type: "contract_clause",
+      clauseNumber: "1.0",
+      title: "Scope of Services & Deliverables",
+      body: "Service Provider shall execute and deliver the engineering modules, technical architecture, and software systems as mutually agreed upon in writing.",
+    },
+    {
+      id: generateContractBlockId("signature"),
+      type: "contract_signature",
+      clientTitle: "CLIENT ENTERPRISE",
+      clientSignatory: "Valued Client",
+      clientDesignation: "Authorized Representative",
+      clientDate: today,
+      agreementDisclaimer:
+        "By signing this I, Valued Client am in full agreement about all of the clauses mentioned above",
+      countersignNote:
+        "Please sign in the designated space above or reply to the email stating that you agree to all terms.",
+    },
+  ];
+}
+

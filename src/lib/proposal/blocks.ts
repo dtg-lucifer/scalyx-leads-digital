@@ -133,7 +133,7 @@ export function parseFlowToSteps(flowStr: string): ArchitectureStep[] {
   if (!flowStr || !flowStr.trim()) return [];
   const parts = flowStr.split(/\s*(?:➔|->|→|=>)\s*/).filter(Boolean);
   return parts.map((part) => {
-    const trimmed = part.trim().replace(/^[-*•●\s]+/, "");
+    const trimmed = part.trim().replace(/^(?:[-+•●]|\*(?!\*))\s*/, "");
     const match = trimmed.match(/^(.*?)\s*\(([^()]+)\)$/);
     if (match) {
       return {
@@ -791,7 +791,7 @@ export function markdownToBlocks(rawMd: string): ProposalBlock[] {
             else if (tl.startsWith("## ")) subtitle = tl.replace(/^##\s+/, "").trim();
             else if (tl.startsWith("### ")) eyebrow = tl.replace(/^###\s+/, "").trim();
             else {
-              const kvMatch = tl.replace(/^[-*•●\s]+/, "").match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
+              const kvMatch = tl.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "").match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
               if (kvMatch) {
                 const k = kvMatch[1].replace(/\*\*/g, "").trim().toLowerCase();
                 const v = kvMatch[2].replace(/\*\*/g, "").trim();
@@ -827,7 +827,7 @@ export function markdownToBlocks(rawMd: string): ProposalBlock[] {
           for (const bl of bodyLines) {
             const tl = bl.trim();
             if (!tl) continue;
-            const parts = tl.replace(/^[-*•●\s]+/, "").split("|").map((p) => p.trim());
+            const parts = tl.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "").split("|").map((p) => p.trim());
             if (parts.length >= 2) {
               const label = parts[0].replace(/\*\*/g, "").trim();
               const value = parts[1].replace(/[`*]/g, "").trim();
@@ -991,7 +991,7 @@ export function markdownToBlocks(rawMd: string): ProposalBlock[] {
 
           for (const bl of bodyLines) {
             const tl = bl.trim();
-            const kv = tl.replace(/^[-*•●\s]+/, "").match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
+            const kv = tl.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "").match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
             if (kv) {
               const k = kv[1].replace(/\*\*/g, "").trim().toLowerCase();
               const v = kv[2].replace(/\*\*/g, "").trim();
@@ -1064,7 +1064,7 @@ export function markdownToBlocks(rawMd: string): ProposalBlock[] {
           let helpline = "+91 8927124748 (Call & WhatsApp)";
 
           for (const bl of bodyLines) {
-            const kv = bl.replace(/^[-*•●\s]+/, "").match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
+            const kv = bl.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "").match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
             if (kv) {
               const k = kv[1].replace(/\*\*/g, "").trim().toLowerCase();
               const v = kv[2].replace(/\*\*/g, "").trim();
@@ -1255,4 +1255,30 @@ export function markdownToBlocks(rawMd: string): ProposalBlock[] {
   }
 
   return blocks;
+}
+
+export function createBlankProposalBlocks(): ProposalBlock[] {
+  return [
+    createDefaultBlock("header"),
+    {
+      ...createDefaultBlock("title_meta"),
+      title: "Untitled Technical Proposal",
+      subtitle: "CUSTOM ARCHITECTURE & SOFTWARE SYSTEMS",
+      eyebrow: "SCALYX ENGINEERING",
+      preparedFor: "Valued Client",
+      preparedBy: "Scalyx Solutions Team",
+      version: "v1.0.0",
+      status: "Draft",
+    } as any,
+    {
+      ...createDefaultBlock("section_header"),
+      number: "01",
+      title: "Executive Summary & Objectives",
+    } as any,
+    {
+      ...createDefaultBlock("text"),
+      content:
+        "This engineering proposal outlines the turnkey architecture, milestones, deliverables, and service scope purpose-engineered for client specifications.",
+    } as any,
+  ];
 }

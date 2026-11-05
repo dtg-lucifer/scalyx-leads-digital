@@ -4,14 +4,17 @@ import {
   AlertCircle,
   Check,
   CheckCircle2,
+  Clock,
   Code2,
   Columns2,
   Copy,
   Download,
   Eye,
   FileCode,
+  FolderClock,
   Layers,
   LayoutTemplate,
+  Loader2,
   Monitor,
   PanelLeft,
   PanelLeftClose,
@@ -19,6 +22,7 @@ import {
   Plus,
   Printer,
   RefreshCw,
+  Save,
   Search,
   Sparkles,
   Users,
@@ -49,11 +53,17 @@ import {
 import {
   ProposalBlock,
   blocksToMarkdown,
+  createBlankProposalBlocks,
   createBlockFromSnippet,
   generateBlockId,
   markdownToBlocks,
 } from "@/lib/proposal/blocks";
 import { VisualBlockEditor } from "@/components/proposal/VisualBlockEditor";
+import {
+  SavedDocumentsModal,
+  type SavedDocSummary,
+} from "@/components/common/SavedDocumentsModal";
+import type { SavedProposalDoc } from "@/types/savedDocument";
 import type { Lead } from "@/types/lead";
 
 export default function ProposalsPage() {
@@ -93,12 +103,162 @@ export default function ProposalsPage() {
     message: string;
   } | null>(null);
 
+  // Persistence & Draft Management State
+  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
+  const [docName, setDocName] = useState<string>(
+    "LexConnect Architecture Proposal",
+  );
+  const [savedProposals, setSavedProposals] = useState<SavedProposalDoc[]>([]);
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
+  const [hasUserEdited, setHasUserEdited] = useState(false);
+  const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Storage Keys
+  const PROPOSALS_STORAGE_KEY = "scalyx_saved_proposals";
+  const CURRENT_PROPOSAL_ID_KEY = "scalyx_current_proposal_id";
+
+  // Derive proposal metadata (title, client, deal value)
+  const proposalMetadata = useMemo(() => {
+    let title = "Technical Architecture Proposal";
+    let clientName = "";
+    let dealValue = "";
+
+    for (const b of blocks) {
+      if (b.type === "title_meta") {
+        if (b.title) title = b.title;
+        if (b.preparedFor) clientName = b.preparedFor;
+      } else if (b.type === "commercial_quotation") {
+        if (b.totalInvestment) dealValue = b.totalInvestment;
+      } else if (b.type === "signoff") {
+        if (!clientName && b.clientName) clientName = b.clientName;
+        if (!dealValue && b.investment) dealValue = b.investment;
+      }
+    }
+
+    return { title, clientName, dealValue };
+  }, [blocks]);
 
   // Derive compiled markdown from visual blocks
   const markdown = useMemo(() => {
     return blocksToMarkdown(blocks);
   }, [blocks]);
+
+  // Load saved drafts from localStorage and API on mount
+  useEffect(() => {
+    try {
+      const local = localStorage.getItem(PROPOSALS_STORAGE_KEY);
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSavedProposals(parsed);
+        }
+      }
+      const storedId = localStorage.getItem(CURRENT_PROPOSAL_ID_KEY);
+      if (storedId) {
+        setCurrentDocId(storedId);
+      }
+    } catch (e) {
+      console.error("Local storage read error:", e);
+    }
+
+    async function loadSavedFromApi() {
+      try {
+        setIsLoadingSaved(true);
+        const res = await fetch("/api/proposals");
+        const data = await res.json();
+        if (data.proposals && Array.isArray(data.proposals)) {
+          setSavedProposals(data.proposals);
+          localStorage.setItem(
+            PROPOSALS_STORAGE_KEY,
+            JSON.stringify(data.proposals),
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load saved proposals from API:", err);
+      } finally {
+        setIsLoadingSaved(false);
+      }
+    }
+    loadSavedFromApi();
+  }, []);
+
+  // Persist helper
+  const persistProposal = async (
+    targetId: string,
+    targetBlocks: ProposalBlock[],
+  ) => {
+    try {
+      setSaveStatus("saving");
+      const now = new Date().toISOString();
+      const docToSave: SavedProposalDoc = {
+        id: targetId,
+        name:
+          docName.trim() ||
+          proposalMetadata.title ||
+          "Scalyx Technical Proposal",
+        title: proposalMetadata.title || "Scalyx Technical Proposal",
+        clientName: proposalMetadata.clientName,
+        dealValue: proposalMetadata.dealValue,
+        blocks: targetBlocks,
+        updatedAt: now,
+        createdAt: now,
+        isDraft: true,
+      };
+
+      // 1. Instant local update
+      setSavedProposals((prev) => {
+        const withoutCurrent = prev.filter((p) => p.id !== targetId);
+        const updated = [docToSave, ...withoutCurrent];
+        try {
+          localStorage.setItem(PROPOSALS_STORAGE_KEY, JSON.stringify(updated));
+          localStorage.setItem(CURRENT_PROPOSAL_ID_KEY, targetId);
+        } catch (e) {
+          console.error("Local storage write error:", e);
+        }
+        return updated;
+      });
+
+      // 2. Background sync to backend API
+      await fetch("/api/proposals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proposal: docToSave }),
+      });
+
+      setSaveStatus("saved");
+      setLastSavedTime(new Date());
+    } catch (err) {
+      console.error("Failed to save proposal:", err);
+      setSaveStatus("error");
+    }
+  };
+
+  // 1-second debounced auto-save
+  useEffect(() => {
+    if (!hasUserEdited && !currentDocId) {
+      return;
+    }
+
+    setSaveStatus("saving");
+    const docId =
+      currentDocId ||
+      `prop_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    if (!currentDocId) {
+      setCurrentDocId(docId);
+    }
+
+    const timer = setTimeout(() => {
+      persistProposal(docId, blocks);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [blocks, docName, hasUserEdited]);
 
   // Fetch leads for autofill
   useEffect(() => {
@@ -159,17 +319,98 @@ export default function ProposalsPage() {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
+  const handleBlocksChange = (newBlocks: ProposalBlock[]) => {
+    setBlocks(newBlocks);
+    setHasUserEdited(true);
+  };
+
   const handleSelectPreset = (presetId: string) => {
     setSelectedPresetId(presetId);
     const preset = PROPOSAL_PRESETS.find((p) => p.id === presetId);
     if (preset) {
       const parsedBlocks = markdownToBlocks(preset.markdown);
       setBlocks(parsedBlocks);
+      setDocName(`${preset.name.split("(")[0].trim()} Proposal`);
+      setCurrentDocId(null);
+      setHasUserEdited(false);
+      setSaveStatus("idle");
       setNotification({
         type: "success",
         message: `Loaded "${preset.name}" visual proposal template!`,
       });
       setTimeout(() => setNotification(null), 3000);
+    }
+  };
+
+  const handleCreateBlank = () => {
+    const blankBlocks = createBlankProposalBlocks();
+    const docId = `prop_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    setBlocks(blankBlocks);
+    setDocName("New Blank Proposal");
+    setSelectedPresetId("blank");
+    setCurrentDocId(docId);
+    setHasUserEdited(true);
+    persistProposal(docId, blankBlocks);
+    setNotification({
+      type: "success",
+      message: "Created new blank proposal canvas!",
+    });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleExplicitSave = () => {
+    const docId =
+      currentDocId ||
+      `prop_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    setCurrentDocId(docId);
+    setHasUserEdited(true);
+    persistProposal(docId, blocks);
+    setNotification({
+      type: "success",
+      message: `Draft "${docName || "Proposal"}" saved to storage!`,
+    });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const handleLoadSavedProposal = (id: string) => {
+    const found = savedProposals.find((p) => p.id === id);
+    if (found) {
+      setBlocks(found.blocks);
+      setCurrentDocId(found.id);
+      setDocName(found.name || found.title || "Custom Proposal Draft");
+      setSelectedPresetId("custom");
+      setHasUserEdited(true);
+      setSaveStatus("saved");
+      setNotification({
+        type: "success",
+        message: `Loaded draft "${found.name || found.title}"!`,
+      });
+      setTimeout(() => setNotification(null), 3000);
+    }
+  };
+
+  const handleDeleteSavedProposal = async (id: string) => {
+    try {
+      const updated = savedProposals.filter((p) => p.id !== id);
+      setSavedProposals(updated);
+      try {
+        localStorage.setItem(PROPOSALS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error("Local storage delete error:", e);
+      }
+      if (currentDocId === id) {
+        setCurrentDocId(null);
+      }
+      await fetch(`/api/proposals?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      setNotification({
+        type: "success",
+        message: "Deleted saved proposal draft.",
+      });
+      setTimeout(() => setNotification(null), 2500);
+    } catch (err) {
+      console.error("Failed to delete proposal:", err);
     }
   };
 
@@ -398,44 +639,57 @@ export default function ProposalsPage() {
       <div className="hidden lg:flex flex-col flex-1 min-h-0 h-full overflow-hidden">
         <div className="shrink-0">
           <AppNavbar
-            title="Visual Proposal Studio & Architecture Blueprint Builder"
+            title="Proposal Studio"
             description="Drag-and-drop visual component blocks with intuitive fields. No Markdown syntax required."
             actions={
               <div className="flex items-center gap-2">
+                {/* Create Blank Proposal Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCreateBlank}
+                  className="gap-1.5 text-xs font-medium rounded-lg border-border"
+                  title="Create a new blank proposal from scratch"
+                >
+                  <Plus className="size-3.5" />
+                  <span>New Blank</span>
+                </Button>
+
+                {/* Saved Proposals Popup List Button */}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsSavedModalOpen(true)}
+                  className="gap-1.5 text-xs font-medium rounded-lg border-border"
+                  title="View and load saved proposals & drafts"
+                >
+                  <FolderClock className="size-3.5 text-primary" />
+                  <span>Saved Drafts ({savedProposals.length})</span>
+                </Button>
+
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setIsRawMarkdownModalOpen(true)}
-                  className="gap-1.5 text-xs font-semibold rounded-lg border-border"
+                  className="gap-1.5 text-xs font-medium rounded-lg border-border"
                   title="View / Copy compiled Markdown output"
                 >
                   <FileCode className="size-3.5 text-primary" />
-                  <span>View Markdown</span>
+                  <span className="hidden sm:inline">Markdown</span>
                 </Button>
+
                 <Button
                   type="button"
-                  variant="outline"
                   size="sm"
                   onClick={handlePrint}
-                  className="gap-1.5 text-xs font-semibold rounded-lg border-border"
+                  className="gap-1.5 text-xs font-semibold rounded-lg shadow-xs bg-primary text-primary-foreground hover:bg-primary/90"
                   title="Print to PDF (A4 Page Fit)"
                 >
                   <Printer className="size-3.5" />
-                  <span>Print / Save PDF</span>
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => handleCopy("md")}
-                  className="gap-1.5 text-xs font-semibold rounded-lg shadow-xs"
-                >
-                  {copiedType === "md" ? (
-                    <Check className="size-3.5 text-emerald-400" />
-                  ) : (
-                    <Copy className="size-3.5" />
-                  )}
-                  <span>Copy Markdown</span>
+                  <span>Print / PDF</span>
                 </Button>
               </div>
             }
@@ -443,68 +697,104 @@ export default function ProposalsPage() {
         </div>
 
         <div className="p-3 xl:p-4 space-y-2.5 flex-1 flex flex-col min-h-0 h-full overflow-hidden">
-          {/* Preset Selector & Autofill Row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-card border border-border/80 rounded-xl shadow-xs shrink-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <LayoutTemplate className="size-3.5 text-primary" />
-                Templates:
-              </span>
-              {PROPOSAL_PRESETS.map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => handleSelectPreset(p.id)}
-                  className={`px-3 py-1.5 text-xs font-semibold border rounded-lg transition-all flex items-center gap-1.5 ${
-                    selectedPresetId === p.id
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                  }`}
-                >
-                  <span>{p.name.split("(")[0].trim()}</span>
-                  {p.id === "lexconnect" && (
-                    <span className="text-[10px] bg-primary-foreground/20 text-primary-foreground px-1.5 py-0.5 rounded-full font-bold">
-                      Official Blueprint
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+          {/* Elegant Workspace Toolbar */}
+          <div className="bg-card border border-border/70 rounded-xl px-3 py-2 shadow-xs shrink-0 flex flex-wrap items-center justify-between gap-2.5">
+            {/* Left: Draft Name & Status */}
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-2 bg-muted/40 hover:bg-muted/60 focus-within:bg-background focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 border border-border/80 px-2.5 py-1 rounded-lg transition-all shadow-2xs">
+                <PenLine className="size-3.5 text-primary shrink-0" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0">
+                  Draft:
+                </span>
+                <input
+                  type="text"
+                  value={docName}
+                  onChange={(e) => {
+                    setDocName(e.target.value);
+                    setHasUserEdited(true);
+                  }}
+                  placeholder="Proposal Name..."
+                  className="h-5 w-44 sm:w-56 md:w-64 text-xs font-semibold bg-transparent border-0 focus:outline-none focus:ring-0 text-foreground placeholder:text-muted-foreground/60 truncate"
+                  title="Name this proposal draft to easily identify it later in your saved drafts"
+                />
+              </div>
 
-            <div className="flex items-center gap-2.5">
+              {/* Autosave Status Pill */}
+              <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium text-muted-foreground bg-muted/30 border border-border/50 shrink-0">
+                {saveStatus === "saving" ? (
+                  <>
+                    <Loader2 className="size-3 animate-spin text-amber-500" />
+                    <span className="text-amber-600 dark:text-amber-400">Saving...</span>
+                  </>
+                ) : saveStatus === "saved" ? (
+                  <>
+                    <Check className="size-3 text-emerald-500" />
+                    <span className="text-emerald-600 dark:text-emerald-400">Saved</span>
+                  </>
+                ) : (
+                  <>
+                    <Clock className="size-3 text-muted-foreground" />
+                    <span>Unsaved</span>
+                  </>
+                )}
+              </div>
+
+              <div className="h-4 w-px bg-border/70 hidden md:block" />
+
+              {/* Template Selector as sleek inline select */}
+              <div className="hidden md:flex items-center gap-1.5 text-xs">
+                <LayoutTemplate className="size-3.5 text-muted-foreground shrink-0" />
+                <select
+                  value={selectedPresetId}
+                  onChange={(e) => handleSelectPreset(e.target.value)}
+                  className="h-7 px-2 pr-6 rounded-lg bg-background hover:bg-muted/40 border border-border/80 text-xs font-medium text-foreground focus:outline-none transition-colors cursor-pointer"
+                  title="Load a preset template"
+                >
+                  {PROPOSAL_PRESETS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      Template: {p.name.split("(")[0].trim()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Autofill with Lead Dropdown */}
               {leads.length > 0 && (
-                <div className="flex items-center gap-1.5 text-xs">
-                  <Users className="size-3.5 text-primary" />
+                <div className="hidden lg:flex items-center gap-1.5 text-xs">
+                  <Users className="size-3.5 text-muted-foreground shrink-0" />
                   <select
                     onChange={(e) =>
                       e.target.value && handleAutofillLead(e.target.value)
                     }
                     defaultValue=""
-                    className="h-8 px-2.5 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none"
+                    className="h-7 px-2 pr-6 rounded-lg bg-background hover:bg-muted/40 border border-border/80 text-xs font-medium text-foreground focus:outline-none transition-colors cursor-pointer"
                   >
                     <option value="" disabled>
-                      Autofill with Lead...
+                      Autofill Lead...
                     </option>
                     {leads.map((l) => (
                       <option key={l.id} value={l.id}>
-                        {l.company || l.name} ({l.name})
+                        {l.company || l.name}
                       </option>
                     ))}
                   </select>
                 </div>
               )}
+            </div>
 
+            {/* Right: Action Buttons & View Mode Switcher */}
+            <div className="flex items-center gap-1.5 shrink-0">
               {/* Custom Client Sign-Off Quick Button */}
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={() => setIsSignoffModalOpen(true)}
-                className="h-8 px-2.5 rounded-lg text-xs font-semibold gap-1.5 border-border hover:bg-muted/60"
+                className="h-7 px-2 rounded-lg text-xs font-medium gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 title="Configure client acceptance sign-off block"
               >
-                <PenLine className="size-3.5 text-primary" />
-                <span>Client Sign-Off</span>
+                <PenLine className="size-3 text-primary" />
+                <span className="hidden sm:inline">Sign-Off</span>
               </Button>
 
               {/* Component Catalog Modal Button */}
@@ -513,18 +803,18 @@ export default function ProposalsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsComponentCatalogOpen(true)}
-                className="h-8 px-2.5 rounded-lg text-xs font-semibold gap-1.5 border-border hover:bg-muted/60"
+                className="h-7 px-2.5 rounded-lg text-xs font-medium gap-1.5 border-border/80 bg-background hover:bg-muted/60 shadow-2xs"
                 title="Open Component Catalog modal"
               >
                 <Layers className="size-3.5 text-primary" />
-                <span>Components Catalog</span>
+                <span>Catalog</span>
               </Button>
 
               {/* Component Drawer Toggle */}
               <button
                 type="button"
                 onClick={() => setShowSnippets((prev) => !prev)}
-                className={`h-8 px-2.5 flex items-center gap-1.5 border rounded-lg text-xs font-semibold transition-colors ${
+                className={`h-7 px-2 flex items-center gap-1 border rounded-lg text-xs font-medium transition-colors ${
                   showSnippets
                     ? "bg-muted text-foreground border-border"
                     : "bg-card text-muted-foreground hover:text-foreground border-border"
@@ -536,48 +826,50 @@ export default function ProposalsPage() {
                 ) : (
                   <PanelLeft className="size-3.5" />
                 )}
-                <span>Side Palette</span>
+                <span className="hidden sm:inline">Palette</span>
               </button>
+
+              <div className="h-4 w-px bg-border/70" />
 
               {/* View Mode Switcher */}
               <div className="flex items-center border border-border/80 rounded-lg bg-muted/40 p-0.5">
                 <button
                   type="button"
                   onClick={() => setViewMode("split")}
-                  className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${
+                  className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${
                     viewMode === "split"
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                   title="Split Visual Editor & Live Preview"
                 >
-                  <Columns2 className="size-3.5" />
+                  <Columns2 className="size-3" />
                   <span>Split</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setViewMode("edit")}
-                  className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
+                  className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
                     viewMode === "edit"
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                   title="Visual Block Editor Only"
                 >
-                  <LayoutTemplate className="size-3.5" />
-                  <span>Visual Editor</span>
+                  <LayoutTemplate className="size-3" />
+                  <span>Editor</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setViewMode("preview")}
-                  className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
+                  className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
                     viewMode === "preview"
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                   title="Live A4 Document Preview Only"
                 >
-                  <Eye className="size-3.5" />
+                  <Eye className="size-3" />
                   <span>Preview</span>
                 </button>
               </div>
@@ -681,7 +973,7 @@ export default function ProposalsPage() {
               >
                 <VisualBlockEditor
                   blocks={blocks}
-                  onChange={setBlocks}
+                  onChange={handleBlocksChange}
                   onInsertSnippet={(snippetId) => {
                     const s = PROPOSAL_SNIPPETS.find((sp) => sp.id === snippetId);
                     if (s) handleInsertSnippet(s);
@@ -1096,6 +1388,29 @@ export default function ProposalsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Saved Proposals & Drafts Modal */}
+      <SavedDocumentsModal
+        isOpen={isSavedModalOpen}
+        onClose={() => setIsSavedModalOpen(false)}
+        documentType="proposal"
+        documents={savedProposals.map((p) => ({
+          id: p.id,
+          name: p.name,
+          title: p.title,
+          clientName: p.clientName,
+          clientCompany: p.clientCompany,
+          dealValue: p.dealValue,
+          updatedAt: p.updatedAt,
+          createdAt: p.createdAt,
+          blocksCount: p.blocks?.length || 0,
+        }))}
+        currentId={currentDocId}
+        onLoad={handleLoadSavedProposal}
+        onDelete={handleDeleteSavedProposal}
+        onCreateBlank={handleCreateBlank}
+        isLoading={isLoadingSaved}
+      />
     </div>
   );
 }

@@ -60,10 +60,10 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
         const paragraphs = block.body.split("\n\n").filter(Boolean);
         contentHtml += `
 <section class="contract-preamble-section">
-  <h2 class="contract-document-title">${escapeHtml(block.title)}</h2>
+  <h2 class="contract-document-title">${renderContractMarkdown(block.title)}</h2>
   <div class="contract-effective-bar">EFFECTIVE DATE: ${escapeHtml(block.effectiveDate)}</div>
   <div class="contract-preamble-body">
-    ${paragraphs.map((p) => `<p>${escapeHtml(p).replace(/\n/g, "<br/>")}</p>`).join("")}
+    ${paragraphs.map((p) => `<p>${renderContractMarkdown(p)}</p>`).join("")}
   </div>
 </section>
 `;
@@ -75,10 +75,10 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
 <section class="contract-clause-section">
   <div class="contract-clause-header">
     <span class="contract-clause-num">${escapeHtml(block.clauseNumber)}</span>
-    <span class="contract-clause-title">${escapeHtml(block.title)}</span>
+    <span class="contract-clause-title">${renderContractMarkdown(block.title)}</span>
   </div>
   <div class="contract-clause-body">
-    ${escapeHtml(block.body).replace(/\n/g, "<br/>")}
+    ${renderContractMarkdown(block.body)}
   </div>
 </section>
 `;
@@ -88,8 +88,8 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
       case "contract_scope_table": {
         contentHtml += `
 <section class="contract-table-section">
-  <h3 class="contract-sub-heading">${escapeHtml(block.title)}</h3>
-  ${block.description ? `<p class="contract-sub-desc">${escapeHtml(block.description)}</p>` : ""}
+  <h3 class="contract-sub-heading">${renderContractMarkdown(block.title)}</h3>
+  ${block.description ? `<p class="contract-sub-desc">${renderContractMarkdown(block.description)}</p>` : ""}
   <table class="contract-minimal-table">
     <thead>
       <tr>
@@ -104,10 +104,10 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
         .map(
           (row) => `
         <tr>
-          <td><strong>${escapeHtml(row.deliverable)}</strong></td>
-          <td>${escapeHtml(row.specifications)}</td>
-          <td><span class="contract-tag">${escapeHtml(row.timeline)}</span></td>
-          <td>${escapeHtml(row.acceptance)}</td>
+          <td><strong>${renderContractMarkdown(row.deliverable)}</strong></td>
+          <td>${renderContractMarkdown(row.specifications)}</td>
+          <td><span class="contract-tag">${renderContractMarkdown(row.timeline)}</span></td>
+          <td>${renderContractMarkdown(row.acceptance)}</td>
         </tr>
       `,
         )
@@ -124,8 +124,8 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
 <section class="contract-commercials-section">
   <div class="contract-commercials-banner">
     <div>
-      <h3 class="contract-sub-heading" style="margin: 0;">${escapeHtml(block.title)}</h3>
-      <p class="contract-sub-desc" style="margin: 4px 0 0;">${escapeHtml(block.paymentTermsSummary)}</p>
+      <h3 class="contract-sub-heading" style="margin: 0;">${renderContractMarkdown(block.title)}</h3>
+      <p class="contract-sub-desc" style="margin: 4px 0 0;">${renderContractMarkdown(block.paymentTermsSummary)}</p>
     </div>
     <div class="contract-total-badge">
       <span class="contract-total-label">TOTAL CONTRACT VALUE</span>
@@ -147,10 +147,10 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
         .map(
           (tr) => `
         <tr>
-          <td><strong>${escapeHtml(tr.milestone)}</strong></td>
+          <td><strong>${renderContractMarkdown(tr.milestone)}</strong></td>
           <td><span class="contract-tag">${escapeHtml(tr.percentage)}</span></td>
           <td class="contract-amount-cell">${escapeHtml(tr.amount)}</td>
-          <td>${escapeHtml(tr.dueCondition)}</td>
+          <td>${renderContractMarkdown(tr.dueCondition)}</td>
         </tr>
       `,
         )
@@ -159,8 +159,8 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
   </table>
 
   <div class="contract-policy-box">
-    <div class="contract-policy-row"><strong>Invoicing Policy:</strong> ${escapeHtml(block.invoicingNotes)}</div>
-    <div class="contract-policy-row"><strong>Late Payments:</strong> ${escapeHtml(block.lateFeePolicy)}</div>
+    <div class="contract-policy-row"><strong>Invoicing Policy:</strong> ${renderContractMarkdown(block.invoicingNotes)}</div>
+    <div class="contract-policy-row"><strong>Late Payments:</strong> ${renderContractMarkdown(block.lateFeePolicy)}</div>
   </div>
 </section>
 `;
@@ -196,12 +196,12 @@ export function renderContractHtml(blocks: ContractBlock[]): string {
 
       <!-- MANDATORY REQUIRED CLIENT CONSENT LINE -->
       <div class="contract-client-pledge">
-        &ldquo;${escapeHtml(disclaimer)}&rdquo;
+        &ldquo;${renderContractMarkdown(disclaimer)}&rdquo;
       </div>
     </div>
   </div>
 
-  ${block.countersignNote ? `<div class="contract-countersign-note">${escapeHtml(block.countersignNote)}</div>` : ""}
+  ${block.countersignNote ? `<div class="contract-countersign-note">${renderContractMarkdown(block.countersignNote)}</div>` : ""}
 </section>
 `;
         break;
@@ -698,4 +698,13 @@ function escapeHtml(str: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function renderContractMarkdown(str: string): string {
+  if (!str) return "";
+  return escapeHtml(str)
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code>$1</code>")
+    .replace(/\n/g, "<br/>");
 }

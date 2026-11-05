@@ -1152,7 +1152,7 @@ export default function LeadsPage() {
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
               <div className="p-6 border-b border-border/80 bg-muted/20">
-                <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center justify-between gap-2 mb-3 pr-12">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-primary border-primary/20 text-[10px] rounded-full font-semibold">
                       Client Hub
@@ -1164,7 +1164,7 @@ export default function LeadsPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleOpenEdit(selectedLead)}
-                    className="h-7 text-xs font-semibold gap-1.5 rounded-lg border-primary/30 text-primary hover:bg-primary/10"
+                    className="h-7 text-xs font-semibold gap-1.5 rounded-lg border-primary/30 text-primary hover:bg-primary/10 shadow-2xs mr-1"
                   >
                     <Edit2 className="size-3" />
                     <span>Edit Lead</span>

@@ -7,6 +7,7 @@ import { Deliverable } from '@/types/deliverable';
 import { Project } from '@/types/project';
 import { EmailLog } from '@/types/email';
 import { hashPassword } from '@/lib/auth/password';
+import { SavedProposalDoc, SavedContractDoc } from '@/types/savedDocument';
 
 // ============================================================================
 // Transformers: Supabase snake_case <-> Application camelCase
@@ -211,6 +212,97 @@ export const supabaseDb = {
 
   async setRetentionDays(days: number): Promise<void> {
     await this.updateSetting('retentionDays', days);
+  },
+
+  // Saved Proposals & Contracts Persistence
+  async getSavedProposals(): Promise<SavedProposalDoc[]> {
+    try {
+      const { data } = await supabaseAdmin
+        .from('settings')
+        .select('value')
+        .eq('key', 'saved_proposals')
+        .maybeSingle();
+      if (data && Array.isArray(data.value)) {
+        return data.value as SavedProposalDoc[];
+      }
+      return [];
+    } catch (err) {
+      console.error('Failed to get saved proposals:', err);
+      return [];
+    }
+  },
+
+  async saveProposalDoc(doc: SavedProposalDoc): Promise<SavedProposalDoc> {
+    const existing = await this.getSavedProposals();
+    const now = new Date().toISOString();
+    const updatedDoc: SavedProposalDoc = {
+      ...doc,
+      updatedAt: now,
+      createdAt: doc.createdAt || now,
+    };
+    const index = existing.findIndex((p) => p.id === doc.id);
+    let updatedList: SavedProposalDoc[];
+    if (index >= 0) {
+      updatedList = [...existing];
+      updatedList[index] = updatedDoc;
+    } else {
+      updatedList = [updatedDoc, ...existing];
+    }
+    updatedList.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    await this.updateSetting('saved_proposals', updatedList);
+    return updatedDoc;
+  },
+
+  async deleteProposalDoc(id: string): Promise<boolean> {
+    const existing = await this.getSavedProposals();
+    const filtered = existing.filter((p) => p.id !== id);
+    await this.updateSetting('saved_proposals', filtered);
+    return true;
+  },
+
+  async getSavedContracts(): Promise<SavedContractDoc[]> {
+    try {
+      const { data } = await supabaseAdmin
+        .from('settings')
+        .select('value')
+        .eq('key', 'saved_contracts')
+        .maybeSingle();
+      if (data && Array.isArray(data.value)) {
+        return data.value as SavedContractDoc[];
+      }
+      return [];
+    } catch (err) {
+      console.error('Failed to get saved contracts:', err);
+      return [];
+    }
+  },
+
+  async saveContractDoc(doc: SavedContractDoc): Promise<SavedContractDoc> {
+    const existing = await this.getSavedContracts();
+    const now = new Date().toISOString();
+    const updatedDoc: SavedContractDoc = {
+      ...doc,
+      updatedAt: now,
+      createdAt: doc.createdAt || now,
+    };
+    const index = existing.findIndex((c) => c.id === doc.id);
+    let updatedList: SavedContractDoc[];
+    if (index >= 0) {
+      updatedList = [...existing];
+      updatedList[index] = updatedDoc;
+    } else {
+      updatedList = [updatedDoc, ...existing];
+    }
+    updatedList.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    await this.updateSetting('saved_contracts', updatedList);
+    return updatedDoc;
+  },
+
+  async deleteContractDoc(id: string): Promise<boolean> {
+    const existing = await this.getSavedContracts();
+    const filtered = existing.filter((c) => c.id !== id);
+    await this.updateSetting('saved_contracts', filtered);
+    return true;
   },
 
   // Users

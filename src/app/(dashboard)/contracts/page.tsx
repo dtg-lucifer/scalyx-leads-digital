@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   ContractBlock,
   ContractPreset,
@@ -8,6 +8,7 @@ import {
 import {
   CONTRACT_PRESETS,
   createDefaultContractBlocks,
+  createBlankContractBlocks,
 } from "@/lib/contract/blocks";
 import { renderContractHtml } from "@/lib/contract/renderer";
 import { VisualContractEditor } from "@/components/contract/VisualContractEditor";
@@ -52,7 +53,14 @@ import {
   Copy,
   RefreshCw,
   LayoutTemplate,
+  FolderClock,
+  PenLine,
+  Save,
+  Check,
+  Clock,
 } from "lucide-react";
+import { SavedDocumentsModal } from "@/components/common/SavedDocumentsModal";
+import type { SavedContractDoc } from "@/types/savedDocument";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -143,7 +151,237 @@ export default function ContractBuilderPage() {
   const [isEmailPreviewLoading, setIsEmailPreviewLoading] = useState(false);
   const [emailPreviewDevice, setEmailPreviewDevice] = useState<"desktop" | "mobile">("desktop");
 
+  // Saved Contracts & Drafts Persistence State
+  const [currentDocId, setCurrentDocId] = useState<string | null>(null);
+  const [docName, setDocName] = useState<string>(
+    "Master Services Agreement Draft",
+  );
+  const [savedContracts, setSavedContracts] = useState<SavedContractDoc[]>([]);
+  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
+  const [hasUserEdited, setHasUserEdited] = useState(false);
+  const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+
+  const CONTRACTS_STORAGE_KEY = "scalyx_saved_contracts";
+  const CURRENT_CONTRACT_ID_KEY = "scalyx_current_contract_id";
+
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Derive contract metadata (title, clientName, clientCompany, dealValue)
+  const contractMetadata = useMemo(() => {
+    let title = contractTitle || "Master Services Agreement";
+    let clientName = "";
+    let clientCompany = "";
+    let dealValue = "";
+
+    for (const b of blocks) {
+      if (b.type === "contract_preamble") {
+        if (b.title) title = b.title;
+      } else if (b.type === "contract_parties") {
+        if (b.clientName) clientName = b.clientName;
+        if (b.clientCompany) clientCompany = b.clientCompany;
+      } else if (b.type === "contract_commercials") {
+        if (b.totalValue) dealValue = b.totalValue;
+      } else if (b.type === "contract_signature") {
+        if (!clientName && b.clientSignatory) clientName = b.clientSignatory;
+        if (!clientCompany && b.clientTitle) clientCompany = b.clientTitle;
+      }
+    }
+
+    return { title, clientName, clientCompany, dealValue };
+  }, [blocks, contractTitle]);
+
+  // Load saved contracts from localStorage and API on mount
+  useEffect(() => {
+    try {
+      const local = localStorage.getItem(CONTRACTS_STORAGE_KEY);
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSavedContracts(parsed);
+        }
+      }
+      const storedId = localStorage.getItem(CURRENT_CONTRACT_ID_KEY);
+      if (storedId) {
+        setCurrentDocId(storedId);
+      }
+    } catch (e) {
+      console.error("Local storage read error for contracts:", e);
+    }
+
+    async function loadSavedFromApi() {
+      try {
+        setIsLoadingSaved(true);
+        const res = await fetch("/api/contracts");
+        const data = await res.json();
+        if (data.contracts && Array.isArray(data.contracts)) {
+          setSavedContracts(data.contracts);
+          localStorage.setItem(
+            CONTRACTS_STORAGE_KEY,
+            JSON.stringify(data.contracts),
+          );
+        }
+      } catch (err) {
+        console.error("Failed to load saved contracts from API:", err);
+      } finally {
+        setIsLoadingSaved(false);
+      }
+    }
+    loadSavedFromApi();
+  }, []);
+
+  // Persist helper
+  const persistContract = async (
+    targetId: string,
+    targetBlocks: ContractBlock[],
+  ) => {
+    try {
+      setSaveStatus("saving");
+      const now = new Date().toISOString();
+      const docToSave: SavedContractDoc = {
+        id: targetId,
+        name:
+          docName.trim() ||
+          contractMetadata.title ||
+          "Scalyx Service Agreement",
+        title: contractMetadata.title || "Scalyx Service Agreement",
+        clientName: contractMetadata.clientName,
+        clientCompany: contractMetadata.clientCompany,
+        dealValue: contractMetadata.dealValue,
+        blocks: targetBlocks,
+        updatedAt: now,
+        createdAt: now,
+        isDraft: true,
+      };
+
+      setSavedContracts((prev) => {
+        const withoutCurrent = prev.filter((c) => c.id !== targetId);
+        const updated = [docToSave, ...withoutCurrent];
+        try {
+          localStorage.setItem(CONTRACTS_STORAGE_KEY, JSON.stringify(updated));
+          localStorage.setItem(CURRENT_CONTRACT_ID_KEY, targetId);
+        } catch (e) {
+          console.error("Local storage write error for contract:", e);
+        }
+        return updated;
+      });
+
+      await fetch("/api/contracts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contract: docToSave }),
+      });
+
+      setSaveStatus("saved");
+      setLastSavedTime(new Date());
+    } catch (err) {
+      console.error("Failed to save contract:", err);
+      setSaveStatus("error");
+    }
+  };
+
+  // 1-second debounced auto-saver
+  useEffect(() => {
+    if (!hasUserEdited && !currentDocId) {
+      return;
+    }
+
+    setSaveStatus("saving");
+    const docId =
+      currentDocId ||
+      `ctr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    if (!currentDocId) {
+      setCurrentDocId(docId);
+    }
+
+    const timer = setTimeout(() => {
+      persistContract(docId, blocks);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [blocks, docName, hasUserEdited]);
+
+  const handleBlocksChange = (newBlocks: ContractBlock[]) => {
+    setBlocks(newBlocks);
+    setHasUserEdited(true);
+  };
+
+  const handleCreateBlank = () => {
+    const blankBlocks = createBlankContractBlocks();
+    const docId = `ctr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    setBlocks(blankBlocks);
+    setDocName("New Blank Contract Agreement");
+    setActivePreset("blank");
+    setContractTitle("Service Contract & Engagement Agreement");
+    setCurrentDocId(docId);
+    setHasUserEdited(true);
+    persistContract(docId, blankBlocks);
+    setEmailStatusMessage({
+      type: "success",
+      text: "Created new blank contract agreement canvas!",
+    });
+    setTimeout(() => setEmailStatusMessage(null), 3000);
+  };
+
+  const handleExplicitSave = () => {
+    const docId =
+      currentDocId ||
+      `ctr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    setCurrentDocId(docId);
+    setHasUserEdited(true);
+    persistContract(docId, blocks);
+    setEmailStatusMessage({
+      type: "success",
+      text: `Contract draft "${docName || "Contract"}" saved to storage!`,
+    });
+    setTimeout(() => setEmailStatusMessage(null), 3000);
+  };
+
+  const handleLoadSavedContract = (id: string) => {
+    const found = savedContracts.find((c) => c.id === id);
+    if (found) {
+      setBlocks(found.blocks);
+      setCurrentDocId(found.id);
+      setDocName(found.name || found.title || "Custom Contract Draft");
+      setContractTitle(found.title || "Master Services Agreement");
+      setActivePreset("custom");
+      setHasUserEdited(true);
+      setSaveStatus("saved");
+      setEmailStatusMessage({
+        type: "success",
+        text: `Loaded contract draft "${found.name || found.title}"!`,
+      });
+      setTimeout(() => setEmailStatusMessage(null), 3000);
+    }
+  };
+
+  const handleDeleteSavedContract = async (id: string) => {
+    try {
+      const updated = savedContracts.filter((c) => c.id !== id);
+      setSavedContracts(updated);
+      try {
+        localStorage.setItem(CONTRACTS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.error("Local storage delete error for contract:", e);
+      }
+      if (currentDocId === id) {
+        setCurrentDocId(null);
+      }
+      await fetch(`/api/contracts?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      setEmailStatusMessage({
+        type: "success",
+        text: "Deleted saved contract draft.",
+      });
+      setTimeout(() => setEmailStatusMessage(null), 2500);
+    } catch (err) {
+      console.error("Failed to delete contract:", err);
+    }
+  };
 
   // Initialize blocks on mount
   useEffect(() => {
@@ -223,6 +461,8 @@ export default function ContractBuilderPage() {
     });
 
     setBlocks(updated);
+    setDocName(`${lead.company || lead.name} Service Agreement`);
+    setHasUserEdited(true);
   };
 
   // Switch preset
@@ -259,6 +499,10 @@ export default function ContractBuilderPage() {
     });
 
     setBlocks(updated);
+    setDocName(`${preset.documentType} Draft`);
+    setCurrentDocId(null);
+    setHasUserEdited(false);
+    setSaveStatus("idle");
   };
 
   // Insert block from Component Catalogue
@@ -646,32 +890,60 @@ export default function ContractBuilderPage() {
       {/* Top Standard App Navbar (Identical Height & Layout to Proposal Studio) */}
       <div className="shrink-0">
         <AppNavbar
-          title="Visual Contract Builder & Legal Agreement Studio"
-          description="Minimalist monochrome contract engine with visual blocks, client execution pledge, and encrypted delivery."
+          title="Contract Builder"
+          description="Draft, customize, encrypt, and dispatch binding agreements."
           actions={
             <div className="flex items-center gap-2">
+              {/* Create Blank Contract Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCreateBlank}
+                className="gap-1.5 text-xs font-medium rounded-lg border-border"
+                title="Create a new blank contract from scratch"
+              >
+                <Plus className="size-3.5" />
+                <span>New Blank</span>
+              </Button>
+
+              {/* Saved Contracts Popup List Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSavedModalOpen(true)}
+                className="gap-1.5 text-xs font-medium rounded-lg border-border"
+                title="View and load saved contracts & drafts"
+              >
+                <FolderClock className="size-3.5 text-primary" />
+                <span>Saved Drafts ({savedContracts.length})</span>
+              </Button>
+
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => setIsDownloadModalOpen(true)}
-                className="gap-1.5 text-xs font-semibold rounded-lg border-border"
+                className="gap-1.5 text-xs font-medium rounded-lg border-border"
                 title="Download / Export with 256-bit AES Password Protection"
               >
                 <Lock className="size-3.5 text-amber-500" />
-                <span>Export &amp; Password</span>
+                <span className="hidden sm:inline">Encrypted PDF</span>
               </Button>
+
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handlePrint}
-                className="gap-1.5 text-xs font-semibold rounded-lg border-border"
+                className="gap-1.5 text-xs font-medium rounded-lg border-border"
                 title="Print or Save as A4 PDF"
               >
                 <Printer className="size-3.5" />
-                <span>Print A4 PDF</span>
+                <span>Print PDF</span>
               </Button>
+
               <Button
                 type="button"
                 size="sm"
@@ -688,96 +960,140 @@ export default function ContractBuilderPage() {
 
       {/* Main Workspace Body */}
       <div className="p-3 xl:p-4 space-y-2.5 flex-1 flex flex-col min-h-0 h-full overflow-hidden">
-        {/* Preset Selector & Autofill Row (Matches Proposal Studio exactly) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-card border border-border/80 rounded-xl shadow-xs shrink-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-              <LayoutTemplate className="size-3.5 text-primary" />
-              Templates:
-            </span>
-            {CONTRACT_PRESETS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => handleSelectPreset(p.id)}
-                className={`px-3 py-1.5 text-xs font-semibold border rounded-lg transition-all flex items-center gap-1.5 ${activePreset === p.id
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                  }`}
-              >
-                <span>{p.name.split("(")[0].trim()}</span>
-              </button>
-            ))}
-          </div>
+        {/* Elegant Workspace Toolbar */}
+        <div className="bg-card border border-border/70 rounded-xl px-3 py-2 shadow-xs shrink-0 flex flex-wrap items-center justify-between gap-2.5">
+          {/* Left: Draft Name & Status */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex items-center gap-2 bg-muted/40 hover:bg-muted/60 focus-within:bg-background focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 border border-border/80 px-2.5 py-1 rounded-lg transition-all shadow-2xs">
+              <PenLine className="size-3.5 text-primary shrink-0" />
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0">
+                Draft:
+              </span>
+              <input
+                type="text"
+                value={docName}
+                onChange={(e) => {
+                  setDocName(e.target.value);
+                  setHasUserEdited(true);
+                }}
+                placeholder="Contract Name..."
+                className="h-5 w-44 sm:w-56 md:w-64 text-xs font-semibold bg-transparent border-0 focus:outline-none focus:ring-0 text-foreground placeholder:text-muted-foreground/60 truncate"
+                title="Name this contract draft to easily identify it in saved drafts"
+              />
+            </div>
 
-          <div className="flex items-center gap-2.5">
+            {/* Autosave Status Pill */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium text-muted-foreground bg-muted/30 border border-border/50 shrink-0">
+              {saveStatus === "saving" ? (
+                <>
+                  <Loader2 className="size-3 animate-spin text-amber-500" />
+                  <span className="text-amber-600 dark:text-amber-400">Saving...</span>
+                </>
+              ) : saveStatus === "saved" ? (
+                <>
+                  <Check className="size-3 text-emerald-500" />
+                  <span className="text-emerald-600 dark:text-emerald-400">Saved</span>
+                </>
+              ) : (
+                <>
+                  <Clock className="size-3 text-muted-foreground" />
+                  <span>Unsaved</span>
+                </>
+              )}
+            </div>
+
+            <div className="h-4 w-px bg-border/70 hidden md:block" />
+
+            {/* Template Selector as sleek inline select */}
+            <div className="hidden md:flex items-center gap-1.5 text-xs">
+              <LayoutTemplate className="size-3.5 text-muted-foreground shrink-0" />
+              <select
+                value={activePreset}
+                onChange={(e) => handleSelectPreset(e.target.value)}
+                className="h-7 px-2 pr-6 rounded-lg bg-background hover:bg-muted/40 border border-border/80 text-xs font-medium text-foreground focus:outline-none transition-colors cursor-pointer"
+                title="Load a contract template"
+              >
+                {CONTRACT_PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    Template: {p.name.split("(")[0].trim()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Autofill with Lead Dropdown */}
             {leads.length > 0 && (
-              <div className="flex items-center gap-1.5 text-xs">
-                <Users className="size-3.5 text-primary" />
+              <div className="hidden lg:flex items-center gap-1.5 text-xs">
+                <Users className="size-3.5 text-muted-foreground shrink-0" />
                 <select
                   value={selectedLeadId}
                   onChange={(e) => e.target.value && handleApplyLead(e.target.value)}
-                  className="h-8 px-2.5 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none"
+                  className="h-7 px-2 pr-6 rounded-lg bg-background hover:bg-muted/40 border border-border/80 text-xs font-medium text-foreground focus:outline-none transition-colors cursor-pointer"
                 >
-                  <option value="">Autofill with Lead...</option>
+                  <option value="">Autofill Lead...</option>
                   {leads.map((l) => (
                     <option key={l.id} value={l.id}>
-                      {l.company || l.name} ({l.name})
+                      {l.company || l.name}
                     </option>
                   ))}
                 </select>
               </div>
             )}
+          </div>
 
+          {/* Right: Component Catalog & Segmented View Mode */}
+          <div className="flex items-center gap-1.5 shrink-0">
             {/* Component Catalog Modal Button */}
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setIsCatalogOpen(true)}
-              className="h-8 px-2.5 rounded-lg text-xs font-semibold gap-1.5 border-border hover:bg-muted/60"
+              className="h-7 px-2.5 rounded-lg text-xs font-medium gap-1.5 border-border/80 bg-background hover:bg-muted/60 shadow-2xs"
               title="Open Component Catalog modal"
             >
               <Layers className="size-3.5 text-primary" />
-              <span>Components Catalog</span>
+              <span>Catalog</span>
             </Button>
+
+            <div className="h-4 w-px bg-border/70" />
 
             {/* View Mode Switcher */}
             <div className="flex items-center border border-border/80 rounded-lg bg-muted/40 p-0.5">
               <button
                 type="button"
                 onClick={() => setViewMode("split")}
-                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${viewMode === "split"
+                className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${viewMode === "split"
                     ? "bg-card text-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
                   }`}
                 title="Split Visual Editor & Live Preview"
               >
-                <Columns2 className="size-3.5" />
+                <Columns2 className="size-3" />
                 <span>Split</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("editor")}
-                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "editor"
+                className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "editor"
                     ? "bg-card text-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
                   }`}
                 title="Visual Block Editor Only"
               >
-                <FileCode className="size-3.5" />
-                <span>Visual Editor</span>
+                <FileCode className="size-3" />
+                <span>Editor</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("preview")}
-                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "preview"
+                className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "preview"
                     ? "bg-card text-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
                   }`}
                 title="Live A4 Document Preview Only"
               >
-                <LayoutGrid className="size-3.5" />
+                <LayoutGrid className="size-3" />
                 <span>Preview</span>
               </button>
             </div>
@@ -816,7 +1132,7 @@ export default function ContractBuilderPage() {
             <div className="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin">
               <VisualContractEditor
                 blocks={blocks}
-                onChange={setBlocks}
+                onChange={handleBlocksChange}
                 activeClientName={activeClientName}
               />
             </div>
@@ -1408,6 +1724,29 @@ export default function ContractBuilderPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Saved Contracts & Drafts Modal */}
+      <SavedDocumentsModal
+        isOpen={isSavedModalOpen}
+        onClose={() => setIsSavedModalOpen(false)}
+        documentType="contract"
+        documents={savedContracts.map((c) => ({
+          id: c.id,
+          name: c.name,
+          title: c.title,
+          clientName: c.clientName,
+          clientCompany: c.clientCompany,
+          dealValue: c.dealValue,
+          updatedAt: c.updatedAt,
+          createdAt: c.createdAt,
+          blocksCount: c.blocks?.length || 0,
+        }))}
+        currentId={currentDocId}
+        onLoad={handleLoadSavedContract}
+        onDelete={handleDeleteSavedContract}
+        onCreateBlank={handleCreateBlank}
+        isLoading={isLoadingSaved}
+      />
     </div>
   );
 }

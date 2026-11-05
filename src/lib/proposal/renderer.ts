@@ -720,13 +720,14 @@ export const PROPOSAL_STYLESHEET = `
 function cleanStatText(text: string): string {
   if (!text) return "";
   return text
-    .replace(/^[-*•●\s]+/, "")
+    .replace(/^(?:[-+•●]|\*(?!\*))\s*/, "")
     .replace(/^\\`|\\`$/g, "")
     .replace(/^`|`$/g, "")
     .replace(/^\*\*|\*\*$/g, "")
     .replace(/^\[|\]$/g, "")
     .replace(/^\\`|\\`$/g, "")
     .replace(/^`|`$/g, "")
+    .replace(/\*\*/g, "")
     .trim();
 }
 
@@ -878,7 +879,7 @@ export function preprocessProposalDirectives(
           continue;
         }
 
-        const cleanLine = line.replace(/^[-*•●\s]+/, "");
+        const cleanLine = line.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "");
         // Match Key: Value or **Key:** Value or **Key**: Value
         const kvMatch = cleanLine.match(/^(?:\*\*)?([^:]+?)(?:\*\*)?:\s*(.*)$/);
         if (kvMatch) {
@@ -976,7 +977,7 @@ export function preprocessProposalDirectives(
         // Maximum stats number is kept at 4
         if (cards.length >= 4) break;
 
-        const content = line.replace(/^[-*•●\s]+/, "");
+        const content = line.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "");
         const parts = content.split("|").map((p: string) => p.trim());
         const label = cleanStatText(parts[0] || "");
         const value = cleanStatText(parts[1] || "");
@@ -1050,7 +1051,7 @@ export function preprocessProposalDirectives(
 
       const nodes = flowContent
         .split(/\u2794|->|\u2192|=>/)
-        .map((n: string) => n.trim().replace(/^[-*•●\s]+/, ""))
+        .map((n: string) => n.trim().replace(/^(?:[-+•●]|\*(?!\*))\s*/, ""))
         .filter(Boolean);
 
       const nodesHtml = nodes
@@ -1100,7 +1101,7 @@ export function preprocessProposalDirectives(
         for (const line of contentLines) {
           const trimmed = line.trim();
           if (/^[-*•●]/.test(trimmed)) {
-            const bulletText = trimmed.replace(/^[-*•●\s]+/, "");
+            const bulletText = trimmed.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "");
             bullets.push(`<li>${renderInlineMarkdown(bulletText)}</li>`);
           }
         }
@@ -1141,7 +1142,7 @@ export function preprocessProposalDirectives(
         for (const line of contentLines) {
           const trimmed = line.trim();
           if (/^[-*•●]/.test(trimmed)) {
-            const bulletText = trimmed.replace(/^[-*•●\s]+/, "");
+            const bulletText = trimmed.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "");
             bullets.push(`<li>${renderInlineMarkdown(bulletText)}</li>`);
           }
         }
@@ -1290,7 +1291,7 @@ export function preprocessProposalDirectives(
           if (currentItem) {
             items.push(renderMilestoneItem(currentItem));
           }
-          const content = line.replace(/^[-*•●\s]+/, "");
+          const content = line.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "");
           const parts = content.split("|").map((p: string) => p.trim());
           const mTitle = parts[0]?.replace(/\*\*/g, "") || "";
           const mPrice = parts[1]?.replace(/\\?`/g, "") || "";
@@ -1347,7 +1348,7 @@ export function preprocessProposalDirectives(
         let line = rawLine.trim();
         if (!line) continue;
         // Strip markdown list bullets without stripping bold ** markers
-        line = line.replace(/^[-*+•●]\s+/, "").trim();
+        line = line.replace(/^(?:[-+•●]|\*(?!\*))\s*/, "").trim();
 
         // Match **Key:** Value, **Key**: Value, or Key: Value
         const match =
@@ -1534,7 +1535,8 @@ export async function renderProposalHtml(markdown: string): Promise<string> {
     .replace(
       /<td>`([^<]+)`<\/td>/g,
       '<td><span class="tech-chip">$1</span></td>',
-    );
+    )
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
   return `<!DOCTYPE html>
 <html lang="en">

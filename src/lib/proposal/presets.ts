@@ -353,6 +353,142 @@ Web & Mobile Clients ➔ Cloudflare Edge CDN ➔ API Gateway & Microservices ➔
 :::
 `;
 
+export const SWARUP_AI_APP_PROPOSAL = `::: header
+
+::: title-meta
+# BECOME YOUR FUTURE VERSION
+## Gamified AI Self-Improvement Platform (Health, Wealth & Relationships)
+- **Client:** Swarup
+- **Prepared By:** Scalyx
+- **Date:** November 6, 2026
+- **Currency:** INR (₹)
+- **Status:** CONFIDENTIAL & PRIVILEGED
+:::
+
+::: stats
+- **QUOTED INITIAL VALUE** | \`₹1,10,000\` | Turnkey Phase 1–4 Delivery
+- **TARGET CAPACITY** | \`1,000 – 5,000 DAU\` | Managed Serverless Cloud
+- **AI CORE GATEWAY** | \`OpenRouter / LiteLLM\` | Multi-LLM Tiered Routing
+- **CROSS-PLATFORM APP** | \`React Native (Expo)\` | Android & iOS + Next.js Web
+:::
+
+## [01] Executive Summary & Project Mission
+
+Following our technical discovery consultation on November 5, 2026, Scalyx has engineered this architecture and commercial delivery proposal for **Become Your Future Version**.
+
+The platform is conceived as a premier gamified self-improvement ecosystem that fuses habit formation mechanics (Duolingo-style daily missions and XP ladders), social accountability networks (Strava/Instagram community feeds and friend challenges), and state-of-the-art autonomous AI agents:
+
+- **AI Mascot & Daily Quests:** An interactive mascot challenges users daily across health, wealth, and relationship pillars (e.g. 10 push-ups, reading 5 pages, micro-savings logs).
+- **Model-Agnostic AI Gateway:** All AI calls route through a centralized gateway (OpenRouter / LiteLLM) under a single consolidated invoice, enabling zero-downtime model hot-swapping and provider failover.
+- **Intelligent Model Routing:** Heuristic and classifier-based routing sends lightweight prompts to economical frontier/open-weight models (DeepSeek, GLM, Llama) while reserving frontier reasoning models (Claude 3.5 Sonnet, GPT-4o) exclusively for multi-step agent flows.
+- **Edge Vision Rep Detection:** To prevent astronomical cloud vision token bills, workout challenges (e.g., push-ups) are verified on-device via MediaPipe/ML Kit pose detection directly on the smartphone hardware.
+- **In-App Sandboxed Mini-Apps:** Isolated code execution sandboxes allowing users to live-code and publish lightweight personal apps.
+
+::: pagebreak
+Scalyx — Technical Proposal | Become Your Future Version Blueprint | Page 1 of 5
+:::
+
+## [02] System Architecture & Model-Agnostic Gateway
+
+The system architecture prioritizes **Model Agnosticism** and **Managed Services First**. Because cloud infrastructure fees are negligible compared to LLM token consumption, engineering focus is concentrated on intelligent tier routing, semantic caching, and strict per-user cost guardrails.
+
+::: architecture title="MODEL-AGNOSTIC AI GATEWAY & DATA PIPELINE" badge="MULTI-LLM TIERED ROUTER"
+React Native & Next.js ➔ FastAPI Core Backend ➔ Intelligent Model Router & Semantic Cache ➔ OpenRouter Gateway (DeepSeek / GLM / Claude / OpenAI) ➔ Postgres (pgvector) & Upstash Redis
+:::
+
+### Comprehensive Technology Stack & Engineering Rationale
+
+| Layer | Technology Chosen | Strategic Purpose & Engineering Rationale |
+| :--- | :--- | :--- |
+| **Mobile Application** | \`React Native (Expo)\` | Single cross-platform TypeScript codebase generating native Android & iOS builds with camera access, push notifications, and Lottie/Rive mascot animations. |
+| **Web Platform** | \`Next.js 15 (React 19)\` | High-performance desktop web interface required for the live-coding builder, community feeds, and high-conversion marketing presence. |
+| **Core API Backend** | \`FastAPI (Python)\` | High-throughput asynchronous Python runtime natively unified with the AI orchestration stack and vector pipelines under a single deployment. |
+| **Database & Vector Memory** | \`PostgreSQL (Neon) + pgvector\` | ACID relational persistence for user profiles, XP transaction ledgers, missions, and community data alongside vector embeddings for agent memory. |
+| **Cache & Real-Time Queues** | \`Redis (Upstash)\` | In-memory sorted sets for real-time leaderboards, sub-millisecond token rate limiting, and ephemeral session states. |
+| **Object & Media Storage** | \`Cloudflare R2 / AWS S3\` | S3-compatible encrypted storage for user challenge verification videos, avatar assets, and generated site bundles with zero bandwidth egress penalties. |
+| **Authentication & Identity** | \`Supabase Auth / Clerk\` | Seamless social login (Google, Apple), biometric authentication, and enterprise-grade session lifecycle management out of the box. |
+| **Monetization & In-App Purchases** | \`RevenueCat\` | Turnkey cross-platform mobile subscription infrastructure managing iOS In-App Purchases and Android Play Billing with tier entitlements. |
+| **Push Notifications & Analytics** | \`FCM / OneSignal + PostHog\` | Timely streak nudges, habit reminders, conversion funnels, and retention cohort tracking. |
+| **Observability & Cost Tracking** | \`Sentry + Langfuse\` | Real-time crash monitoring, execution tracing, and granular per-user / per-model token cost guardrails. |
+
+::: pagebreak
+Scalyx — Technical Proposal | Become Your Future Version Blueprint | Page 2 of 5
+:::
+
+## [03] Detailed Engineering Specifications & Cost Control
+
+::: feature-grid
+### [A] Intelligent Model Routing & Cost Guardrails
+- **Multi-LLM Gateway:** OpenRouter / LiteLLM integration providing a single unified billing dashboard, dynamic failover, and access to all premier models.
+- **Complexity Classifier & Cascading:** Rule-based heuristics + lightweight classifier model evaluating task complexity. Simple prompts execute on low-cost models (DeepSeek/GLM); complex agent tasks escalate to Claude 3.5 / GPT-4o only when required.
+- **Semantic Prompt Caching:** Vector similarity caching in Redis/pgvector answering repeated questions with zero token consumption.
+- **Hard Quotas & Langfuse Tracking:** Strict daily token budgets per subscription tier with proactive alerts.
+
+### [B] Gamification, Quests & Postgres XP Ledger
+- **Append-Only XP Ledger:** Financial-grade event ledger in PostgreSQL ensuring XP points cannot be duped or tampered with.
+- **Redis Sorted Sets:** Ultra-fast sub-millisecond leaderboard calculation for global and friend rankings.
+- **Deterministic Quest Verification:** Plain-code business logic for quest completion and scoring to avoid AI hallucination and unnecessary LLM token calls.
+
+### [C] Edge Rep Detection & Video Quests
+- **On-Device Pose Detection:** MediaPipe / ML Kit edge computer vision running on the mobile phone hardware to count push-up and workout repetitions locally.
+- **Bandwidth & Token Optimization:** Zero cloud vision API streaming required during active exercise. Video uploads are restricted to dispute reviews and spot checks using sampled keyframes on cheap vision models.
+
+### [D] Asynchronous Agents & Safe Code Sandboxes
+- **Queued Background Workers:** Overnight autonomous agent workflows executed via queued workers (Celery/Inngest) utilizing batch API discount windows.
+- **Isolated Sandboxes (E2B / Daytona):** Zero-trust containerized execution environments for user live-coding and mini-app generation.
+- **Safe Onboarding Fallbacks:** Secure profile ingestion using user-prompted AI export summaries or file uploads, eliminating reliance on unsupported private account scraping.
+:::
+
+::: pagebreak
+Scalyx — Technical Proposal | Become Your Future Version Blueprint | Page 3 of 5
+:::
+
+## [04] Phased Delivery Roadmap & Milestones
+
+To manage engineering complexity and guarantee rapid time-to-market, the platform will be developed in four (4) progressive MVP delivery sprints:
+
+::: milestones title="Phased Milestone Engineering Schedule"
+- **MVP 1: Foundation, Auth, Quests, XP Engine & Personal Agent** | \`₹45,000\`
+  Setup of Expo mobile app & FastAPI backend, user authentication, profile setup with onboarding fallback, Home screen with daily missions and tamper-proof Postgres XP ledger, and single personal agent connected via OpenRouter gateway with rule-based routing.
+- **MVP 2: Multi-Agent Orchestration, Full Router, Caching & Token Guardrails** | \`₹35,000\`
+  Implementation of specialized multi-agent chat, classifier-driven tiered routing with automatic cascading fallback, Redis semantic prompt cache, and Langfuse per-user token budget dashboards.
+- **MVP 3: Social Community, Real-Time Leaderboards & RevenueCat Monetization** | \`₹18,000\`
+  Community feed, friend challenges, Redis sorted-set leaderboards, social proofs, and RevenueCat integration for Apple App Store & Google Play subscriptions.
+- **MVP 4: On-Device Pose Detection, Sandboxes, Background Agents & Launch** | \`₹12,000\`
+  On-device MediaPipe push-up rep counter, isolated E2B coding sandboxes, queued overnight agent workflows, end-to-end UAT, app store submission, and production handover.
+:::
+
+::: callout-green
+**Scalability & Cost Assurance:** Designed specifically to sustain 1,000 to 5,000 Daily Active Users (DAU) while maintaining predictable token expenditures through on-device edge verification and tiered semantic caching.
+:::
+
+## [05] Commercial Quotation & Investment Summary
+
+::: quotation
+**Total Investment:** ₹1,10,000
+**Subtitle:** Turnkey Architecture, Full-Stack Development, AI Router & App Store Delivery
+- **MVP 1 — Core App, XP Ledger & Personal Agent:** ₹45,000
+- **MVP 2 — Multi-Agent Router, Semantic Cache & Guardrails:** ₹35,000
+- **MVP 3 — Community, Leaderboards & Monetization:** ₹18,000
+- **MVP 4 — Edge Vision, Code Sandboxes & App Store Launch:** ₹12,000
+:::
+
+::: pagebreak
+Scalyx — Technical Proposal | Become Your Future Version Blueprint | Page 4 of 5
+:::
+
+## [06] Acceptance & Authorization
+
+::: signoff
+- **Agency:** Scalyx
+- **Website:** https://scalyx.in
+- **Email:** contact@scalyx.in
+- **Helpline:** +91 8927124748 (Call & WhatsApp)
+- **Client:** Swarup
+- **Total Investment:** ₹1,10,000 INR
+:::
+`;
+
 export const BLANK_PROPOSAL = `::: header
 
 ::: title-meta

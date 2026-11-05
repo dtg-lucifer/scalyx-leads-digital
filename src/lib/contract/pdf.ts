@@ -10,7 +10,13 @@ interface ExportPdfOptions {
 
 function cleanPdfText(text: string): string {
   if (!text) return "";
-  return text.replace(/₹\s?/g, "INR ").replace(/•/g, "-");
+  return text
+    .replace(/₹\s?/g, "INR ")
+    .replace(/•/g, "-")
+    .replace(/\*\*(.*?)\*\*/g, "$1")
+    .replace(/\*(.*?)\*/g, "$1")
+    .replace(/`(.*?)`/g, "$1")
+    .replace(/\*\*/g, "");
 }
 
 export function generateContractPdf(
