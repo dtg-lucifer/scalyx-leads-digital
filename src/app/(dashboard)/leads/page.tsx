@@ -105,6 +105,26 @@ export default function LeadsPage() {
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedPortalUrl, setCopiedPortalUrl] = useState(false);
 
+  // Edit Lead Modal State
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    company: "",
+    roleTitle: "",
+    source: "Website" as LeadSource,
+    status: "New" as LeadStatus,
+    dealValue: 0,
+    revenueCollected: 0,
+    currency: "INR",
+    portalAccessCode: "",
+    notes: "",
+    remarks: "",
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+
   // Edit Drawer State
   const [editStatus, setEditStatus] = useState<LeadStatus>("New");
   const [editRevenue, setEditRevenue] = useState(0);
@@ -174,6 +194,84 @@ export default function LeadsPage() {
       console.error(err);
     } finally {
       setSavingDrawer(false);
+    }
+  };
+
+  const handleOpenEdit = (lead: Lead) => {
+    setEditingLead(lead);
+    setEditForm({
+      name: lead.name || "",
+      email: lead.email || "",
+      phone: lead.phone || "",
+      company: lead.company || "",
+      roleTitle: lead.roleTitle || "",
+      source: lead.source || "Website",
+      status: lead.status || "New",
+      dealValue: lead.dealValue ?? 0,
+      revenueCollected: lead.revenueCollected ?? 0,
+      currency: lead.currency || "INR",
+      portalAccessCode: lead.portalAccessCode || "",
+      notes: lead.notes || "",
+      remarks: lead.remarks || "",
+    });
+    setIsEditOpen(true);
+  };
+
+  const generateNewPortalCode = () => {
+    const randomChars = Math.random().toString(36).substring(2, 8);
+    setEditForm((prev) => ({
+      ...prev,
+      portalAccessCode: `scalyx-${randomChars}`,
+    }));
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLead) return;
+    if (!editForm.name.trim() || !editForm.email.trim()) {
+      alert("Client name and email address are required.");
+      return;
+    }
+
+    try {
+      setSavingEdit(true);
+      const res = await fetch(`/api/leads/${editingLead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          email: editForm.email.trim(),
+          phone: editForm.phone.trim(),
+          company: editForm.company.trim(),
+          roleTitle: editForm.roleTitle.trim(),
+          source: editForm.source,
+          status: editForm.status,
+          dealValue: Number(editForm.dealValue) || 0,
+          revenueCollected: Number(editForm.revenueCollected) || 0,
+          currency: editForm.currency.trim() || "INR",
+          portalAccessCode: editForm.portalAccessCode.trim(),
+          notes: editForm.notes.trim(),
+          remarks: editForm.remarks.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.lead) {
+        setLeads((prev) =>
+          prev.map((l) => (l.id === editingLead.id ? { ...l, ...data.lead } : l))
+        );
+        setSelectedLead((prev) =>
+          prev && prev.id === editingLead.id ? { ...prev, ...data.lead } : prev
+        );
+        setIsEditOpen(false);
+        setEditingLead(null);
+      } else {
+        alert(data.error || "Failed to update lead details.");
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err?.message || "Failed to save lead updates.");
+    } finally {
+      setSavingEdit(false);
     }
   };
 
@@ -601,6 +699,16 @@ export default function LeadsPage() {
                               type="button"
                               variant="ghost"
                               size="icon"
+                              onClick={() => handleOpenEdit(lead)}
+                              title="Edit Lead Details"
+                              className="size-7 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg"
+                            >
+                              <Edit2 className="size-3.5" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
                               onClick={() => handleOpenDetails(lead)}
                               title="Open Relational Drawer"
                               className="size-7 text-muted-foreground hover:text-foreground rounded-lg"
@@ -788,6 +896,255 @@ export default function LeadsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Lead Dialog Modal */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="w-[94vw] sm:max-w-xl md:max-w-2xl bg-card rounded-2xl border border-border/80 shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <Edit2 className="size-3.5" />
+                </div>
+                <span>Edit Client Lead</span>
+              </div>
+              {editingLead && (
+                <Badge variant="outline" className="text-[10px] font-mono font-normal">
+                  ID: {editingLead.id.slice(0, 10)}...
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveEdit} className="space-y-4 mt-2">
+            {/* 1. Basic Info: Name & Company */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Client Full Name <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  required
+                  placeholder="e.g. Vikram Singhania"
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Company / Organization
+                </label>
+                <Input
+                  placeholder="e.g. Singhania Tech Ltd"
+                  value={editForm.company}
+                  onChange={(e) => setEditForm({ ...editForm, company: e.target.value })}
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+            </div>
+
+            {/* 2. Contact: Email, Phone, Role */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Email Address <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  required
+                  type="email"
+                  placeholder="vikram@singhaniatech.com"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="h-9 text-xs rounded-lg font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Phone / WhatsApp
+                </label>
+                <Input
+                  placeholder="+91 98200 55443"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Role / Designation
+                </label>
+                <Input
+                  placeholder="e.g. Founder & CEO"
+                  value={editForm.roleTitle}
+                  onChange={(e) => setEditForm({ ...editForm, roleTitle: e.target.value })}
+                  className="h-9 text-xs rounded-lg"
+                />
+              </div>
+            </div>
+
+            {/* 3. Pipeline: Source, Status */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Lead Acquisition Source
+                </label>
+                <select
+                  value={editForm.source}
+                  onChange={(e) => setEditForm({ ...editForm, source: e.target.value as any })}
+                  className="w-full h-9 px-2.5 bg-card border border-input text-xs text-foreground focus:outline-none rounded-lg"
+                >
+                  {SOURCES.map((s) => (
+                    <option key={s} value={s} className="bg-card">{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Pipeline Status
+                </label>
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value as any })}
+                  className="w-full h-9 px-2.5 bg-card border border-input text-xs text-foreground focus:outline-none rounded-lg"
+                >
+                  <option value="New" className="bg-card">New</option>
+                  <option value="Contacted" className="bg-card">Contacted</option>
+                  <option value="Qualified" className="bg-card">Qualified</option>
+                  <option value="Proposal Sent" className="bg-card">Proposal Sent</option>
+                  <option value="Won" className="bg-card">Won</option>
+                  <option value="Completed" className="bg-card">Completed</option>
+                  <option value="Lost" className="bg-card">Lost</option>
+                </select>
+              </div>
+            </div>
+
+            {/* 4. Financials: Deal Value, Revenue Collected, Currency */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-muted/20 border border-border/80 rounded-xl">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Deal Value ({editForm.currency || "INR"})
+                </label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.dealValue}
+                  onChange={(e) => setEditForm({ ...editForm, dealValue: parseFloat(e.target.value) || 0 })}
+                  className="h-9 text-xs font-mono rounded-lg bg-background"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-1">
+                  Revenue Collected ({editForm.currency || "INR"})
+                </label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={editForm.revenueCollected}
+                  onChange={(e) => setEditForm({ ...editForm, revenueCollected: parseFloat(e.target.value) || 0 })}
+                  className="h-9 text-xs font-mono font-bold rounded-lg bg-background text-emerald-600 dark:text-emerald-400"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Currency Code
+                </label>
+                <Input
+                  value={editForm.currency}
+                  onChange={(e) => setEditForm({ ...editForm, currency: e.target.value.toUpperCase() })}
+                  placeholder="INR, USD, EUR..."
+                  className="h-9 text-xs font-mono rounded-lg bg-background uppercase"
+                />
+              </div>
+            </div>
+
+            {/* 5. Client Portal Password */}
+            <div className="p-3 border border-border/80 bg-muted/20 rounded-xl space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                  <KeyRound className="size-3.5 text-primary" />
+                  <span>Client Portal Access Password</span>
+                </label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={generateNewPortalCode}
+                  className="h-6 text-[11px] gap-1 text-primary hover:text-primary hover:bg-primary/10 px-2"
+                >
+                  <Sparkles className="size-3" />
+                  <span>Randomize</span>
+                </Button>
+              </div>
+              <Input
+                value={editForm.portalAccessCode}
+                onChange={(e) => setEditForm({ ...editForm, portalAccessCode: e.target.value })}
+                placeholder="pass-1234 or custom password"
+                className="h-9 text-xs font-mono rounded-lg bg-background"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                This password allows the client to access their private progress hub and deliverables.
+              </p>
+            </div>
+
+            {/* 6. Notes & Remarks */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Scope & Requirements Notes
+                </label>
+                <Textarea
+                  rows={2}
+                  placeholder="Technical scope, requirements, milestone details..."
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                  className="text-xs rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                  Remarks & Follow-up Details
+                </label>
+                <Textarea
+                  rows={2}
+                  placeholder="Key requirements, agreed milestones, follow-up timeline..."
+                  value={editForm.remarks}
+                  onChange={(e) => setEditForm({ ...editForm, remarks: e.target.value })}
+                  className="text-xs rounded-lg"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="mt-4 pt-2 border-t border-border flex items-center justify-between sm:justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditOpen(false)}
+                className="rounded-lg"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={savingEdit}
+                className="font-semibold rounded-lg gap-1.5"
+              >
+                <Save className="size-3.5" />
+                <span>{savingEdit ? "Saving..." : "Save Changes"}</span>
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Slide-Over Drawer for Selected Lead */}
       <Sheet open={Boolean(selectedLead)} onOpenChange={(open) => !open && setSelectedLead(null)}>
         <SheetContent className="overflow-y-auto bg-card border-l border-border/80 p-0 rounded-l-2xl w-full max-w-2xl">
@@ -795,11 +1152,23 @@ export default function LeadsPage() {
             <div className="flex flex-col h-full">
               {/* Drawer Header */}
               <div className="p-6 border-b border-border/80 bg-muted/20">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className="text-primary border-primary/20 text-[10px] rounded-full font-semibold">
-                    Client Hub
-                  </Badge>
-                  <span className="text-[11px] font-mono text-muted-foreground">ID: {selectedLead.id}</span>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-primary border-primary/20 text-[10px] rounded-full font-semibold">
+                      Client Hub
+                    </Badge>
+                    <span className="text-[11px] font-mono text-muted-foreground">ID: {selectedLead.id}</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpenEdit(selectedLead)}
+                    className="h-7 text-xs font-semibold gap-1.5 rounded-lg border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    <Edit2 className="size-3" />
+                    <span>Edit Lead</span>
+                  </Button>
                 </div>
 
                 <h2 className="text-xl font-bold text-foreground">{selectedLead.name}</h2>

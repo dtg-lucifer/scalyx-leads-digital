@@ -394,6 +394,19 @@ export const supabaseDb = {
       .maybeSingle();
 
     if (error || !data) return null;
+
+    if (updates.portalAccessCode) {
+      try {
+        const portalPasswordHash = await hashPassword(updates.portalAccessCode);
+        await supabaseAdmin
+          .from('client_portals')
+          .update({ password_hash: portalPasswordHash })
+          .eq('lead_id', id);
+      } catch (syncErr) {
+        console.error('Failed to sync client portal password hash:', syncErr);
+      }
+    }
+
     return mapLeadFromDb(data);
   },
 
