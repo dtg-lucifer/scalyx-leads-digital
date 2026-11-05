@@ -700,11 +700,10 @@ export default function ContractBuilderPage() {
                 key={p.id}
                 type="button"
                 onClick={() => handleSelectPreset(p.id)}
-                className={`px-3 py-1.5 text-xs font-semibold border rounded-lg transition-all flex items-center gap-1.5 ${
-                  activePreset === p.id
+                className={`px-3 py-1.5 text-xs font-semibold border rounded-lg transition-all flex items-center gap-1.5 ${activePreset === p.id
                     ? "bg-primary text-primary-foreground border-primary"
                     : "bg-muted/30 border-border text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                }`}
+                  }`}
               >
                 <span>{p.name.split("(")[0].trim()}</span>
               </button>
@@ -748,11 +747,10 @@ export default function ContractBuilderPage() {
               <button
                 type="button"
                 onClick={() => setViewMode("split")}
-                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${
-                  viewMode === "split"
+                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${viewMode === "split"
                     ? "bg-card text-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
                 title="Split Visual Editor & Live Preview"
               >
                 <Columns2 className="size-3.5" />
@@ -761,11 +759,10 @@ export default function ContractBuilderPage() {
               <button
                 type="button"
                 onClick={() => setViewMode("editor")}
-                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
-                  viewMode === "editor"
+                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "editor"
                     ? "bg-card text-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
                 title="Visual Block Editor Only"
               >
                 <FileCode className="size-3.5" />
@@ -774,11 +771,10 @@ export default function ContractBuilderPage() {
               <button
                 type="button"
                 onClick={() => setViewMode("preview")}
-                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${
-                  viewMode === "preview"
+                className={`p-1 px-2.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "preview"
                     ? "bg-card text-foreground shadow-xs font-bold"
                     : "text-muted-foreground hover:text-foreground"
-                }`}
+                  }`}
                 title="Live A4 Document Preview Only"
               >
                 <LayoutGrid className="size-3.5" />
@@ -792,13 +788,12 @@ export default function ContractBuilderPage() {
         <div className="grid grid-cols-12 grid-rows-1 gap-3.5 items-stretch flex-1 min-h-0 h-full overflow-hidden">
           {/* Left Column: Visual Block Editor */}
           <div
-            className={`${
-              viewMode === "split"
+            className={`${viewMode === "split"
                 ? "col-span-12 lg:col-span-6 2xl:col-span-6"
                 : viewMode === "editor"
-                ? "col-span-12"
-                : "hidden"
-            } bg-card border border-border/80 rounded-xl p-3 flex flex-col h-full min-h-0 overflow-hidden shadow-xs`}
+                  ? "col-span-12"
+                  : "hidden"
+              } bg-card border border-border/80 rounded-xl p-3 flex flex-col h-full min-h-0 overflow-hidden shadow-xs`}
           >
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/70 shrink-0">
               <div className="flex items-center gap-2">
@@ -829,13 +824,12 @@ export default function ContractBuilderPage() {
 
           {/* Right Column: Minimal Elegant Live Preview */}
           <div
-            className={`${
-              viewMode === "split"
+            className={`${viewMode === "split"
                 ? "col-span-12 lg:col-span-6 2xl:col-span-6"
                 : viewMode === "preview"
-                ? "col-span-12"
-                : "hidden"
-            } bg-card border border-border/80 rounded-xl p-3 flex flex-col h-full min-h-0 overflow-hidden shadow-xs`}
+                  ? "col-span-12"
+                  : "hidden"
+              } bg-card border border-border/80 rounded-xl p-3 flex flex-col h-full min-h-0 overflow-hidden shadow-xs`}
           >
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/70 shrink-0">
               <div className="flex items-center gap-2">
@@ -908,11 +902,10 @@ export default function ContractBuilderPage() {
                     key={cat}
                     type="button"
                     onClick={() => setCatalogCategory(cat)}
-                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors shrink-0 ${
-                      catalogCategory === cat
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors shrink-0 ${catalogCategory === cat
                         ? "bg-primary text-primary-foreground shadow-xs"
                         : "bg-muted/40 text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                   >
                     {cat}
                   </button>
@@ -974,7 +967,7 @@ export default function ContractBuilderPage() {
 
       {/* 2. Password-Protected Export / Download Modal */}
       <Dialog open={isDownloadModalOpen} onOpenChange={setIsDownloadModalOpen}>
-        <DialogContent className="max-w-md p-0 overflow-hidden rounded-2xl border-border">
+        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-2xl border-border">
           <DialogHeader className="p-5 pb-3 border-b border-border/70 bg-muted/20">
             <div className="flex items-center gap-2">
               <div className="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
@@ -1161,11 +1154,10 @@ export default function ContractBuilderPage() {
             <div className="w-full md:w-[480px] shrink-0 p-5 sm:p-6 space-y-4 overflow-y-auto bg-card scrollbar-thin flex flex-col">
               {emailStatusMessage && (
                 <div
-                  className={`p-3 rounded-xl text-xs flex items-center gap-2 ${
-                    emailStatusMessage.type === "success"
+                  className={`p-3 rounded-xl text-xs flex items-center gap-2 ${emailStatusMessage.type === "success"
                       ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
                       : "bg-destructive/10 text-destructive border border-destructive/20"
-                  }`}
+                    }`}
                 >
                   {emailStatusMessage.type === "success" ? (
                     <CheckCircle2 className="size-4 shrink-0" />
@@ -1328,11 +1320,10 @@ export default function ContractBuilderPage() {
                   <button
                     type="button"
                     onClick={() => setEmailPreviewDevice("desktop")}
-                    className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 ${
-                      emailPreviewDevice === "desktop"
+                    className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 ${emailPreviewDevice === "desktop"
                         ? "bg-card text-foreground shadow-2xs font-semibold"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                     title="Desktop Preview (600px)"
                   >
                     <Monitor className="size-3.5" />
@@ -1341,11 +1332,10 @@ export default function ContractBuilderPage() {
                   <button
                     type="button"
                     onClick={() => setEmailPreviewDevice("mobile")}
-                    className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 ${
-                      emailPreviewDevice === "mobile"
+                    className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 ${emailPreviewDevice === "mobile"
                         ? "bg-card text-foreground shadow-2xs font-semibold"
                         : "text-muted-foreground hover:text-foreground"
-                    }`}
+                      }`}
                     title="Mobile Preview (375px)"
                   >
                     <Smartphone className="size-3.5" />
@@ -1363,11 +1353,10 @@ export default function ContractBuilderPage() {
                   </div>
                 ) : (
                   <div
-                    className={`transition-all duration-300 w-full bg-white shadow-xl border border-border/80 rounded-none overflow-hidden my-auto ${
-                      emailPreviewDevice === "mobile"
+                    className={`transition-all duration-300 w-full bg-white shadow-xl border border-border/80 rounded-none overflow-hidden my-auto ${emailPreviewDevice === "mobile"
                         ? "max-w-[375px] border-4 border-slate-800 rounded-2xl shadow-2xl"
                         : "max-w-[600px]"
-                    }`}
+                      }`}
                   >
                     <iframe
                       srcDoc={emailPreviewHtml}
