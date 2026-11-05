@@ -318,16 +318,16 @@ export default function DeliverablesPage() {
 
         {/* Items Table */}
         <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full min-w-[950px] text-left border-collapse text-xs">
+          <div className="overflow-x-auto w-full scrollbar-thin">
+            <table className="w-full min-w-[1080px] text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-border bg-muted/30 font-semibold text-muted-foreground text-xs">
-                  <th className="py-3.5 px-4 min-w-[200px]">Asset Title & File</th>
-                  <th className="py-3.5 px-4 min-w-[150px]">Client / Lead</th>
-                  <th className="py-3.5 px-4 min-w-[140px]">Downloads</th>
-                  <th className="py-3.5 px-4 min-w-[170px]">Retention Countdown</th>
-                  <th className="py-3.5 px-4 min-w-[110px]">Status</th>
-                  <th className="py-3.5 px-4 w-32 text-right">Actions</th>
+                  <th className="py-3.5 px-4 min-w-[280px]">Asset Title & File</th>
+                  <th className="py-3.5 px-4 min-w-[200px] whitespace-nowrap">Client / Lead</th>
+                  <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Downloads</th>
+                  <th className="py-3.5 px-4 min-w-[200px] whitespace-nowrap">Retention Countdown</th>
+                  <th className="py-3.5 px-4 min-w-[130px] whitespace-nowrap">Status</th>
+                  <th className="py-3.5 px-4 w-32 text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

@@ -19,8 +19,8 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
       data.font === "roboto"
         ? "font-sans"
         : data.font === "poppins"
-        ? "font-sans"
-        : "font-mono";
+          ? "font-sans"
+          : "font-mono";
 
     const formatCurrency = (val: number) => {
       if (val === undefined || val === null || isNaN(val)) return `${data.currencySymbol} 0.00`;
@@ -66,7 +66,7 @@ export const InvoicePreview = forwardRef<HTMLDivElement, InvoicePreviewProps>(
                   <div className="relative size-12 rounded-none overflow-hidden shadow-xs shrink-0 bg-transparent">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={data.company.logoUrl || "/assets/scalyx_light.png"}
+                      src={data.company.logoUrl || "/assets/scalyx_dark.png"}
                       alt={data.company.name}
                       className="w-full h-full object-contain rounded-none"
                     />

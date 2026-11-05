@@ -40,7 +40,7 @@ export interface InvoiceData {
 
 export const SCALYX_DEFAULTS: CompanyDetails = {
   name: "Scalyx",
-  logoUrl: "/assets/scalyx_light.png",
+  logoUrl: "/assets/scalyx_dark.png",
   website: "https://scalyx.in",
   email: "contact@scalyx.in",
   phone: "+91-89271-24748",

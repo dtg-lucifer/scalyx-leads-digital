@@ -454,21 +454,21 @@ export default function LeadsPage() {
 
         {/* Excel-like Relational Table View */}
         <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
-          <div className="overflow-x-auto w-full">
-            <table className="w-full min-w-[1150px] text-left border-collapse text-xs">
+          <div className="overflow-x-auto w-full scrollbar-thin">
+            <table className="w-full min-w-[1260px] text-left border-collapse text-xs">
               <thead>
                 <tr className="border-b border-border bg-muted/30 font-semibold text-muted-foreground text-xs">
                   <th className="py-3.5 px-4 w-12 text-center">#</th>
-                  <th className="py-3.5 px-4 min-w-[200px]">Client / Lead</th>
-                  <th className="py-3.5 px-4 min-w-[130px]">Source</th>
-                  <th className="py-3.5 px-4 min-w-[120px]">Status</th>
-                  <th className="py-3.5 px-4 min-w-[120px] text-right">Deal Value</th>
-                  <th className="py-3.5 px-4 min-w-[130px] text-right font-bold text-emerald-600 dark:text-emerald-400">
+                  <th className="py-3.5 px-4 min-w-[280px]">Client / Lead</th>
+                  <th className="py-3.5 px-4 min-w-[140px] whitespace-nowrap">Source</th>
+                  <th className="py-3.5 px-4 min-w-[120px] whitespace-nowrap">Status</th>
+                  <th className="py-3.5 px-4 min-w-[130px] text-right whitespace-nowrap">Deal Value</th>
+                  <th className="py-3.5 px-4 min-w-[140px] text-right font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                     Revenue Recv
                   </th>
-                  <th className="py-3.5 px-4 min-w-[220px]">Relations Hub</th>
-                  <th className="py-3.5 px-4 min-w-[160px]">Remarks</th>
-                  <th className="py-3.5 px-4 w-24 text-right">Actions</th>
+                  <th className="py-3.5 px-4 min-w-[250px] whitespace-nowrap">Relations Hub</th>
+                  <th className="py-3.5 px-4 min-w-[180px]">Remarks</th>
+                  <th className="py-3.5 px-4 w-28 text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -517,26 +517,32 @@ export default function LeadsPage() {
                           {String(idx + 1).padStart(2, "0")}
                         </td>
 
-                        {/* Client details */}
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {/* Client details - Spacious & non-squished */}
+                        <td className="py-3.5 px-4 min-w-[280px]">
+                          <div className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors leading-tight">
                             {lead.name}
                           </div>
-                          <div className="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                            {lead.company && <span>{lead.company} •</span>}
-                            <span>{lead.email}</span>
+                          <div className="mt-1 space-y-0.5">
+                            {lead.company && (
+                              <div className="text-[11px] font-medium text-foreground/80 leading-snug">
+                                {lead.company}
+                              </div>
+                            )}
+                            <div className="text-[11px] text-muted-foreground font-mono">
+                              {lead.email}
+                            </div>
                           </div>
                         </td>
 
                         {/* Source */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <Badge variant="outline" className="text-[11px] font-normal rounded-full">
                             {lead.source}
                           </Badge>
                         </td>
 
                         {/* Status */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 text-[11px] font-semibold border rounded-full ${statusCfg.color} ${statusCfg.bg}`}
                           >
@@ -545,18 +551,18 @@ export default function LeadsPage() {
                         </td>
 
                         {/* Deal Value */}
-                        <td className="py-3.5 px-4 text-right font-mono font-medium text-foreground">
+                        <td className="py-3.5 px-4 text-right font-mono font-medium text-foreground whitespace-nowrap">
                           ₹{Number(lead.dealValue).toLocaleString("en-IN")}
                         </td>
 
                         {/* Revenue Collected */}
-                        <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                        <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
                           ₹{Number(lead.revenueCollected).toLocaleString("en-IN")}
                         </td>
 
                         {/* Relational Hub Badges */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-1.5 flex-wrap">
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5 flex-nowrap">
                             <span
                               title="Connected Documents in Drive"
                               className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-muted/60 border border-border text-[11px] text-muted-foreground rounded-full"
@@ -584,12 +590,12 @@ export default function LeadsPage() {
                         </td>
 
                         {/* Remarks */}
-                        <td className="py-3.5 px-4 text-muted-foreground truncate max-w-[180px]" title={lead.remarks || ""}>
+                        <td className="py-3.5 px-4 text-muted-foreground max-w-[200px] truncate" title={lead.remarks || ""}>
                           {lead.remarks || <span className="italic text-muted-foreground/60">—</span>}
                         </td>
 
                         {/* Action */}
-                        <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center justify-end gap-1">
                             <Button
                               type="button"

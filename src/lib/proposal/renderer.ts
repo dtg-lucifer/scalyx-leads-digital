@@ -1,4 +1,4 @@
-import { SCALYX_LOGO_DATA_URI } from "@/lib/email/logo";
+import { SCALYX_LOGO_DATA_URI } from "@/lib/branding";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
@@ -318,31 +318,52 @@ export const PROPOSAL_STYLESHEET = `
   }
   .proposal-table {
     width: 100%;
-    border-collapse: collapse;
-    margin: 18px 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 20px 0;
     font-size: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
   }
   .proposal-table th {
     background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 8px 12px;
-    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    font-weight: 700;
     color: #0f172a;
     text-align: left;
-    font-size: 10.5px;
+    font-size: 11px;
     letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .proposal-table th:last-child {
+    border-right: none;
   }
   .proposal-table td {
-    border: 1px solid #e2e8f0;
-    padding: 9px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    padding: 10px 14px;
     color: #334155;
     vertical-align: top;
-    line-height: 1.55;
+    line-height: 1.6;
+  }
+  .proposal-table td:last-child {
+    border-right: none;
+  }
+  .proposal-table tr:last-child td {
+    border-bottom: none;
+  }
+  .proposal-table tr:nth-child(even) td {
+    background-color: #fafbfc;
   }
   .table-total-row td {
-    background-color: #f8fafc;
+    background-color: #f8fafc !important;
     border-top: 2px solid #0f172a;
-    font-weight: 600;
+    font-weight: 700;
+    color: #0f172a;
   }
   .tech-chip {
     display: inline-block;
@@ -765,23 +786,50 @@ export function preprocessProposalDirectives(
 ): string {
   let md = rawMd;
 
-  // 1. Header: supports single-line "::: header", "::: header :::", multiline, or "<Header />"
+  // 1. Header: supports single-line or multi-line custom parameters
   md = md.replace(
-    /(?:^:::\s*header\b[^\n]*(?:\r?\n:::\s*)?|<Header\s*\/?>|<Header>[\s\S]*?<\/Header>)/gm,
-    () => {
+    /(?:^:::\s*header\b([\s\S]*?)(?:^:::|:::\s*$)|<Header\s*\/?>|<Header>([\s\S]*?)<\/Header>)/gm,
+    (_match, body1, body2) => {
+      const body = (body1 || body2 || "").replace(/:::\s*$/, "").trim();
+      let brandTitle = "Scalyx";
+      let brandSubtitle = "CUSTOM SOFTWARE DEVELOPMENT & CLOUD SYSTEMS";
+      let web = "scalyx.in";
+      let email = "contact@scalyx.in";
+      let helpline = "+91 8927124748";
+      let helplineNote = "(Call & WhatsApp)";
+
+      if (body) {
+        for (const rawLine of body.split("\n")) {
+          const line = rawLine.trim();
+          if (/^(?:brand|brandTitle|company):/i.test(line)) {
+            brandTitle = line.replace(/^(?:brand|brandTitle|company):\s*/i, "").trim();
+          } else if (/^(?:subtitle|brandSubtitle|tagline):/i.test(line)) {
+            brandSubtitle = line.replace(/^(?:subtitle|brandSubtitle|tagline):\s*/i, "").trim();
+          } else if (/^(?:web|website):/i.test(line)) {
+            web = line.replace(/^(?:web|website):\s*/i, "").trim();
+          } else if (/^email:/i.test(line)) {
+            email = line.replace(/^email:\s*/i, "").trim();
+          } else if (/^helpline:/i.test(line)) {
+            helpline = line.replace(/^helpline:\s*/i, "").trim();
+          } else if (/^(?:helplineNote|callNote):/i.test(line)) {
+            helplineNote = line.replace(/^(?:helplineNote|callNote):\s*/i, "").trim();
+          }
+        }
+      }
+
       return register(`
 <div class="proposal-header">
   <div class="proposal-header-left">
-    <img src="/assets/scalyx_light.png" alt="Scalyx Logo" class="proposal-logo-img" onerror="this.onerror=null;this.src='${SCALYX_LOGO_DATA_URI}';" />
+    <img src="/assets/scalyx_dark.png" alt="${brandTitle} Logo" class="proposal-logo-img" onerror="this.onerror=null;this.src='${SCALYX_LOGO_DATA_URI}';" />
     <div>
-      <div class="proposal-brand-title">Scalyx</div>
-      <div class="proposal-brand-subtitle">CUSTOM SOFTWARE DEVELOPMENT & CLOUD SYSTEMS</div>
+      <div class="proposal-brand-title">${brandTitle}</div>
+      <div class="proposal-brand-subtitle">${brandSubtitle}</div>
     </div>
   </div>
   <div class="proposal-header-right">
-    <div><strong>Web:</strong> scalyx.in</div>
-    <div><strong>Email:</strong> contact@scalyx.in</div>
-    <div><strong>Helpline:</strong> +91 8927124748 <span class="text-muted">(Call & WhatsApp)</span></div>
+    <div><strong>Web:</strong> ${web}</div>
+    <div><strong>Email:</strong> ${email}</div>
+    <div><strong>Helpline:</strong> ${helpline} ${helplineNote ? `<span class="text-muted">${helplineNote}</span>` : ""}</div>
   </div>
 </div>
 `);
@@ -886,8 +934,8 @@ export function preprocessProposalDirectives(
 
       const badgeHtml =
         badge &&
-        badge.toLowerCase() !== "none" &&
-        badge.toLowerCase() !== "false"
+          badge.toLowerCase() !== "none" &&
+          badge.toLowerCase() !== "false"
           ? `<span class="proposal-badge-confidential">${badge}</span>`
           : "";
 
@@ -1014,9 +1062,8 @@ export function preprocessProposalDirectives(
 
           const arrow =
             i < nodes.length - 1 ? '<span class="pipeline-arrow">➔</span>' : "";
-          return `<span class="${nodeClass}">${node}</span>${
-            arrow ? ` ${arrow}` : ""
-          }`;
+          return `<span class="${nodeClass}">${node}</span>${arrow ? ` ${arrow}` : ""
+            }`;
         })
         .join(" ");
 
@@ -1395,15 +1442,32 @@ export function preprocessProposalDirectives(
     },
   );
 
-  // 13. Running Footer
+  // 13. Running Footer: supports custom left and right text
   md = md.replace(
-    /(?:^:::\s*footer\b[^\n]*(?:\r?\n:::\s*)?|<Footer\s*\/?>)/gm,
-    () => `
+    /(?:^:::\s*footer\b([\s\S]*?)(?:^:::|:::\s*$)|<Footer\s*\/?>|<Footer>([\s\S]*?)<\/Footer>)/gm,
+    (_match, body1, body2) => {
+      const body = (body1 || body2 || "").replace(/:::\s*$/, "").trim();
+      let textLeft = "Scalyx Architectural Blueprint & Engineering Proposal &bull; Confidential";
+      let textRight = "Page Fit: A4 Standard &bull; scalyx.in";
+
+      if (body) {
+        for (const rawLine of body.split("\n")) {
+          const line = rawLine.trim();
+          if (/^(?:textLeft|left|confidential):/i.test(line)) {
+            textLeft = line.replace(/^(?:textLeft|left|confidential):\s*/i, "").trim();
+          } else if (/^(?:textRight|right|pageFit):/i.test(line)) {
+            textRight = line.replace(/^(?:textRight|right|pageFit):\s*/i, "").trim();
+          }
+        }
+      }
+
+      return `
 <div class="proposal-running-footer">
-  <span>Scalyx Architectural Blueprint & Engineering Proposal &bull; Confidential</span>
-  <span>Page Fit: A4 Standard &bull; scalyx.in</span>
+  <span>${textLeft}</span>
+  <span>${textRight}</span>
 </div>
-`,
+`;
+    },
   );
 
   return md;

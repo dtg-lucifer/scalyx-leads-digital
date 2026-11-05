@@ -2,7 +2,6 @@
 
 import {
   AlertCircle,
-  Bold,
   Check,
   CheckCircle2,
   Code2,
@@ -10,28 +9,22 @@ import {
   Copy,
   Download,
   Eye,
-  Heading1,
-  Heading2,
-  Heading3,
-  Italic,
+  FileCode,
   Layers,
   LayoutTemplate,
-  List,
-  ListOrdered,
   Monitor,
   PanelLeft,
   PanelLeftClose,
   PenLine,
   Plus,
   Printer,
-  Quote,
   RefreshCw,
   Search,
   Sparkles,
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppNavbar } from "@/components/layout/AppNavbar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,26 +46,41 @@ import {
   PROPOSAL_SNIPPETS,
   type ProposalSnippet,
 } from "@/lib/proposal/snippets";
+import {
+  ProposalBlock,
+  blocksToMarkdown,
+  createBlockFromSnippet,
+  generateBlockId,
+  markdownToBlocks,
+} from "@/lib/proposal/blocks";
+import { VisualBlockEditor } from "@/components/proposal/VisualBlockEditor";
 import type { Lead } from "@/types/lead";
 
 export default function ProposalsPage() {
   const [selectedPresetId, setSelectedPresetId] = useState("lexconnect");
-  const [markdown, setMarkdown] = useState<string>(LEXCONNECT_FULL_PROPOSAL);
+  const [blocks, setBlocks] = useState<ProposalBlock[]>(() =>
+    markdownToBlocks(LEXCONNECT_FULL_PROPOSAL),
+  );
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [previewDocHeight, setPreviewDocHeight] = useState<number>(1400);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [showSnippets, setShowSnippets] = useState<boolean>(false);
   const [isSignoffModalOpen, setIsSignoffModalOpen] = useState<boolean>(false);
-  const [isComponentCatalogOpen, setIsComponentCatalogOpen] = useState<boolean>(false);
+  const [isComponentCatalogOpen, setIsComponentCatalogOpen] =
+    useState<boolean>(false);
+  const [isRawMarkdownModalOpen, setIsRawMarkdownModalOpen] =
+    useState<boolean>(false);
+
   const [signoffClientName, setSignoffClientName] = useState<string>("");
   const [signoffSignee, setSignoffSignee] = useState<string>("");
   const [signoffEmail, setSignoffEmail] = useState<string>("");
   const [signoffScope, setSignoffScope] = useState<string>(
-    "Full Technical Architecture & Turnkey Delivery"
+    "Full Technical Architecture & Turnkey Delivery",
   );
   const [signoffInvestment, setSignoffInvestment] = useState<string>(
-    "₹85,000 INR (2 Phases)"
+    "₹85,000 INR (2 Phases)",
   );
+
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [viewMode, setViewMode] = useState<"split" | "edit" | "preview">(
@@ -85,8 +93,12 @@ export default function ProposalsPage() {
     message: string;
   } | null>(null);
 
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Derive compiled markdown from visual blocks
+  const markdown = useMemo(() => {
+    return blocksToMarkdown(blocks);
+  }, [blocks]);
 
   // Fetch leads for autofill
   useEffect(() => {
@@ -102,7 +114,7 @@ export default function ProposalsPage() {
     loadLeads();
   }, []);
 
-  // Debounced proposal rendering
+  // Debounced proposal rendering into live A4 HTML
   useEffect(() => {
     let isCancelled = false;
     async function renderContent() {
@@ -151,50 +163,29 @@ export default function ProposalsPage() {
     setSelectedPresetId(presetId);
     const preset = PROPOSAL_PRESETS.find((p) => p.id === presetId);
     if (preset) {
-      setMarkdown(preset.markdown);
+      const parsedBlocks = markdownToBlocks(preset.markdown);
+      setBlocks(parsedBlocks);
       setNotification({
         type: "success",
-        message: `Loaded "${preset.name}" preset template!`,
+        message: `Loaded "${preset.name}" visual proposal template!`,
       });
       setTimeout(() => setNotification(null), 3000);
     }
   };
 
   const handleInsertSnippet = (snippet: ProposalSnippet) => {
-    // If inserting Sign-off & Acceptance Grid, open the dedicated customization modal
     if (snippet.id === "signoff_acceptance") {
       setIsComponentCatalogOpen(false);
       setIsSignoffModalOpen(true);
       return;
     }
 
-    const textarea = textareaRef.current;
-    if (!textarea) {
-      setMarkdown((prev) => `${prev}\n\n${snippet.markdown}\n`);
-      return;
-    }
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const current = textarea.value;
-
-    const before = current.substring(0, start);
-    const after = current.substring(end);
-
-    const insertion = `\n\n${snippet.markdown}\n\n`;
-    const newText = before + insertion + after;
-
-    setMarkdown(newText);
-
-    setTimeout(() => {
-      textarea.focus();
-      const newCursor = start + insertion.length;
-      textarea.setSelectionRange(newCursor, newCursor);
-    }, 50);
+    const newBlock = createBlockFromSnippet(snippet.id);
+    setBlocks((prev) => [...prev, newBlock]);
 
     setNotification({
       type: "success",
-      message: `Inserted "${snippet.name}" component!`,
+      message: `Added "${snippet.name}" component block!`,
     });
     setTimeout(() => setNotification(null), 2500);
   };
@@ -208,67 +199,27 @@ export default function ProposalsPage() {
     const investment =
       signoffInvestment.trim() || "As per agreed milestone schedule";
 
-    const customSignoffMd = `::: signoff
-- **Client Name:** ${clientName}
-- **Authorized Signee:** ${signee}
-- **Client Email:** ${email}
-- **Agreed Scope:** ${scope}
-- **Total Investment:** ${investment}
-- **Agency:** Scalyx
-- **Website:** https://scalyx.in
-- **Email:** contact@scalyx.in
-- **Helpline:** +91 8927124748 (Call & WhatsApp)
-:::`;
+    const signoffBlock: ProposalBlock = {
+      id: generateBlockId("signoff"),
+      type: "signoff",
+      clientName,
+      signee,
+      email,
+      scope,
+      investment,
+      agency: "Scalyx",
+      website: "https://scalyx.in",
+      agencyEmail: "contact@scalyx.in",
+      helpline: "+91 8927124748 (Call & WhatsApp)",
+    };
 
-    const textarea = textareaRef.current;
-    if (!textarea) {
-      setMarkdown((prev) => `${prev}\n\n${customSignoffMd}\n`);
-    } else {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const current = textarea.value;
-      const before = current.substring(0, start);
-      const after = current.substring(end);
-      const insertion = `\n\n${customSignoffMd}\n\n`;
-      setMarkdown(before + insertion + after);
-      setTimeout(() => {
-        textarea.focus();
-        const newCursor = start + insertion.length;
-        textarea.setSelectionRange(newCursor, newCursor);
-      }, 50);
-    }
-
+    setBlocks((prev) => [...prev, signoffBlock]);
     setIsSignoffModalOpen(false);
     setNotification({
       type: "success",
-      message: `Inserted customized Sign-off Grid for "${clientName}"!`,
+      message: `Added customized Sign-off Grid for "${clientName}"!`,
     });
     setTimeout(() => setNotification(null), 3000);
-  };
-
-  const handleFormat = (prefix: string, suffix: string = "") => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const current = textarea.value;
-    const selected = current.substring(start, end) || "text";
-
-    const newText =
-      current.substring(0, start) +
-      prefix +
-      selected +
-      suffix +
-      current.substring(end);
-
-    setMarkdown(newText);
-
-    setTimeout(() => {
-      textarea.focus();
-      const cursor = start + prefix.length + selected.length + suffix.length;
-      textarea.setSelectionRange(cursor, cursor);
-    }, 50);
   };
 
   const handleAutofillLead = (leadId: string) => {
@@ -282,48 +233,51 @@ export default function ProposalsPage() {
       year: "numeric",
     });
 
-    // Sync signoff modal states with selected lead
     setSignoffClientName(clientName);
     setSignoffSignee(lead.name || "");
     setSignoffEmail(lead.email || "");
-    if (lead.dealValue) {
-      const prefix = lead.currency === "USD" ? "$" : "₹";
-      setSignoffInvestment(
-        `${prefix}${lead.dealValue.toLocaleString("en-IN")}`
-      );
+    const prefix = lead.currency === "USD" ? "$" : "₹";
+    const formattedVal = lead.dealValue
+      ? `${prefix}${lead.dealValue.toLocaleString("en-IN")}`
+      : "";
+    if (formattedVal) {
+      setSignoffInvestment(`${formattedVal} (2 Phases)`);
     }
 
-    let updated = markdown;
-    updated = updated.replace(
-      /(\*\*(?:Client|Client Name|Authorized Client):\*\*)\s*([^\n]+)/gi,
-      `$1 ${clientName}`,
-    );
-    if (lead.name) {
-      updated = updated.replace(
-        /(\*\*(?:Authorized Signee|Representative):\*\*)\s*([^\n]+)/gi,
-        `$1 ${lead.name}`,
-      );
-    }
-    if (lead.email) {
-      updated = updated.replace(
-        /(\*\*(?:Client Email|Email):\*\*)\s*([^\n]+)/gi,
-        `$1 ${lead.email}`,
-      );
-    }
-    updated = updated.replace(/(\*\*Date:\*\*)\s*([^\n]+)/g, `$1 ${dateStr}`);
-    if (lead.dealValue) {
-      const prefix = lead.currency === "USD" ? "$" : "₹";
-      const formattedVal = `${prefix}${lead.dealValue.toLocaleString("en-IN")}`;
-      updated = updated.replace(
-        /(\*\*Total Investment:\*\*)\s*([^\n]+)/g,
-        `$1 ${formattedVal}`,
-      );
-    }
+    // Update matching visual blocks directly
+    setBlocks((prev) => {
+      return prev.map((block) => {
+        if (block.type === "title_meta") {
+          return {
+            ...block,
+            preparedFor: clientName,
+            date: dateStr,
+          };
+        }
+        if (block.type === "signoff") {
+          return {
+            ...block,
+            clientName,
+            signee: lead.name || block.signee,
+            email: lead.email || block.email,
+            investment: formattedVal
+              ? `${formattedVal} (Agreed Schedule)`
+              : block.investment,
+          };
+        }
+        if (block.type === "commercial_quotation" && formattedVal) {
+          return {
+            ...block,
+            totalInvestment: formattedVal,
+          };
+        }
+        return block;
+      });
+    });
 
-    setMarkdown(updated);
     setNotification({
       type: "success",
-      message: `Autofilled document metadata & sign-off for "${clientName}"!`,
+      message: `Autofilled document metadata & sign-off blocks for "${clientName}"!`,
     });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -346,7 +300,7 @@ export default function ProposalsPage() {
       type: "success",
       message:
         type === "md"
-          ? "Copied raw Markdown to clipboard!"
+          ? "Copied proposal Markdown to clipboard!"
           : "Copied compiled HTML document to clipboard!",
     });
     setTimeout(() => {
@@ -368,10 +322,9 @@ export default function ProposalsPage() {
   const categories = [
     "All",
     "Header & Meta",
-    "Structure",
-    "Technical",
-    "Financial",
-    "Legal & Close",
+    "Scope & Features",
+    "Architecture & Tech",
+    "Commercial & Sign-off",
   ];
 
   const filteredSnippets = PROPOSAL_SNIPPETS.filter((s) => {
@@ -383,9 +336,6 @@ export default function ProposalsPage() {
       s.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
-
-  const wordCount = markdown.trim().split(/\s+/).filter(Boolean).length;
-  const lineCount = markdown.split("\n").length;
 
   return (
     <div className="flex-1 flex flex-col h-full min-h-0 text-foreground bg-background overflow-hidden">
@@ -422,11 +372,10 @@ export default function ProposalsPage() {
             Please Open on Desktop
           </h2>
           <p className="text-xs text-muted-foreground leading-relaxed mb-6">
-            Proposal Studio is an architectural document compiler and blueprint
-            engineering workspace designed for desktop screens. To write
-            markdown, insert architecture components, and compile print-ready A4
-            PDF proposals, please access this page from a desktop or laptop
-            device.
+            Proposal Studio is a visual block editor and document compiler
+            designed for desktop screens. To configure visual components, drag
+            and reorder blocks, and compile print-ready A4 PDF proposals, please
+            access this page from a desktop device.
           </p>
           <div className="flex flex-col sm:flex-row gap-2.5 w-full">
             <Link
@@ -445,14 +394,25 @@ export default function ProposalsPage() {
         </div>
       </div>
 
-      {/* DESKTOP WORKSPACE (>= 1024px) - Strictly fits screen without outer scrolling */}
+      {/* DESKTOP WORKSPACE (>= 1024px) */}
       <div className="hidden lg:flex flex-col flex-1 min-h-0 h-full overflow-hidden">
         <div className="shrink-0">
           <AppNavbar
-            title="Proposal Studio & Architecture Blueprint Builder"
-            description="Live RemarkGFM Markdown editor with prestyled components for technical blueprints and milestone quotations."
+            title="Visual Proposal Studio & Architecture Blueprint Builder"
+            description="Drag-and-drop visual component blocks with intuitive fields. No Markdown syntax required."
             actions={
               <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsRawMarkdownModalOpen(true)}
+                  className="gap-1.5 text-xs font-semibold rounded-lg border-border"
+                  title="View / Copy compiled Markdown output"
+                >
+                  <FileCode className="size-3.5 text-primary" />
+                  <span>View Markdown</span>
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
@@ -462,7 +422,7 @@ export default function ProposalsPage() {
                   title="Print to PDF (A4 Page Fit)"
                 >
                   <Printer className="size-3.5" />
-                  <span>Print / Save as PDF</span>
+                  <span>Print / Save PDF</span>
                 </Button>
                 <Button
                   type="button"
@@ -511,7 +471,7 @@ export default function ProposalsPage() {
               ))}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {leads.length > 0 && (
                 <div className="flex items-center gap-1.5 text-xs">
                   <Users className="size-3.5 text-primary" />
@@ -589,7 +549,7 @@ export default function ProposalsPage() {
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
-                  title="Split Editor & Preview"
+                  title="Split Visual Editor & Live Preview"
                 >
                   <Columns2 className="size-3.5" />
                   <span>Split</span>
@@ -602,10 +562,10 @@ export default function ProposalsPage() {
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
-                  title="Editor Only"
+                  title="Visual Block Editor Only"
                 >
-                  <Code2 className="size-3.5" />
-                  <span>Editor</span>
+                  <LayoutTemplate className="size-3.5" />
+                  <span>Visual Editor</span>
                 </button>
                 <button
                   type="button"
@@ -615,7 +575,7 @@ export default function ProposalsPage() {
                       ? "bg-card text-foreground shadow-xs font-bold"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
-                  title="Live A4 Document Preview"
+                  title="Live A4 Document Preview Only"
                 >
                   <Eye className="size-3.5" />
                   <span>Preview</span>
@@ -624,7 +584,7 @@ export default function ProposalsPage() {
             </div>
           </div>
 
-          {/* Locked Grid Workspace: Editor and Preview scroll independently */}
+          {/* Locked Grid Workspace: Visual Block Editor & Preview scroll independently */}
           <div className="grid grid-cols-12 grid-rows-1 gap-3.5 items-stretch flex-1 min-h-0 h-full overflow-hidden">
             {/* Left Sidebar: Prestyled Component Palette */}
             {showSnippets && (
@@ -643,7 +603,7 @@ export default function ProposalsPage() {
                     </Badge>
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                    Click to insert markdown component block.
+                    Click Insert to add visual component block.
                   </p>
                 </div>
 
@@ -676,7 +636,7 @@ export default function ProposalsPage() {
                   ))}
                 </div>
 
-                {/* Snippets List: only this scrolls inside the palette */}
+                {/* Snippets List */}
                 <div className="space-y-1.5 pt-1 flex-1 min-h-0 overflow-y-auto pr-1">
                   {filteredSnippets.map((snippet) => (
                     <div
@@ -690,8 +650,8 @@ export default function ProposalsPage() {
                         <button
                           type="button"
                           onClick={() => handleInsertSnippet(snippet)}
-                          className="shrink-0 p-1 px-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-[10px] flex items-center gap-0.5"
-                          title="Insert snippet at cursor"
+                          className="shrink-0 p-1 px-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-[10px] flex items-center gap-0.5 font-semibold"
+                          title="Insert visual block"
                         >
                           <Plus className="size-3" />
                           <span>Insert</span>
@@ -706,7 +666,7 @@ export default function ProposalsPage() {
               </div>
             )}
 
-            {/* Middle Pane: Markdown Code Editor */}
+            {/* Middle Pane: FULLY VISUAL WYSIWYG BLOCK EDITOR */}
             {(viewMode === "split" || viewMode === "edit") && (
               <div
                 className={`${
@@ -715,112 +675,17 @@ export default function ProposalsPage() {
                       ? "col-span-9 xl:col-span-9 2xl:col-span-10"
                       : "col-span-12"
                     : showSnippets
-                      ? "col-span-4 xl:col-span-4 2xl:col-span-5"
+                      ? "col-span-5 xl:col-span-5 2xl:col-span-5"
                       : "col-span-6"
                 } bg-card border border-border/80 rounded-xl shadow-xs flex flex-col h-full min-h-0 overflow-hidden`}
               >
-                {/* Formatting Toolbar - Fixed at top of editor */}
-                <div className="p-2 border-b border-border bg-muted/20 flex flex-wrap items-center justify-between gap-2 shrink-0">
-                  <div className="flex items-center gap-0.5">
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("**", "**")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Bold (**text**)"
-                    >
-                      <Bold className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("*", "*")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Italic (*text*)"
-                    >
-                      <Italic className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("`", "`")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md font-mono text-xs font-bold px-2"
-                      title="Inline Code (`code`)"
-                    >
-                      `code`
-                    </button>
-                    <span className="text-border mx-1">|</span>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("# ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Heading 1"
-                    >
-                      <Heading1 className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("## ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Heading 2"
-                    >
-                      <Heading2 className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("### ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Heading 3"
-                    >
-                      <Heading3 className="size-3.5" />
-                    </button>
-                    <span className="text-border mx-1">|</span>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("- ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Bullet list"
-                    >
-                      <List className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("1. ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Numbered list"
-                    >
-                      <ListOrdered className="size-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleFormat("> ", "")}
-                      className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-md"
-                      title="Blockquote"
-                    >
-                      <Quote className="size-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
-                    <span>{wordCount} words</span>
-                    <span>•</span>
-                    <span>{lineCount} lines</span>
-                    <button
-                      type="button"
-                      onClick={handleDownloadMd}
-                      className="p-1 hover:text-foreground rounded-md"
-                      title="Download .md file"
-                    >
-                      <Download className="size-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Textarea Editor: strictly scrolls inside the editor */}
-                <Textarea
-                  ref={textareaRef}
-                  value={markdown}
-                  onChange={(e) => setMarkdown(e.target.value)}
-                  placeholder="Write your technical proposal in Markdown..."
-                  className="w-full font-mono text-xs p-4 rounded-b-xl border-none focus-visible:ring-0 flex-1 min-h-0 h-full resize-none leading-relaxed overflow-y-auto"
-                  spellCheck={false}
+                <VisualBlockEditor
+                  blocks={blocks}
+                  onChange={setBlocks}
+                  onInsertSnippet={(snippetId) => {
+                    const s = PROPOSAL_SNIPPETS.find((sp) => sp.id === snippetId);
+                    if (s) handleInsertSnippet(s);
+                  }}
                 />
               </div>
             )}
@@ -834,11 +699,11 @@ export default function ProposalsPage() {
                       ? "col-span-9 xl:col-span-9 2xl:col-span-10"
                       : "col-span-12"
                     : showSnippets
-                      ? "col-span-5 xl:col-span-5 2xl:col-span-5"
+                      ? "col-span-4 xl:col-span-4 2xl:col-span-5"
                       : "col-span-6"
                 } bg-card border border-border/80 rounded-xl shadow-xs flex flex-col h-full min-h-0 overflow-hidden`}
               >
-                {/* Preview Bar - Fixed at top of preview */}
+                {/* Preview Bar */}
                 <div className="p-2 border-b border-border bg-muted/20 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
                     <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -921,7 +786,8 @@ export default function ProposalsPage() {
               <span>Customize Client Sign-off & Acceptance Grid</span>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-              Specify the client details, authorized representative, scope, and total investment for this proposal document.
+              Specify the client details, authorized representative, scope, and
+              total investment for this proposal document.
             </DialogDescription>
           </DialogHeader>
 
@@ -936,20 +802,29 @@ export default function ProposalsPage() {
                 <select
                   defaultValue=""
                   onChange={(e) => {
-                    const selectedLead = leads.find((l) => l.id === e.target.value);
+                    const selectedLead = leads.find(
+                      (l) => l.id === e.target.value,
+                    );
                     if (selectedLead) {
-                      setSignoffClientName(selectedLead.company || selectedLead.name);
+                      setSignoffClientName(
+                        selectedLead.company || selectedLead.name,
+                      );
                       setSignoffSignee(selectedLead.name);
                       setSignoffEmail(selectedLead.email);
                       if (selectedLead.dealValue) {
-                        const prefix = selectedLead.currency === "USD" ? "$" : "₹";
-                        setSignoffInvestment(`${prefix}${selectedLead.dealValue.toLocaleString("en-IN")}`);
+                        const prefix =
+                          selectedLead.currency === "USD" ? "$" : "₹";
+                        setSignoffInvestment(
+                          `${prefix}${selectedLead.dealValue.toLocaleString("en-IN")}`,
+                        );
                       }
                     }
                   }}
                   className="w-full h-9 px-3 rounded-lg bg-background border border-input text-xs text-foreground focus:outline-none"
                 >
-                  <option value="" disabled>Select lead to auto-populate...</option>
+                  <option value="" disabled>
+                    Select lead to auto-populate...
+                  </option>
                   {leads.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.company || l.name} ({l.name} — {l.email})
@@ -1047,17 +922,24 @@ export default function ProposalsPage() {
       </Dialog>
 
       {/* 2. Component Catalog Dialog */}
-      <Dialog open={isComponentCatalogOpen} onOpenChange={setIsComponentCatalogOpen}>
+      <Dialog
+        open={isComponentCatalogOpen}
+        onOpenChange={setIsComponentCatalogOpen}
+      >
         <DialogContent className="w-[94vw] sm:max-w-2xl md:max-w-3xl bg-card rounded-2xl p-6 shadow-2xl max-h-[85vh] flex flex-col">
           <DialogHeader className="pb-3 border-b border-border/80 shrink-0">
             <DialogTitle className="text-base font-bold flex items-center justify-between text-foreground">
               <div className="flex items-center gap-2">
                 <Layers className="size-4 text-primary shrink-0" />
-                <span>Components Catalog ({PROPOSAL_SNIPPETS.length} Pre-Styled Blocks)</span>
+                <span>
+                  Components Catalog ({PROPOSAL_SNIPPETS.length} Pre-Styled
+                  Blocks)
+                </span>
               </div>
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5">
-              Click any component to insert it directly into your proposal at cursor position.
+              Click any component to insert it directly into your visual proposal
+              blocks flow.
             </DialogDescription>
           </DialogHeader>
 
@@ -1122,7 +1004,11 @@ export default function ProposalsPage() {
                       className="h-7 px-3 text-xs rounded-lg gap-1 font-semibold"
                     >
                       <Plus className="size-3" />
-                      <span>{snippet.id === "signoff_acceptance" ? "Configure & Insert" : "Insert"}</span>
+                      <span>
+                        {snippet.id === "signoff_acceptance"
+                          ? "Configure & Insert"
+                          : "Insert Block"}
+                      </span>
                     </Button>
                   </div>
                 </div>
@@ -1140,6 +1026,73 @@ export default function ProposalsPage() {
             >
               Close
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 3. View Compiled Markdown Code Modal */}
+      <Dialog
+        open={isRawMarkdownModalOpen}
+        onOpenChange={setIsRawMarkdownModalOpen}
+      >
+        <DialogContent className="w-[94vw] sm:max-w-2xl md:max-w-3xl bg-card rounded-2xl p-6 shadow-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="pb-3 border-b border-border/80 shrink-0">
+            <DialogTitle className="text-base font-bold flex items-center justify-between text-foreground">
+              <div className="flex items-center gap-2">
+                <FileCode className="size-4 text-primary shrink-0" />
+                <span>Compiled Proposal Markdown</span>
+              </div>
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              Clean Markdown generated from your visual blocks. You can copy or
+              download this for version control or exports.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2 flex-1 min-h-0 flex flex-col">
+            <Textarea
+              readOnly
+              value={markdown}
+              rows={16}
+              className="font-mono text-xs p-3.5 bg-muted/30 border border-border rounded-xl resize-none flex-1 overflow-y-auto leading-relaxed"
+            />
+          </div>
+
+          <DialogFooter className="pt-2 border-t border-border/80 flex items-center justify-between sm:justify-between w-full">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadMd}
+              className="gap-1.5 text-xs font-semibold rounded-lg"
+            >
+              <Download className="size-3.5" />
+              <span>Download .md</span>
+            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsRawMarkdownModalOpen(false)}
+                className="rounded-lg text-xs"
+              >
+                Close
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => handleCopy("md")}
+                className="gap-1.5 text-xs font-semibold rounded-lg shadow-xs"
+              >
+                {copiedType === "md" ? (
+                  <Check className="size-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="size-3.5" />
+                )}
+                <span>Copy to Clipboard</span>
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

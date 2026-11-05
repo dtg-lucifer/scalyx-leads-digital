@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ExternalLink,
+  FileSignature,
   FileSpreadsheet,
   FolderTree,
   Kanban,
@@ -47,7 +48,13 @@ const NAV_ITEMS = [
     name: "Proposal Studio",
     href: "/proposals",
     icon: ScrollText,
-    description: "Live Markdown blueprint & quotation builder",
+    description: "Live visual blueprint & quotation builder",
+  },
+  {
+    name: "Contract Builder",
+    href: "/contracts",
+    icon: FileSignature,
+    description: "Visual contract editor & email dispatch",
   },
   {
     name: "Invoice Generator",
