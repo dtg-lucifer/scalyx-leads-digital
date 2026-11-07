@@ -105,6 +105,7 @@ export default function ProposalsPage() {
 
   // Persistence & Draft Management State
   const [currentDocId, setCurrentDocId] = useState<string | null>(null);
+  const [proposalRefNo, setProposalRefNo] = useState<string>("SCX-PRP-2026-001");
   const [docName, setDocName] = useState<string>(
     "LexConnect Architecture Proposal",
   );
@@ -198,6 +199,7 @@ export default function ProposalsPage() {
       const now = new Date().toISOString();
       const docToSave: SavedProposalDoc = {
         id: targetId,
+        referenceNo: proposalRefNo,
         name:
           docName.trim() ||
           proposalMetadata.title ||
@@ -326,6 +328,15 @@ export default function ProposalsPage() {
 
   const handleSelectPreset = (presetId: string) => {
     setSelectedPresetId(presetId);
+    if (presetId === "lexconnect") {
+      setProposalRefNo("SCX-PRP-2026-001");
+    } else if (presetId === "quotation") {
+      setProposalRefNo("SCX-PRP-2026-012");
+    } else {
+      setProposalRefNo(
+        `SCX-PRP-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+      );
+    }
     const preset = PROPOSAL_PRESETS.find((p) => p.id === presetId);
     if (preset) {
       const parsedBlocks = markdownToBlocks(preset.markdown);
@@ -345,7 +356,9 @@ export default function ProposalsPage() {
   const handleCreateBlank = () => {
     const blankBlocks = createBlankProposalBlocks();
     const docId = `prop_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    const newRef = `SCX-PRP-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`;
     setBlocks(blankBlocks);
+    setProposalRefNo(newRef);
     setDocName("New Blank Proposal");
     setSelectedPresetId("blank");
     setCurrentDocId(docId);
@@ -378,6 +391,15 @@ export default function ProposalsPage() {
       setBlocks(found.blocks);
       setCurrentDocId(found.id);
       setDocName(found.name || found.title || "Custom Proposal Draft");
+      if (found.referenceNo) {
+        setProposalRefNo(found.referenceNo);
+      } else {
+        setProposalRefNo(
+          found.id.startsWith("prop_")
+            ? `SCX-PRP-${found.id.slice(5, 11).toUpperCase()}`
+            : found.id,
+        );
+      }
       setSelectedPresetId("custom");
       setHasUserEdited(true);
       setSaveStatus("saved");
@@ -718,6 +740,16 @@ export default function ProposalsPage() {
                   title="Name this proposal draft to easily identify it later in your saved drafts"
                 />
               </div>
+
+              {/* Unique Reference Number Badge */}
+              {proposalRefNo && (
+                <span
+                  className="font-mono text-[10.5px] font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md shrink-0 cursor-default"
+                  title="Unique Proposal Reference ID"
+                >
+                  {proposalRefNo}
+                </span>
+              )}
 
               {/* Autosave Status Pill */}
               <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium text-muted-foreground bg-muted/30 border border-border/50 shrink-0">
@@ -1396,6 +1428,11 @@ export default function ProposalsPage() {
         documentType="proposal"
         documents={savedProposals.map((p) => ({
           id: p.id,
+          docNumber:
+            p.referenceNo ||
+            (p.id.startsWith("prop_")
+              ? `SCX-PRP-${p.id.slice(5, 11).toUpperCase()}`
+              : p.id),
           name: p.name,
           title: p.title,
           clientName: p.clientName,

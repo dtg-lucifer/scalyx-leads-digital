@@ -7,7 +7,7 @@ import { Deliverable } from '@/types/deliverable';
 import { Project } from '@/types/project';
 import { EmailLog } from '@/types/email';
 import { hashPassword } from '@/lib/auth/password';
-import { SavedProposalDoc, SavedContractDoc } from '@/types/savedDocument';
+import { SavedProposalDoc, SavedContractDoc, SavedInvoiceDoc } from '@/types/savedDocument';
 
 // ============================================================================
 // Transformers: Supabase snake_case <-> Application camelCase
@@ -302,6 +302,51 @@ export const supabaseDb = {
     const existing = await this.getSavedContracts();
     const filtered = existing.filter((c) => c.id !== id);
     await this.updateSetting('saved_contracts', filtered);
+    return true;
+  },
+
+  async getSavedInvoices(): Promise<SavedInvoiceDoc[]> {
+    try {
+      const { data } = await supabaseAdmin
+        .from('settings')
+        .select('value')
+        .eq('key', 'saved_invoices')
+        .maybeSingle();
+      if (data && Array.isArray(data.value)) {
+        return data.value as SavedInvoiceDoc[];
+      }
+      return [];
+    } catch (err) {
+      console.error('Failed to get saved invoices:', err);
+      return [];
+    }
+  },
+
+  async saveInvoiceDoc(doc: SavedInvoiceDoc): Promise<SavedInvoiceDoc> {
+    const existing = await this.getSavedInvoices();
+    const now = new Date().toISOString();
+    const updatedDoc: SavedInvoiceDoc = {
+      ...doc,
+      updatedAt: now,
+      createdAt: doc.createdAt || now,
+    };
+    const index = existing.findIndex((inv) => inv.id === doc.id);
+    let updatedList: SavedInvoiceDoc[];
+    if (index >= 0) {
+      updatedList = [...existing];
+      updatedList[index] = updatedDoc;
+    } else {
+      updatedList = [updatedDoc, ...existing];
+    }
+    updatedList.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    await this.updateSetting('saved_invoices', updatedList);
+    return updatedDoc;
+  },
+
+  async deleteInvoiceDoc(id: string): Promise<boolean> {
+    const existing = await this.getSavedInvoices();
+    const filtered = existing.filter((inv) => inv.id !== id);
+    await this.updateSetting('saved_invoices', filtered);
     return true;
   },
 

@@ -985,16 +985,39 @@ export async function renderEmailHtml(
 
               ${
                 params.attachedFilesList
-                  ? `
+                  ? (() => {
+                      const fileItems = String(params.attachedFilesList)
+                        .split(/\r?\n|(?<=\))\s*,\s*/)
+                        .map((s: string) => s.trim())
+                        .filter(Boolean);
+                      const explicitCount = params.attachedCount
+                        ? parseInt(String(params.attachedCount), 10)
+                        : null;
+                      const count =
+                        Number.isInteger(explicitCount) && (explicitCount as number) > 0
+                          ? explicitCount
+                          : fileItems.length || 1;
+
+                      return `
                 <div style="margin-top: 24px; padding: 14px 16px; background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 0px !important; box-sizing: border-box; max-width: 100%;">
                   <div style="font-size: 10.5px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;">
-                    Attached Documents (${params.attachedFilesList.split(",").length})
+                    Attached Documents (${count})
                   </div>
-                  <div style="font-size: 12px; color: #0f172a; font-family: 'Space Grotesk', ui-monospace, Menlo, monospace; word-break: break-word; overflow-wrap: anywhere; line-height: 1.5;">
-                    ${params.attachedFilesList}
+                  <div style="font-size: 12px; color: #0f172a; font-family: 'Space Grotesk', ui-monospace, Menlo, monospace; word-break: break-word; overflow-wrap: anywhere; line-height: 1.6;">
+                    ${
+                      fileItems.length > 0
+                        ? fileItems
+                            .map(
+                              (f) =>
+                                `<div style="padding: 2px 0;">📎 ${f}</div>`,
+                            )
+                            .join("")
+                        : params.attachedFilesList
+                    }
                   </div>
                 </div>
-              `
+              `;
+                    })()
                   : ""
               }
 

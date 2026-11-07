@@ -27,6 +27,7 @@ import {
 
 export interface SavedDocSummary {
   id: string;
+  docNumber?: string;
   name?: string;
   title: string;
   clientName?: string;
@@ -40,7 +41,7 @@ export interface SavedDocSummary {
 interface SavedDocumentsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  documentType: "proposal" | "contract";
+  documentType: "proposal" | "contract" | "invoice";
   documents: SavedDocSummary[];
   currentId: string | null;
   onLoad: (id: string) => void;
@@ -86,16 +87,44 @@ export function SavedDocumentsModal({
   const [query, setQuery] = useState("");
 
   const filtered = documents.filter((doc) => {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
+    if (!q) return true;
+    const docNumMatch = (doc.docNumber || "").toLowerCase().includes(q);
+    const idMatch = (doc.id || "").toLowerCase().includes(q);
     const nameMatch = (doc.name || "").toLowerCase().includes(q);
     const titleMatch = (doc.title || "").toLowerCase().includes(q);
     const clientMatch = (doc.clientName || "").toLowerCase().includes(q);
     const companyMatch = (doc.clientCompany || "").toLowerCase().includes(q);
-    return nameMatch || titleMatch || clientMatch || companyMatch;
+    const dealMatch = (doc.dealValue || "").toLowerCase().includes(q);
+    return (
+      docNumMatch ||
+      idMatch ||
+      nameMatch ||
+      titleMatch ||
+      clientMatch ||
+      companyMatch ||
+      dealMatch
+    );
   });
 
-  const labelSingular = documentType === "proposal" ? "Proposal" : "Contract";
-  const labelPlural = documentType === "proposal" ? "Proposals" : "Contracts";
+  const labelSingular =
+    documentType === "proposal"
+      ? "Proposal"
+      : documentType === "contract"
+        ? "Contract"
+        : "Invoice";
+  const labelPlural =
+    documentType === "proposal"
+      ? "Proposals"
+      : documentType === "contract"
+        ? "Contracts"
+        : "Invoices";
+  const idExample =
+    documentType === "invoice"
+      ? "INV-2026-001"
+      : documentType === "contract"
+        ? "SCX-CTR-2026-088"
+        : "SCX-PRP-2026-001";
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -135,7 +164,7 @@ export function SavedDocumentsModal({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={`Search saved ${labelPlural.toLowerCase()} by title, client, or company...`}
+              placeholder={`Search by ID (e.g. ${idExample}), name, title, or client...`}
               className="h-9 pl-9 text-xs rounded-lg bg-background"
             />
           </div>
@@ -155,7 +184,7 @@ export function SavedDocumentsModal({
               </p>
               <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
                 {query
-                  ? "Try searching with a different client name or keyword."
+                  ? `Try searching with ID like "${idExample}" or client keyword.`
                   : `Your drafts auto-save continuously every 1 second as you edit. You can also start a fresh blank ${labelSingular.toLowerCase()}.`}
               </p>
               <Button
@@ -193,11 +222,16 @@ export function SavedDocumentsModal({
                 >
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-xs text-foreground truncate max-w-[280px]">
+                      {(doc.docNumber || doc.id) && (
+                        <span className="font-mono text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded tracking-wide">
+                          {doc.docNumber || doc.id}
+                        </span>
+                      )}
+                      <span className="font-bold text-xs text-foreground truncate max-w-[260px]">
                         {doc.name || doc.title || `Untitled ${labelSingular}`}
                       </span>
                       {doc.name && doc.title && doc.name !== doc.title && (
-                        <span className="text-[10.5px] text-muted-foreground/80 font-mono truncate max-w-[180px]">
+                        <span className="text-[10.5px] text-muted-foreground/80 font-mono truncate max-w-[160px]">
                           ({doc.title})
                         </span>
                       )}
@@ -211,7 +245,14 @@ export function SavedDocumentsModal({
                         </Badge>
                       )}
                       <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        {doc.blocksCount} {doc.blocksCount === 1 ? "section" : "sections"}
+                        {doc.blocksCount}{" "}
+                        {documentType === "invoice"
+                          ? doc.blocksCount === 1
+                            ? "item"
+                            : "items"
+                          : doc.blocksCount === 1
+                            ? "section"
+                            : "sections"}
                       </span>
                       {doc.dealValue && (
                         <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded font-semibold">

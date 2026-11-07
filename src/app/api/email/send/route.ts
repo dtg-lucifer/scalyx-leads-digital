@@ -68,8 +68,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Pass attached files list to template if not already passed
-    if (attachments.length > 0 && !params.attachedFilesList) {
-      params.attachedFilesList = attachments.map((a) => a.filename).join(', ');
+    if (attachments.length > 0) {
+      if (!params.attachedFilesList) {
+        params.attachedFilesList = attachments.map((a) => a.filename).join('\n');
+      }
+      if (!params.attachedCount) {
+        params.attachedCount = String(attachments.length);
+      }
     }
 
     const sanitizedParams = sanitizeEmailParams(params, req);

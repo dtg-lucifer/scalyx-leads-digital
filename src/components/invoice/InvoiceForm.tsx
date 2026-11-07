@@ -17,12 +17,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { printInvoiceDocument } from "@/lib/invoice/printInvoice";
 
 interface InvoiceFormProps {
   data: InvoiceData;
   onChange: (newData: InvoiceData) => void;
   onOpenFontDialog: () => void;
   onDownloadPdf: () => void;
+  onPrint?: () => void;
   isDownloading: boolean;
 }
 
@@ -39,6 +41,7 @@ export default function InvoiceForm({
   onChange,
   onOpenFontDialog,
   onDownloadPdf,
+  onPrint,
   isDownloading,
 }: InvoiceFormProps) {
   const [itemInput, setItemInput] = useState("");
@@ -172,7 +175,7 @@ export default function InvoiceForm({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() => window.print()}
+            onClick={() => (onPrint ? onPrint() : printInvoiceDocument("invoice-document"))}
             className="h-9 gap-1.5 text-xs font-medium"
           >
             <Printer className="size-3.5" />

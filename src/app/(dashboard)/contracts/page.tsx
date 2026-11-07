@@ -176,9 +176,12 @@ export default function ContractBuilderPage() {
     let clientName = "";
     let clientCompany = "";
     let dealValue = "";
+    let referenceNo = "SCX-CTR-2026-088";
 
     for (const b of blocks) {
-      if (b.type === "contract_preamble") {
+      if (b.type === "contract_header" && b.referenceNo) {
+        referenceNo = b.referenceNo;
+      } else if (b.type === "contract_preamble") {
         if (b.title) title = b.title;
       } else if (b.type === "contract_parties") {
         if (b.clientName) clientName = b.clientName;
@@ -191,7 +194,7 @@ export default function ContractBuilderPage() {
       }
     }
 
-    return { title, clientName, clientCompany, dealValue };
+    return { title, clientName, clientCompany, dealValue, referenceNo };
   }, [blocks, contractTitle]);
 
   // Load saved contracts from localStorage and API on mount
@@ -243,6 +246,7 @@ export default function ContractBuilderPage() {
       const now = new Date().toISOString();
       const docToSave: SavedContractDoc = {
         id: targetId,
+        referenceNo: contractMetadata.referenceNo,
         name:
           docName.trim() ||
           contractMetadata.title ||
@@ -982,6 +986,16 @@ export default function ContractBuilderPage() {
               />
             </div>
 
+            {/* Unique Reference Number Badge */}
+            {contractMetadata.referenceNo && (
+              <span
+                className="font-mono text-[10.5px] font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-md shrink-0 cursor-default"
+                title="Unique Contract Reference ID"
+              >
+                {contractMetadata.referenceNo}
+              </span>
+            )}
+
             {/* Autosave Status Pill */}
             <div className="hidden sm:flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium text-muted-foreground bg-muted/30 border border-border/50 shrink-0">
               {saveStatus === "saving" ? (
@@ -1064,8 +1078,8 @@ export default function ContractBuilderPage() {
                 type="button"
                 onClick={() => setViewMode("split")}
                 className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium rounded-md transition-colors ${viewMode === "split"
-                    ? "bg-card text-foreground shadow-xs font-bold"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "bg-card text-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:text-foreground"
                   }`}
                 title="Split Visual Editor & Live Preview"
               >
@@ -1076,8 +1090,8 @@ export default function ContractBuilderPage() {
                 type="button"
                 onClick={() => setViewMode("editor")}
                 className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "editor"
-                    ? "bg-card text-foreground shadow-xs font-bold"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "bg-card text-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:text-foreground"
                   }`}
                 title="Visual Block Editor Only"
               >
@@ -1088,8 +1102,8 @@ export default function ContractBuilderPage() {
                 type="button"
                 onClick={() => setViewMode("preview")}
                 className={`px-2 py-0.5 flex items-center gap-1 text-[11px] font-medium transition-colors ${viewMode === "preview"
-                    ? "bg-card text-foreground shadow-xs font-bold"
-                    : "text-muted-foreground hover:text-foreground"
+                  ? "bg-card text-foreground shadow-xs font-bold"
+                  : "text-muted-foreground hover:text-foreground"
                   }`}
                 title="Live A4 Document Preview Only"
               >
@@ -1105,10 +1119,10 @@ export default function ContractBuilderPage() {
           {/* Left Column: Visual Block Editor */}
           <div
             className={`${viewMode === "split"
-                ? "col-span-12 lg:col-span-6 2xl:col-span-6"
-                : viewMode === "editor"
-                  ? "col-span-12"
-                  : "hidden"
+              ? "col-span-12 lg:col-span-6 2xl:col-span-6"
+              : viewMode === "editor"
+                ? "col-span-12"
+                : "hidden"
               } bg-card border border-border/80 rounded-xl p-3 flex flex-col h-full min-h-0 overflow-hidden shadow-xs`}
           >
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/70 shrink-0">
@@ -1141,10 +1155,10 @@ export default function ContractBuilderPage() {
           {/* Right Column: Minimal Elegant Live Preview */}
           <div
             className={`${viewMode === "split"
-                ? "col-span-12 lg:col-span-6 2xl:col-span-6"
-                : viewMode === "preview"
-                  ? "col-span-12"
-                  : "hidden"
+              ? "col-span-12 lg:col-span-6 2xl:col-span-6"
+              : viewMode === "preview"
+                ? "col-span-12"
+                : "hidden"
               } bg-card border border-border/80 rounded-xl p-3 flex flex-col h-full min-h-0 overflow-hidden shadow-xs`}
           >
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-border/70 shrink-0">
@@ -1219,8 +1233,8 @@ export default function ContractBuilderPage() {
                     type="button"
                     onClick={() => setCatalogCategory(cat)}
                     className={`px-2.5 py-1 text-xs font-semibold rounded-lg transition-colors shrink-0 ${catalogCategory === cat
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-muted/40 text-muted-foreground hover:text-foreground"
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "bg-muted/40 text-muted-foreground hover:text-foreground"
                       }`}
                   >
                     {cat}
@@ -1471,8 +1485,8 @@ export default function ContractBuilderPage() {
               {emailStatusMessage && (
                 <div
                   className={`p-3 rounded-xl text-xs flex items-center gap-2 ${emailStatusMessage.type === "success"
-                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
-                      : "bg-destructive/10 text-destructive border border-destructive/20"
+                    ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
                     }`}
                 >
                   {emailStatusMessage.type === "success" ? (
@@ -1637,8 +1651,8 @@ export default function ContractBuilderPage() {
                     type="button"
                     onClick={() => setEmailPreviewDevice("desktop")}
                     className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 ${emailPreviewDevice === "desktop"
-                        ? "bg-card text-foreground shadow-2xs font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
+                      ? "bg-card text-foreground shadow-2xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
                       }`}
                     title="Desktop Preview (600px)"
                   >
@@ -1649,8 +1663,8 @@ export default function ContractBuilderPage() {
                     type="button"
                     onClick={() => setEmailPreviewDevice("mobile")}
                     className={`px-2.5 py-1 text-xs rounded transition-colors flex items-center gap-1.5 ${emailPreviewDevice === "mobile"
-                        ? "bg-card text-foreground shadow-2xs font-semibold"
-                        : "text-muted-foreground hover:text-foreground"
+                      ? "bg-card text-foreground shadow-2xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
                       }`}
                     title="Mobile Preview (375px)"
                   >
@@ -1670,8 +1684,8 @@ export default function ContractBuilderPage() {
                 ) : (
                   <div
                     className={`transition-all duration-300 w-full bg-white shadow-xl border border-border/80 rounded-none overflow-hidden my-auto ${emailPreviewDevice === "mobile"
-                        ? "max-w-[375px] border-4 border-slate-800 rounded-2xl shadow-2xl"
-                        : "max-w-[600px]"
+                      ? "max-w-[375px] border-4 border-slate-800 rounded-2xl shadow-2xl"
+                      : "max-w-[600px]"
                       }`}
                   >
                     <iframe
@@ -1732,6 +1746,7 @@ export default function ContractBuilderPage() {
         documentType="contract"
         documents={savedContracts.map((c) => ({
           id: c.id,
+          docNumber: c.referenceNo || c.id,
           name: c.name,
           title: c.title,
           clientName: c.clientName,

@@ -157,7 +157,8 @@ export default function EmailSenderPage() {
         if (attachedFiles.length > 0) {
           mergedParams.attachedFilesList = attachedFiles
             .map((f) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`)
-            .join(", ");
+            .join("\n");
+          mergedParams.attachedCount = String(attachedFiles.length);
         }
 
         const res = await fetch("/api/email/logs", {
@@ -289,7 +290,8 @@ export default function EmailSenderPage() {
       if (attachedFiles.length > 0) {
         mergedParams.attachedFilesList = attachedFiles
           .map((f) => `${f.name} (${(f.size / 1024).toFixed(1)} KB)`)
-          .join(", ");
+          .join("\n");
+        mergedParams.attachedCount = String(attachedFiles.length);
       }
 
       const formData = new FormData();
